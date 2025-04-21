@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.LoginController"
+      stylesheets="@../styles/auth.css">
+
+    <!-- Partie gauche avec le logo et le texte de bienvenue -->
+    <VBox styleClass="left-side">
+        <VBox alignment="CENTER" spacing="20" styleClass="logo-container">
+            <Circle radius="40" styleClass="logo-circle"/>
+            <Label text="MaSanté" styleClass="logo-text"/>
+            <Label text="Votre santé, notre priorité" styleClass="logo-subtitle"/>
+        </VBox>
+        
+        <VBox alignment="CENTER" styleClass="welcome-text">
+            <Label text="Bienvenue" styleClass="welcome-title"/>
+            <Label text="Connectez-vous pour accéder à votre espace" styleClass="welcome-subtitle"/>
+        </VBox>
+    </VBox>
+
+    <!-- Partie droite avec le formulaire de connexion -->
+    <VBox styleClass="right-side">
+        <VBox styleClass="form-container">
+            <Label text="Connexion" styleClass="form-title"/>
+            
+            <VBox styleClass="form-group">
+                <Label text="Email:" styleClass="field-label"/>
+                <TextField fx:id="emailField" promptText="Entrez votre email" styleClass="form-field"/>
+            </VBox>
+
+            <VBox styleClass="form-group">
+                <Label text="Mot de passe:" styleClass="field-label"/>
+                <PasswordField fx:id="passwordField" promptText="Entrez votre mot de passe" styleClass="form-field"/>
+            </VBox>
+
+            <CheckBox fx:id="recaptchaCheckBox" text="Je ne suis pas un robot" styleClass="recaptcha-checkbox"/>
+            
+            <Label fx:id="messageLabel" styleClass="message-label"/>
+
+            <Button text="Se connecter" onAction="#handleLogin" styleClass="submit-button"/>
+
+            <HBox alignment="CENTER" styleClass="register-link">
+                <Label text="Vous n'avez pas de compte ? "/>
+                <Hyperlink text="S'inscrire" onAction="#handleRegister"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</HBox> 
