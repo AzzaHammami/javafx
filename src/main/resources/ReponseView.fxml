@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane minWidth="900" minHeight="600" prefWidth="1200" prefHeight="800" xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Front.ReponseController"
+            stylesheets="/styles/theme.css">
+    <!-- En-tête -->
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT">
+            <padding>
+                <Insets left="20" right="20" top="15" bottom="15"/>
+            </padding>
+            <Text text="Gestion des Réponses" styleClass="header-label"/>
+        </HBox>
+    </top>
+    
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
+            <HBox spacing="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                
+                <!-- Formulaire -->
+                <VBox styleClass="form-container" spacing="15" minWidth="350">
+                    <Text text="Nouvelle Réponse" styleClass="section-title"/>
+                    
+                    <VBox spacing="5">
+                        <Label text="Contenu" styleClass="form-label"/>
+                        <TextArea fx:id="contenuField" promptText="Entrez votre réponse" 
+                                 prefRowCount="6" wrapText="true" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Date" styleClass="form-label"/>
+                        <DatePicker fx:id="datePicker" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Réclamation liée" styleClass="form-label"/>
+                        <ComboBox fx:id="reclamationComboBox" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="Ajouter Réponse" onAction="#ajouterReponse" styleClass="btn-primary"/>
+                        <Button text="Modifier" onAction="#modifierReponse" styleClass="btn-secondary"/>
+                        <Button text="Supprimer" onAction="#supprimerReponse" styleClass="btn-danger"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Table -->
+                <VBox HBox.hgrow="ALWAYS" styleClass="table-section" minWidth="600">
+                    <TableView fx:id="tableView" VBox.vgrow="ALWAYS" styleClass="custom-table">
+                        <columns>
+                            <TableColumn fx:id="contenuColumn" text="Contenu" minWidth="200" prefWidth="300"/>
+                            <TableColumn fx:id="dateColumn" text="Date" minWidth="100" prefWidth="120"/>
+                            <TableColumn fx:id="reclamationColumn" text="Réclamation" minWidth="150" prefWidth="200"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

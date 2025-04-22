@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane minWidth="900" minHeight="600" prefWidth="1200" prefHeight="800" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="Controllers.MessengerController"
+            stylesheets="/styles/theme.css">
+
+    <!-- Header -->
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="20">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+            <Text text="Messagerie" styleClass="header-title" />
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userNameLabel" styleClass="header-subtitle"/>
+        </HBox>
+    </top>
+
+    <!-- Main Content -->
+    <center>
+        <HBox spacing="0" style="-fx-background-color: #f5f5f5;">
+            <!-- Conversations List -->
+            <VBox style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-width: 0 1px 0 0;" prefWidth="320">
+                <VBox style="-fx-padding: 20 18 12 18;" spacing="12">
+                    <TextField fx:id="searchField" promptText="Rechercher une conversation..."
+                               style="-fx-background-color: #f0f0f0; -fx-border-radius: 15; -fx-background-radius: 15;"/>
+                    <Button text="Nouvelle conversation" onAction="#handleNewConversation"
+                            style="-fx-background-color: #4285f4; -fx-text-fill: white; -fx-font-weight: bold;"
+                            maxWidth="Infinity"/>
+                </VBox>
+                <ListView fx:id="conversationListView" VBox.vgrow="ALWAYS"/>
+                <Label fx:id="emptyConversationLabel" text="" style="-fx-text-fill: #888; -fx-font-size: 16px; -fx-padding: 20px;" visible="false"/>
+            </VBox>
+
+            <!-- Chat Area -->
+            <VBox HBox.hgrow="ALWAYS" style="-fx-background-color: white;">
+                <!-- Conversation Header -->
+                <HBox style="-fx-background-color: #f8f8f8; -fx-padding: 15;" alignment="CENTER_LEFT" spacing="15">
+                    <Label fx:id="conversationTitleLabel" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="infoButton" text="Info"
+                            style="-fx-background-color: #e0e0e0; -fx-text-fill: #333;"/>
+                </HBox>
+
+                <!-- Messages -->
+                <ScrollPane fx:id="messagesScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="messagesContainer" spacing="10" style="-fx-padding: 20;"/>
+                </ScrollPane>
+
+                <!-- Message Input Area -->
+                <HBox style="-fx-background-color: #ffff99; -fx-padding: 15; -fx-border-color: #ddd; -fx-border-width: 1 0 0 0;"
+                      alignment="CENTER" spacing="10">
+                    <TextArea fx:id="messageInput" promptText="Écrivez votre message..."
+                              wrapText="true" prefRowCount="2" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: white; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-radius: 5;"/>
+                    <Button fx:id="sendButton" text="Envoyer" onAction="#handleSendMessage"
+                            style="-fx-background-color: #4285f4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 5 15;"/>
+                </HBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

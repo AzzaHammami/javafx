@@ -1,0 +1,10 @@
+Pour que l'interface fonctionne correctement, veuillez :
+
+1. Télécharger une image d'arrière-plan médicale appropriée
+2. La renommer en "doctor-background.jpg"
+3. La placer dans ce dossier (src/main/resources/images/)
+
+L'image devrait être :
+- De préférence en haute résolution (minimum 1200x800 pixels)
+- En rapport avec le domaine médical (par exemple : un médecin, un hôpital, ou du matériel médical)
+- De couleurs pas trop vives pour ne pas gêner la lisibilité du texte

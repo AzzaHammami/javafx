@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Front.ReclamationController"
+            stylesheets="/styles/theme.css">
+    <!-- En-tête -->
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT">
+            <padding>
+                <Insets left="20" right="20" top="15" bottom="15"/>
+            </padding>
+            <Text text="Gestion des Réclamations" styleClass="header-label"/>
+        </HBox>
+    </top>
+    
+    <!-- Contenu principal -->
+    <center>
+        <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="AS_NEEDED">
+            <HBox spacing="20">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                
+                <!-- Formulaire -->
+                <VBox styleClass="form-container" spacing="15" minWidth="350">
+                    <Text text="Nouvelle Réclamation" styleClass="section-title"/>
+                    
+                    <TextField fx:id="idField" visible="false" managed="false"/>
+                    
+                    <VBox spacing="5">
+                        <Label text="Sujet" styleClass="form-label"/>
+                        <TextField fx:id="sujetField" promptText="Entrez le sujet" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Description" styleClass="form-label"/>
+                        <TextArea fx:id="descriptionField" promptText="Entrez la description" 
+                                 prefRowCount="4" wrapText="true" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Statut" styleClass="form-label"/>
+                        <ChoiceBox fx:id="statutChoice" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Date" styleClass="form-label"/>
+                        <DatePicker fx:id="dateField" styleClass="form-field"/>
+                    </VBox>
+                    
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="Ajouter" onAction="#ajouterReclamation" styleClass="btn-primary"/>
+                        <Button text="Modifier" onAction="#modifierReclamation" styleClass="btn-secondary"/>
+                        <Button text="Supprimer" onAction="#supprimerReclamation" styleClass="btn-danger"/>
+                    </HBox>
+                </VBox>
+
+                <!-- Table -->
+                <VBox HBox.hgrow="ALWAYS" styleClass="table-section" minWidth="600">
+                    <TableView fx:id="tableReclamation" VBox.vgrow="ALWAYS" styleClass="custom-table">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" minWidth="50" prefWidth="50"/>
+                            <TableColumn fx:id="colSujet" text="Sujet" minWidth="150" prefWidth="200"/>
+                            <TableColumn fx:id="colDescription" text="Description" minWidth="200" prefWidth="300"/>
+                            <TableColumn fx:id="colStatut" text="Statut" minWidth="100" prefWidth="120"/>
+                            <TableColumn fx:id="colDate" text="Date" minWidth="100" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </HBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

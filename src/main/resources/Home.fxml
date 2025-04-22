@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane minWidth="900" minHeight="600" prefHeight="800.0" prefWidth="1200.0" xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Home"
+         stylesheets="/styles/theme.css">
+         
+    <center>
+        <StackPane>
+            <!-- Image d'arrière-plan -->
+            <ImageView styleClass="background-image" fitWidth="1200" fitHeight="800" preserveRatio="false">
+                <image>
+                    <Image url="@images/doctor-background.jpg"/>
+                </image>
+            </ImageView>
+            
+            <VBox alignment="CENTER" spacing="30" styleClass="home-container">
+                <!-- En-tête -->
+                <VBox alignment="CENTER" styleClass="home-header">
+                    <Text text="Système de Gestion des Réclamations" styleClass="home-title"/>
+                    <Text text="Bienvenue dans votre espace de gestion" styleClass="home-subtitle"/>
+                </VBox>
+                
+                <!-- Boutons -->
+                <VBox spacing="20" alignment="CENTER" styleClass="buttons-container">
+                    <Button fx:id="btnUser" text="Espace Utilisateur" onAction="#goToUserSpace" styleClass="home-button"/>
+                    <Button fx:id="btnAdmin" text="Espace Admin" onAction="#goToAdminSpace" styleClass="home-button"/>
+                </VBox>
+                
+                <!-- Footer -->
+                <Text text="2025 - Tous droits réservés" styleClass="footer-text">
+                    <VBox.margin>
+                        <Insets top="50"/>
+                    </VBox.margin>
+                </Text>
+            </VBox>
+        </StackPane>
+    </center>
+</BorderPane>

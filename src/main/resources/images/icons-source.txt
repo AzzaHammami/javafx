@@ -1,0 +1,14 @@
+Pour que le dashboard fonctionne correctement, veuillez ajouter les icônes suivantes dans le dossier src/main/resources/images/ :
+
+1. admin-avatar.png - Une icône d'avatar professionnel (50x50px)
+2. dashboard-icon.png - Une icône de tableau de bord (20x20px)
+3. claims-icon.png - Une icône de document ou réclamation (20x20px)
+4. responses-icon.png - Une icône de message ou réponse (20x20px)
+5. logout-icon.png - Une icône de déconnexion (20x20px)
+6. search-icon.png - Une icône de recherche (16x16px)
+7. export-icon.png - Une icône d'exportation (16x16px)
+
+Les icônes devraient être :
+- En format PNG avec fond transparent
+- De préférence en blanc pour la barre latérale (sauf admin-avatar)
+- De style cohérent (par exemple Material Design ou Font Awesome)

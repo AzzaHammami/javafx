@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<BorderPane minWidth="900" minHeight="600" prefWidth="1200" prefHeight="800" xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.LoginController" stylesheets="/styles/theme.css">
+    <center>
+        <VBox alignment="CENTER" spacing="18" prefWidth="300">
+            <Label text="Connexion" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+            <ComboBox fx:id="userComboBox" promptText="Choisir un utilisateur" prefWidth="220"/>
+            <Button fx:id="loginButton" text="Se connecter" onAction="#handleLogin" prefWidth="220"/>
+        </VBox>
+    </center>
+</BorderPane>
