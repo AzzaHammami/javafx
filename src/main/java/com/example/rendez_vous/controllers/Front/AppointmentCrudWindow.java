@@ -2,6 +2,7 @@ package com.example.rendez_vous.controllers.Front;
 
 import com.example.rendez_vous.services.Servicerendez_vous;
 import com.example.rendez_vous.models.RendezVous;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -97,105 +98,6 @@ public class AppointmentCrudWindow {
 
         HBox actions = createActionButtons(root);
         root.getChildren().add(actions);
-
-        return root;
-    }
-
-    private VBox getContentWithConfirmationSelector() {
-        logger.info("Building confirmation view");
-        if (selectedTime.isEmpty()) {
-            logger.warning("No time selected for confirmation");
-            showError("Erreur", "Veuillez sélectionner une heure");
-            return getContentWithDateSelector();
-        }
-
-        VBox root = new VBox();
-        root.setStyle("-fx-background-color: white;");
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(0, 0, 0, 0));
-
-        HBox progressBar = new HBox(0);
-        progressBar.setAlignment(Pos.CENTER);
-        progressBar.setPadding(new Insets(22, 0, 0, 0));
-        String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
-
-        for (int i = 0; i < steps.length; i++) {
-            VBox step = new VBox(5);
-            step.setAlignment(Pos.CENTER);
-            Circle circle = new Circle(15);
-            Label stepLabel = new Label(steps[i]);
-
-            if (i < 3) {
-                circle.setFill(Color.web("#ffd600"));
-                Label check = new Label("✓");
-                check.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-                StackPane circlePane = new StackPane(circle, check);
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circlePane, stepLabel);
-            } else {
-                circle.setFill(Color.web("#ffd600"));
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circle, stepLabel);
-            }
-
-            if (i < steps.length - 1) {
-                Rectangle line = new Rectangle(80, 4);
-                line.setFill(Color.web("#ffd600"));
-                progressBar.getChildren().addAll(step, line);
-            } else {
-                progressBar.getChildren().add(step);
-            }
-        }
-
-        VBox confirmationBox = new VBox(20);
-        confirmationBox.setAlignment(Pos.CENTER);
-        confirmationBox.setPadding(new Insets(40, 0, 0, 0));
-
-        VBox summaryBox = new VBox(10);
-        summaryBox.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 20;");
-
-        String formattedDate = datePicker.getValue().format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
-        logger.log(Level.FINE, "Formatted appointment date: {0}", formattedDate);
-
-        Label confirmationLabel = new Label("Confirmation du rendez-vous");
-        confirmationLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
-
-        Label doctorLabel = new Label("Médecin: " + (medecinNom != null ? medecinNom : "Non sélectionné"));
-        doctorLabel.setStyle("-fx-font-size: 16px;");
-
-        Label dateLabel = new Label("Date: " + formattedDate);
-        dateLabel.setStyle("-fx-font-size: 16px;");
-
-        Label timeLabel = new Label("Heure: " + selectedTime);
-        timeLabel.setStyle("-fx-font-size: 16px;");
-
-        Label reasonLabel = new Label("Motif: " + motifField.getText());
-        reasonLabel.setStyle("-fx-font-size: 16px;");
-
-        summaryBox.getChildren().addAll(confirmationLabel, doctorLabel, dateLabel, timeLabel, reasonLabel);
-
-        Button confirmBtn = new Button("Confirmer le rendez-vous");
-        confirmBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 25;");
-
-        confirmBtn.setOnAction(e -> {
-            try {
-                if (medecinNom == null || medecinNom.trim().isEmpty() || medecinIdField.getText().trim().isEmpty()) {
-                    logger.warning("No doctor selected during confirmation");
-                    showError("Erreur", "Veuillez sélectionner un médecin");
-                    return;
-                }
-
-                logger.info("Confirming appointment creation");
-                handleAdd();
-                showInfo("Succès", "Votre rendez-vous a été confirmé avec succès!");
-            } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Error confirming appointment", ex);
-                showError("Erreur", "Une erreur est survenue lors de la confirmation: " + ex.getMessage());
-            }
-        });
-
-        confirmationBox.getChildren().addAll(summaryBox, confirmBtn);
-        root.getChildren().addAll(progressBar, confirmationBox);
 
         return root;
     }
@@ -610,6 +512,105 @@ public class AppointmentCrudWindow {
         return root;
     }
 
+    public VBox getContentWithConfirmationSelector() {
+        logger.info("Building confirmation view");
+        if (selectedTime.isEmpty()) {
+            logger.warning("No time selected for confirmation");
+            showError("Erreur", "Veuillez sélectionner une heure");
+            return getContentWithDateSelector();
+        }
+
+        VBox root = new VBox();
+        root.setStyle("-fx-background-color: white;");
+        root.setAlignment(Pos.TOP_CENTER);
+        root.setPadding(new Insets(0, 0, 0, 0));
+
+        HBox progressBar = new HBox(0);
+        progressBar.setAlignment(Pos.CENTER);
+        progressBar.setPadding(new Insets(22, 0, 0, 0));
+        String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
+
+        for (int i = 0; i < steps.length; i++) {
+            VBox step = new VBox(5);
+            step.setAlignment(Pos.CENTER);
+            Circle circle = new Circle(15);
+            Label stepLabel = new Label(steps[i]);
+
+            if (i < 3) {
+                circle.setFill(Color.web("#ffd600"));
+                Label check = new Label("✓");
+                check.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
+                StackPane circlePane = new StackPane(circle, check);
+                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
+                step.getChildren().addAll(circlePane, stepLabel);
+            } else {
+                circle.setFill(Color.web("#ffd600"));
+                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
+                step.getChildren().addAll(circle, stepLabel);
+            }
+
+            if (i < steps.length - 1) {
+                Rectangle line = new Rectangle(80, 4);
+                line.setFill(Color.web("#ffd600"));
+                progressBar.getChildren().addAll(step, line);
+            } else {
+                progressBar.getChildren().add(step);
+            }
+        }
+
+        VBox confirmationBox = new VBox(20);
+        confirmationBox.setAlignment(Pos.CENTER);
+        confirmationBox.setPadding(new Insets(40, 0, 0, 0));
+
+        VBox summaryBox = new VBox(10);
+        summaryBox.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 20;");
+
+        String formattedDate = datePicker.getValue().format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
+        logger.log(Level.FINE, "Formatted appointment date: {0}", formattedDate);
+
+        Label confirmationLabel = new Label("Confirmation du rendez-vous");
+        confirmationLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
+
+        Label doctorLabel = new Label("Médecin: " + (medecinNom != null ? medecinNom : "Non sélectionné"));
+        doctorLabel.setStyle("-fx-font-size: 16px;");
+
+        Label dateLabel = new Label("Date: " + formattedDate);
+        dateLabel.setStyle("-fx-font-size: 16px;");
+
+        Label timeLabel = new Label("Heure: " + selectedTime);
+        timeLabel.setStyle("-fx-font-size: 16px;");
+
+        Label reasonLabel = new Label("Motif: " + motifField.getText());
+        reasonLabel.setStyle("-fx-font-size: 16px;");
+
+        summaryBox.getChildren().addAll(confirmationLabel, doctorLabel, dateLabel, timeLabel, reasonLabel);
+
+        Button confirmBtn = new Button("Confirmer le rendez-vous");
+        confirmBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 25;");
+
+        confirmBtn.setOnAction(e -> {
+            try {
+                if (medecinNom == null || medecinNom.trim().isEmpty() || medecinIdField.getText().trim().isEmpty()) {
+                    logger.warning("No doctor selected during confirmation");
+                    showError("Erreur", "Veuillez sélectionner un médecin");
+                    return;
+                }
+
+                logger.info("Confirming appointment creation");
+                handleAdd();
+                showInfo("Succès", "Votre rendez-vous a été confirmé avec succès!");
+            } catch (Exception ex) {
+                logger.log(Level.SEVERE, "Error confirming appointment", ex);
+                showError("Erreur", "Une erreur est survenue lors de la confirmation: " + ex.getMessage());
+            }
+        });
+
+        confirmationBox.getChildren().addAll(summaryBox, confirmBtn);
+        root.getChildren().addAll(progressBar, confirmationBox);
+
+        return root;
+    }
+
     private void handleAdd() {
         try {
             logger.info("Attempting to add new appointment");
@@ -746,7 +747,7 @@ public class AppointmentCrudWindow {
     }
 
     // Nouvelle vue CRUD minimaliste pour les rendez-vous
-    private VBox getCrudTableOnlyView() {
+    public VBox getCrudTableOnlyView() {
         VBox layout = new VBox(20);
         layout.setPadding(new Insets(20));
 
@@ -760,8 +761,7 @@ public class AppointmentCrudWindow {
         TableColumn<RendezVous, String> dateCol = new TableColumn<>("Date");
         dateCol.setCellValueFactory(cell -> {
             LocalDateTime d = cell.getValue().getDate();
-            String formatted = d != null ? d.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
-            return new javafx.beans.property.SimpleStringProperty(formatted);
+            return new ReadOnlyStringWrapper(d != null ? d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "");
         });
 
         TableColumn<RendezVous, String> motifCol = new TableColumn<>("Motif");
@@ -776,20 +776,19 @@ public class AppointmentCrudWindow {
         TableColumn<RendezVous, String> statutCol = new TableColumn<>("Statut");
         statutCol.setCellValueFactory(new PropertyValueFactory<>("statut"));
 
-        // Colonne Actions
         TableColumn<RendezVous, Void> actionCol = new TableColumn<>("Actions");
         actionCol.setCellFactory(col -> new TableCell<>() {
-            private final Button btnEdit = new Button("Modifier");
-            private final Button btnDelete = new Button("Supprimer");
-            private final HBox box = new HBox(8, btnEdit, btnDelete);
+            final Button modifBtn = new Button("Modifier");
+            final Button supprBtn = new Button("Supprimer");
+            final HBox box = new HBox(6, modifBtn, supprBtn);
             {
-                btnEdit.setStyle("-fx-background-color: #2dce89; -fx-text-fill: white;");
-                btnDelete.setStyle("-fx-background-color: #f5365c; -fx-text-fill: white;");
-                btnEdit.setOnAction(e -> {
+                modifBtn.setStyle("-fx-background-color: #26c6da; -fx-text-fill: white;");
+                supprBtn.setStyle("-fx-background-color: #ef5350; -fx-text-fill: white;");
+                modifBtn.setOnAction(e -> {
                     RendezVous rv = getTableView().getItems().get(getIndex());
                     showEditDialog(rv);
                 });
-                btnDelete.setOnAction(e -> {
+                supprBtn.setOnAction(e -> {
                     RendezVous rv = getTableView().getItems().get(getIndex());
                     supprimerRendezVous(rv);
                 });
