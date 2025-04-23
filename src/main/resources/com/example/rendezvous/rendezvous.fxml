@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml" 
+      fx:controller="com.example.rendez_vous.controllers.RendezVousController"
+      stylesheets="@styles.css">
+    
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <Label text="Gestion des Rendez-vous" styleClass="title-label"/>
+    
+    <VBox styleClass="date-picker-container">
+        <StackPane styleClass="date-input-wrapper">
+            <TextField fx:id="dateInput" styleClass="date-input" editable="false" 
+                       promptText="Sélectionner une date" text="17 avril 2025"/>
+            <Label styleClass="calendar-icon" text="📅" StackPane.alignment="CENTER_RIGHT">
+                <padding>
+                    <Insets right="12"/>
+                </padding>
+            </Label>
+            
+            <VBox fx:id="customDatePicker" styleClass="date-picker,hidden">
+                <HBox styleClass="date-picker-header">
+                    <Label fx:id="monthYearLabel" styleClass="month-year" text="Avril 2025"/>
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Button text="Aujourd'hui" styleClass="today-button"/>
+                        <HBox styleClass="nav-buttons" spacing="5">
+                            <Button text="◀" styleClass="nav-button"/>
+                            <Button text="▶" styleClass="nav-button"/>
+                        </HBox>
+                    </HBox>
+                </HBox>
+                
+                <HBox styleClass="view-buttons">
+                    <Button text="Mois" styleClass="view-button"/>
+                    <Button text="Semaine" styleClass="view-button,active"/>
+                    <Button text="Jour" styleClass="view-button"/>
+                </HBox>
+                
+                <GridPane fx:id="calendarGrid" styleClass="calendar-grid">
+                    <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints vgrow="SOMETIMES" minHeight="30" prefHeight="30" />
+                    </rowConstraints>
+                    
+                    <Label text="Dim" GridPane.columnIndex="0" styleClass="days-header"/>
+                    <Label text="Lun" GridPane.columnIndex="1" styleClass="days-header"/>
+                    <Label text="Mar" GridPane.columnIndex="2" styleClass="days-header"/>
+                    <Label text="Mer" GridPane.columnIndex="3" styleClass="days-header"/>
+                    <Label text="Jeu" GridPane.columnIndex="4" styleClass="days-header"/>
+                    <Label text="Ven" GridPane.columnIndex="5" styleClass="days-header"/>
+                    <Label text="Sam" GridPane.columnIndex="6" styleClass="days-header"/>
+                </GridPane>
+                
+                <GridPane fx:id="weekViewGrid" styleClass="week-view,visible">
+                    <VBox styleClass="time-column">
+                        <Label styleClass="time-slot" text="8:00"/>
+                        <Label styleClass="time-slot" text="9:00"/>
+                        <Label styleClass="time-slot" text="10:00"/>
+                        <Label styleClass="time-slot" text="11:00"/>
+                        <Label styleClass="time-slot" text="12:00"/>
+                        <Label styleClass="time-slot" text="13:00"/>
+                        <Label styleClass="time-slot" text="14:00"/>
+                        <Label styleClass="time-slot" text="15:00"/>
+                        <Label styleClass="time-slot" text="16:00"/>
+                        <Label styleClass="time-slot" text="17:00"/>
+                        <Label styleClass="time-slot" text="18:00"/>
+                        <Label styleClass="time-slot" text="19:00"/>
+                    </VBox>
+                    
+                    <FlowPane styleClass="color-legend">
+                        <HBox styleClass="legend-item">
+                            <Circle radius="4" styleClass="event-dot,event-consultation"/>
+                            <Label text="Consultation"/>
+                        </HBox>
+                        <HBox styleClass="legend-item">
+                            <Circle radius="4" styleClass="event-dot,event-vaccination"/>
+                            <Label text="Vaccination"/>
+                        </HBox>
+                        <HBox styleClass="legend-item">
+                            <Circle radius="4" styleClass="event-dot,event-urgence"/>
+                            <Label text="Urgence"/>
+                        </HBox>
+                        <HBox styleClass="legend-item">
+                            <Circle radius="4" styleClass="event-dot,event-suivi"/>
+                            <Label text="Suivi"/>
+                        </HBox>
+                        <HBox styleClass="legend-item">
+                            <Circle radius="4" styleClass="event-dot,event-autre"/>
+                            <Label text="Autre"/>
+                        </HBox>
+                    </FlowPane>
+                </GridPane>
+            </VBox>
+        </StackPane>
+    </VBox>
+</VBox>

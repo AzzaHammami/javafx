@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <display-name>Rendez_Vous</display-name>
+
+    <servlet>
+        <servlet-name>DisponibiliteRestController</servlet-name>
+        <servlet-class>com.example.rendez_vous.controllers.api.DisponibiliteRestController</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DisponibiliteRestController</servlet-name>
+        <url-pattern>/api/disponibilites/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

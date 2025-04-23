@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" 
+          fx:controller="com.example.rendez_vous.controllers.DisponibiliteController"
+          style="-fx-background-color: #f5f6fa;">
+    <top>
+        <VBox alignment="CENTER" style="-fx-background-color: #4834d4;">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <Label text="Gestion des Disponibilités" 
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color: transparent;">
+            <VBox spacing="20" alignment="CENTER">
+                <padding>
+                    <Insets top="30" right="40" bottom="30" left="40"/>
+                </padding>
+
+                <VBox spacing="25" style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
+                    <GridPane hgap="15" vgap="15">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="100" prefWidth="120"/>
+                            <ColumnConstraints minWidth="200" prefWidth="250"/>
+                        </columnConstraints>
+
+                        <Label text="Médecin ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <TextField fx:id="medecinIdField" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                                 promptText="Entrez l'ID du médecin"
+                                 style="-fx-padding: 8; -fx-background-radius: 5;"/>
+
+                        <Label text="Date Début:" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <DatePicker fx:id="dateDebutPicker" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                                  promptText="Sélectionnez la date de début"
+                                  style="-fx-padding: 4;"/>
+
+                        <Label text="Heure Début:" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <ComboBox fx:id="heureDebutField" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                                promptText="Sélectionnez l'heure de début"
+                                style="-fx-padding: 4;"/>
+
+                        <Label text="Date Fin:" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <DatePicker fx:id="dateFinPicker" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                                  promptText="Sélectionnez la date de fin"
+                                  style="-fx-padding: 4;"/>
+
+                        <Label text="Heure Fin:" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <ComboBox fx:id="heureFinField" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                                promptText="Sélectionnez l'heure de fin"
+                                style="-fx-padding: 4;"/>
+
+                        <Label text="Statut:" GridPane.rowIndex="5" GridPane.columnIndex="0"
+                               style="-fx-font-size: 14px; -fx-text-fill: #2d3436;"/>
+                        <ComboBox fx:id="statutField" GridPane.rowIndex="5" GridPane.columnIndex="1"
+                                promptText="Sélectionnez le statut"
+                                style="-fx-padding: 4;"/>
+                    </GridPane>
+
+                    <HBox spacing="15" alignment="CENTER_LEFT">
+                        <Button text="Ajouter" onAction="#ajouterDisponibilite"
+                                style="-fx-background-color: #4834d4; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+                        <Button text="Modifier" onAction="#modifierDisponibilite"
+                                style="-fx-background-color: #00b894; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+                        <Button text="Supprimer" onAction="#supprimerDisponibilite"
+                                style="-fx-background-color: #ff7675; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+                        <Button text="Rafraîchir" onAction="#rafraichirListe"
+                                style="-fx-background-color: #0984e3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;"/>
+                    </HBox>
+                </VBox>
+
+                <StackPane style="-fx-background-color: #f9fbfd; -fx-border-color: #1976d2; -fx-border-width: 2; -fx-border-radius: 18; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, #b0bec5, 14, 0.17, 0, 2); -fx-padding: 24 24 24 24;" maxWidth="Infinity" maxHeight="Infinity" minHeight="600" prefHeight="600" VBox.vgrow="ALWAYS">
+                    <ScrollPane fitToWidth="true" fitToHeight="true" maxWidth="Infinity" maxHeight="Infinity" minHeight="600" prefHeight="600" style="-fx-background-color: transparent;">
+                        <TableView fx:id="tableView" maxWidth="Infinity" maxHeight="Infinity" minHeight="600" prefHeight="600" style="-fx-background-color: white; -fx-border-color: #1976d2; -fx-border-width: 2; -fx-border-radius: 14; -fx-background-radius: 14; -fx-table-cell-border-color: #e3eafc; -fx-padding: 10; -fx-font-size: 19px; -fx-row-height: 36;">
+                            <columns>
+                                <TableColumn fx:id="idCol" text="ID" prefWidth="70" />
+                                <TableColumn fx:id="medecinIdCol" text="Médecin ID" prefWidth="140" />
+                                <TableColumn fx:id="dateDebutCol" text="Date Début" prefWidth="220" />
+                                <TableColumn fx:id="dateFinCol" text="Date Fin" prefWidth="220" />
+                                <TableColumn fx:id="statutCol" text="Statut" prefWidth="150" />
+                            </columns>
+                        </TableView>
+                    </ScrollPane>
+                </StackPane>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

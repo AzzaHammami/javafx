@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.rendez_vous.controllers.LandingController"
+           stylesheets="@../styles/theme.css">
+           
+    <!-- Background Image -->
+    <ImageView fitWidth="1920" fitHeight="1080" preserveRatio="true" opacity="0.18" style="-fx-alignment: center;">
+        <image>
+            <Image url="@images/doctor-background.jpg" />
+        </image>
+    </ImageView>
+    <VBox alignment="CENTER" spacing="20" styleClass="landing-container">
+        <padding>
+            <Insets top="40" right="40" bottom="40" left="40"/>
+        </padding>
+        
+        <!-- Card Container -->
+        <VBox styleClass="landing-card" maxWidth="800">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+            
+            <!-- Header -->
+            <VBox alignment="CENTER" spacing="10">
+                <Text text="Système de Gestion des Réclamations" 
+                      styleClass="landing-title"/>
+                <Text text="Bienvenue dans votre espace de gestion" 
+                      styleClass="landing-subtitle"/>
+            </VBox>
+            
+            <!-- Buttons -->
+            <VBox alignment="CENTER" spacing="15" styleClass="button-container">
+                <padding>
+                    <Insets top="30"/>
+                </padding>
+                
+                <Button text="Espace Utilisateur" 
+                        onAction="#handleUserSpace"
+                        styleClass="landing-button"/>
+                        
+                <Button text="Espace Admin" 
+                        onAction="#handleAdminSpace"
+                        styleClass="landing-button"/>
+            </VBox>
+        </VBox>
+        
+        <!-- Footer -->
+        <Text text="2025 - Tous droits réservés" 
+              styleClass="landing-footer"/>
+    </VBox>
+</StackPane>

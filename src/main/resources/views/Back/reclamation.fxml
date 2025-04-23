@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.rendez_vous.controllers.Back.ReclamationController"
+      stylesheets="@../../styles/theme.css" spacing="0">
+
+    <!-- Barre latérale -->
+    <VBox styleClass="sidebar">
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+        <VBox styleClass="sidebar-header" alignment="CENTER">
+            <padding>
+                <Insets bottom="30"/>
+            </padding>
+            <Text text="Admin Dashboard" styleClass="sidebar-title"/>
+        </VBox>
+        <VBox styleClass="menu-items" spacing="10" VBox.vgrow="ALWAYS">
+            <Button text="Ajouter Médecin" styleClass="menu-item, menu-item-active" onAction="#showAjouterMedecinForm"/>
+            <Button text="Prise de rendez-vous" styleClass="menu-item" onAction="#showRendezVousCrud"/>
+            <Button text="Disponibilité Médecin" styleClass="menu-item" onAction="#showDisponibiliteCrud"/>
+            <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+                <Button text="Retour" onAction="#handleRetourHome" styleClass="menu-item, logout-button"/>
+            </VBox>
+        </VBox>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <VBox styleClass="main-content" HBox.hgrow="ALWAYS">
+        <!-- En-tête -->
+        <HBox alignment="CENTER_LEFT" spacing="16" style="-fx-background-color: transparent;">
+            <Text text="Gestion des Médecins" style="-fx-font-size: 22px; -fx-font-weight: bold;" />
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField promptText="Rechercher..." />
+        </HBox>
+        <!-- Zone dynamique pour afficher uniquement le formulaire d'ajout de médecin -->
+        <VBox fx:id="medecinContent" spacing="18" alignment="CENTER" style="-fx-background-color: #fff; -fx-background-radius: 10; -fx-padding: 30;"/>
+    </VBox>
+</HBox>

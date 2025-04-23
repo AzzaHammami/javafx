@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.rendez_vous.controllers.ListeRendezvousController" spacing="18" alignment="TOP_CENTER" style="-fx-background-color: #f9fbfd; -fx-padding: 30 0 30 0;">
+    <Label text="Gestion des Rendez-vous" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-padding: 0 0 20 0;"/>
+    <HBox spacing="20" alignment="CENTER">
+        <VBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Motif"/>
+            <TextField fx:id="motifField" promptText="Motif" maxWidth="160"/>
+            <Label text="ID Patient"/>
+            <TextField fx:id="patientIdField" promptText="ID Patient" maxWidth="160"/>
+            <Label text="ID Médecin"/>
+            <TextField fx:id="medecinIdField" promptText="ID Médecin" maxWidth="160"/>
+        </VBox>
+        <VBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Date"/>
+            <DatePicker fx:id="datePicker" promptText="Date" maxWidth="160"/>
+            <Label text="Heure"/>
+            <ComboBox fx:id="heureCombo" promptText="Heure" maxWidth="160"/>
+            <Label text="Minute"/>
+            <ComboBox fx:id="minuteCombo" promptText="Minute" maxWidth="160"/>
+            <Label text="Statut"/>
+            <ComboBox fx:id="statutComboBox" promptText="Statut" maxWidth="160"/>
+        </VBox>
+        <VBox spacing="16" alignment="CENTER">
+            <Button text="Ajouter" fx:id="btnAjouter" onAction="#ajouterRendezVous" style="-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 7;"/>
+            <Button text="Modifier" fx:id="btnModifier" onAction="#modifierRendezVous" style="-fx-background-color: #ffd600; -fx-text-fill: #333; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 7;"/>
+            <Button text="Supprimer" fx:id="btnSupprimer" onAction="#supprimerRendezVous" style="-fx-background-color: #ff5252; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 7;"/>
+        </VBox>
+    </HBox>
+    <TableView fx:id="tableView" prefHeight="350" prefWidth="700">
+        <columns>
+            <TableColumn fx:id="idCol" text="ID" />
+            <TableColumn fx:id="motifCol" text="Motif" />
+            <TableColumn fx:id="patientIdCol" text="ID Patient" />
+            <TableColumn fx:id="medecinIdCol" text="ID Médecin" />
+            <TableColumn fx:id="dateCol" text="Date" />
+            <TableColumn fx:id="statutCol" text="Statut" />
+        </columns>
+    </TableView>
+</VBox>

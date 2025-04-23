@@ -1,0 +1,534 @@
+.root {
+    -fx-primary: #6366f1;
+    -fx-primary-light: #818cf8;
+    -fx-primary-dark: #4f46e5;
+    -fx-gray-100: #f3f4f6;
+    -fx-gray-200: #e5e7eb;
+    -fx-gray-300: #d1d5db;
+    -fx-gray-400: #9ca3af;
+    -fx-gray-500: #6b7280;
+    -fx-gray-700: #374151;
+    -fx-red-500: #ef4444;
+    -fx-green-500: #10b981;
+    -fx-blue-500: #3b82f6;
+    -fx-orange-500: #f97316;
+    -fx-purple-500: #a855f7;
+}
+
+.date-input-wrapper {
+    -fx-max-width: 300;
+    max-width: 300px;
+    -fx-background-color: white;
+    background-color: white;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.date-input {
+    -fx-padding: 10 40 10 15;
+    padding: 10px 40px 10px 15px;
+    -fx-border-color: -fx-gray-300;
+    border-color: -fx-gray-300;
+    -fx-border-radius: 6;
+    border-radius: 6px;
+    -fx-font-size: 16;
+    font-size: 16px;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-background-color: white;
+    background-color: white;
+    -fx-border-width: 1;
+    border-width: 1px;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.calendar-icon {
+    -fx-text-fill: -fx-gray-500;
+    color: -fx-gray-500;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.date-picker {
+    -fx-background-color: white;
+    background-color: white;
+    -fx-border-radius: 8;
+    border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 4);
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.date-picker-header {
+    -fx-background-color: -fx-primary;
+    background-color: -fx-primary;
+    -fx-padding: 15;
+    padding: 15px;
+    -fx-spacing: 10;
+    gap: 10px;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.month-year {
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-font-size: 18;
+    font-size: 18px;
+    -fx-text-fill: white;
+    color: white;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: white;
+    color: white;
+    -fx-padding: 5;
+    padding: 5px;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-min-width: 30;
+    min-width: 30px;
+    -fx-min-height: 30;
+    min-height: 30px;
+    -fx-background-radius: 15;
+    border-radius: 15px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255,255,255,0.2);
+    background-color: rgba(255,255,255,0.2);
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 5;
+    padding: 5px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+}
+
+.view-button {
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+    -fx-background-radius: 20;
+    border-radius: 20px;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-font-weight: 500;
+    font-weight: 500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-text-fill: -fx-gray-700;
+    color: -fx-gray-700;
+    -fx-background-color: transparent;
+    background-color: transparent;
+}
+
+.view-button:hover {
+    -fx-background-color: -fx-gray-100;
+    background-color: -fx-gray-100;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+}
+
+.view-button.active {
+    -fx-background-color: -fx-primary;
+    background-color: -fx-primary;
+    -fx-text-fill: white;
+    color: white;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+}
+
+.view-button.day.selected {
+    -fx-background-color: -fx-primary;
+    background-color: -fx-primary;
+    -fx-text-fill: white;
+    color: white;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-background-color: -fx-primary;
+    background-color: -fx-primary;
+}
+
+.view-button.day.today {
+    -fx-background-color: -fx-gray-100;
+    background-color: -fx-gray-100;
+    -fx-text-fill: -fx-primary;
+    color: -fx-primary;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-background-color: -fx-gray-100;
+    background-color: -fx-gray-100;
+}
+
+.calendar-grid {
+    -fx-padding: 15;
+    padding: 15px;
+    -fx-background-color: white;
+    background-color: white;
+}
+
+.days-header {
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-font-size: 14;
+    font-size: 14px;
+    -fx-text-fill: -fx-gray-500;
+    color: -fx-gray-500;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-padding: 5;
+    padding: 5px;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.days-grid {
+    -fx-hgap: 8;
+    gap: 8px;
+    -fx-vgap: 8;
+    -fx-padding: 8;
+    padding: 8px;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.day {
+    -fx-min-height: 36;
+    min-height: 36px;
+    -fx-min-width: 36;
+    min-width: 36px;
+    -fx-alignment: center;
+    text-align: center;
+    -fx-background-radius: 18;
+    border-radius: 18px;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.day:hover {
+    -fx-background-color: rgba(255,255,255,0.2);
+    background-color: rgba(255,255,255,0.2);
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.view-buttons {
+    -fx-padding: 10;
+    padding: 10px;
+    -fx-spacing: 5;
+    gap: 5px;
+    -fx-alignment: center;
+    text-align: center;
+    -fx-border-color: -fx-gray-200;
+    border-color: -fx-gray-200;
+    -fx-border-width: 0 0 1 0;
+    border-width: 0 0 1px 0;
+    -fx-background-color: white;
+    background-color: white;
+}
+
+.date-picker.hidden {
+    visibility: hidden;
+    display: none;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+}
+
+.title-label {
+    -fx-font-size: 24;
+    font-size: 24px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-text-fill: -fx-primary-dark;
+    color: -fx-primary-dark;
+}
+
+.date-picker {
+    -fx-background-color: white;
+    background-color: white;
+    -fx-border-color: -fx-gray-300;
+    border-color: -fx-gray-300;
+    -fx-border-radius: 6;
+    border-radius: 6px;
+}
+
+.today-button {
+    -fx-background-color: -fx-primary-light;
+    background-color: -fx-primary-light;
+    -fx-text-fill: white;
+    color: white;
+    -fx-background-radius: 20;
+    border-radius: 20px;
+    -fx-padding: 8 15;
+    padding: 8px 15px;
+}
+
+.today-button:hover {
+    -fx-background-color: -fx-primary;
+}
+
+.day-header {
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-text-fill: -fx-gray-500;
+    color: -fx-gray-500;
+}
+
+.week-view {
+    -fx-background-color: white;
+    background-color: white;
+    -fx-padding: 15;
+    padding: 15px;
+}
+
+.color-legend {
+    -fx-padding: 15px;
+    -fx-border-color: -fx-gray-200;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.legend-title {
+    -fx-font-weight: bold;
+}
+
+.legend-item {
+    -fx-spacing: 5;
+    -fx-alignment: center;
+}
+
+.consultation-dot {
+    -fx-fill: -fx-blue-500;
+    fill: -fx-blue-500;
+}
+
+.vaccination-dot {
+    -fx-fill: -fx-green-500;
+    fill: -fx-green-500;
+}
+
+.urgence-dot {
+    -fx-fill: -fx-red-500;
+    fill: -fx-red-500;
+}
+
+.suivi-dot {
+    -fx-fill: -fx-purple-500;
+    fill: -fx-purple-500;
+}
+
+.autre-dot {
+    -fx-fill: -fx-orange-500;
+    fill: -fx-orange-500;
+}
+
+.calendar-day {
+    -fx-background-color: white;
+    -fx-border-color: -fx-gray-200;
+    -fx-padding: 5px;
+    -fx-alignment: center;
+}
+
+.calendar-day:hover {
+    -fx-background-color: -fx-gray-100;
+}
+
+.calendar-day-today {
+    -fx-background-color: -fx-primary-light;
+    -fx-text-fill: white;
+}
+
+.calendar-day-selected {
+    -fx-background-color: -fx-primary;
+    -fx-text-fill: white;
+    background-color: -fx-primary;
+    color: white;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: bold;
+    font-weight: bold;
+}
+
+.calendar-day-other-month {
+    -fx-text-fill: -fx-gray-400;
+    color: -fx-gray-400;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.calendar-day-outside-month {
+    -fx-text-fill: -fx-gray-400;
+    color: -fx-gray-400;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+    -fx-padding: 0;
+    padding: 0;
+    -fx-font-weight: normal;
+    font-weight: normal;
+}
+
+.event {
+    -fx-background-radius: 4;
+    border-radius: 4px;
+    -fx-padding: 5;
+    padding: 5px;
+    -fx-text-fill: white;
+    color: white;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.event-consultation {
+    -fx-background-color: -fx-blue-500;
+    background-color: -fx-blue-500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.event-vaccination {
+    -fx-background-color: -fx-green-500;
+    background-color: -fx-green-500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.event-urgence {
+    -fx-background-color: -fx-red-500;
+    background-color: -fx-red-500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.event-suivi {
+    -fx-background-color: -fx-purple-500;
+    background-color: -fx-purple-500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}
+
+.event-autre {
+    -fx-background-color: -fx-orange-500;
+    background-color: -fx-orange-500;
+    -fx-border-color: transparent;
+    border-color: transparent;
+    -fx-border-width: 0;
+    border-width: 0;
+}

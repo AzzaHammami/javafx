@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Back.AdminLoginController"
+      stylesheets="@../../styles/theme.css"
+      alignment="CENTER" spacing="20">
+      
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    
+    <!-- En-tête -->
+    <VBox alignment="CENTER" spacing="10">
+        <Text text="Système de Gestion des Réclamations" 
+              style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+        <Text text="Bienvenue dans votre espace de gestion" 
+              style="-fx-font-size: 16; -fx-fill: #666;"/>
+    </VBox>
+    
+    <!-- Boutons d'accès -->
+    <VBox alignment="CENTER" spacing="15" styleClass="buttons-container">
+        <padding>
+            <Insets top="30"/>
+        </padding>
+        
+        <Button text="Espace Utilisateur" 
+                onAction="#handleUserSpace"
+                styleClass="home-button"/>
+                
+        <Button text="Espace Admin" 
+                onAction="#handleAdminSpace"
+                styleClass="home-button"/>
+    </VBox>
+    
+    <!-- Footer -->
+    <Text text="2025 - Tous droits réservés" 
+          style="-fx-font-size: 12; -fx-fill: #999;"
+          VBox.vgrow="ALWAYS"/>
+          
+</VBox>
