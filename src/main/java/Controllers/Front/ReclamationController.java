@@ -5,6 +5,7 @@ import models.Reponse;
 import models.User;
 import services.ReclamationService;
 import services.ReponseService;
+import services.UserService;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -45,31 +46,34 @@ public class ReclamationController implements Initializable {
     @FXML
     private TextArea descriptionField;
     @FXML
-    private TableView<Reclamation> tableView;
-    @FXML
-    private TableColumn<Reclamation, String> sujetColumn;
-    @FXML
-    private TableColumn<Reclamation, String> descriptionColumn;
-    @FXML
-    private TableColumn<Reclamation, LocalDate> dateColumn;
-    @FXML
-    private TableColumn<Reclamation, String> statutColumn;
-    @FXML
-    private TableView<Reponse> reponsesTableView;
-    @FXML
-    private TableColumn<Reponse, String> reponseContenuColumn;
-    @FXML
-    private TableColumn<Reponse, LocalDate> reponseDateColumn;
+    private VBox cardContainer;
     @FXML
     private VBox reponsesContainer;
+    @FXML
+    private ScrollPane mainScrollPane;
+    @FXML
+    private VBox formContainer;
+    @FXML
+    private Button ajouterButton;
+    @FXML
+    private Button modifierButton;
+    @FXML
+    private Button supprimerButton;
+    @FXML
+    private Button annulerButton;
 
     private ReclamationService reclamationService;
     private ReponseService reponseService;
     private Reclamation selectedReclamation;
+    private UserService userService = new UserService();
     // Ajout pour gestion utilisateur courant
     private models.User currentUser;
     public void setCurrentUser(models.User user) {
         this.currentUser = user;
+        // Recharge les réclamations dès que l'utilisateur courant est défini
+        if (cardContainer != null) {
+            loadReclamations();
+        }
     }
 
     @FXML
@@ -78,70 +82,41 @@ public class ReclamationController implements Initializable {
         reclamationService = new ReclamationService();
         reponseService = new ReponseService();
         
-        setupTableColumns();
-        setupReponseColumns();
         loadReclamations();
         
         // Initialize responses container
         reponsesContainer.setVisible(false);
         reponsesContainer.setManaged(false);
-        
-        // Setup selection listener
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            selectedReclamation = newSelection;
-            if (newSelection != null) {
-                sujetField.setText(newSelection.getSujet());
-                descriptionField.setText(newSelection.getDescription());
-                reponsesContainer.setVisible(true);
-                reponsesContainer.setManaged(true);
-                loadReponses();
-            } else {
-                sujetField.clear();
-                descriptionField.clear();
-                reponsesContainer.setVisible(false);
-                reponsesContainer.setManaged(false);
-            }
-        });
-    }
-
-    private void setupTableColumns() {
-        // Set column widths as percentages
-        sujetColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.3));
-        descriptionColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
-        dateColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.15));
-        statutColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.15));
-        
-        // Set cell value factories
-        sujetColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getSujet()));
-        descriptionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
-        dateColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getDateReclamation()));
-        statutColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStatut()));
-    }
-
-    private void setupReponseColumns() {
-        reponseContenuColumn.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getContenu()));
-        reponseDateColumn.setCellValueFactory(cellData -> 
-            new SimpleObjectProperty<>(cellData.getValue().getDateReponse()));
+        hideForm();
     }
 
     private void loadReclamations() {
-        ObservableList<Reclamation> data = FXCollections.observableArrayList();
-        data.addAll(reclamationService.getAll());
-        tableView.setItems(data);
-    }
-
-    private void loadReponses() {
-        if (selectedReclamation != null) {
-            ObservableList<Reponse> reponses = FXCollections.observableArrayList();
-            reponses.addAll(reponseService.getReponsesByReclamation(selectedReclamation.getId()));
-            reponsesTableView.setItems(reponses);
+        cardContainer.getChildren().clear();
+        if (currentUser == null) return;
+        List<Reclamation> reclamations = reclamationService.getAll();
+        for (Reclamation rec : reclamations) {
+            if (rec.getUserId() != null && rec.getUserId().equals(currentUser.getId())) {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/front/CardReclamationFront.fxml"));
+                    Node card = loader.load();
+                    CardReclamationFrontController cardController = loader.getController();
+                    String userName = currentUser.getName();
+                    cardController.setData(rec, userName);
+                    cardController.setParentController(this);
+                    cardContainer.getChildren().add(card);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     private void clearForm() {
         sujetField.clear();
         descriptionField.clear();
+        showAllFormButtons();
+        hideForm();
+        selectedReclamation = null;
     }
 
     private boolean validateInputs() {
@@ -194,12 +169,13 @@ public class ReclamationController implements Initializable {
     @FXML
     private void handleEnvoyerReclamation(ActionEvent event) {
         if (validateInputs()) {
-            Reclamation reclamation = new Reclamation();
-            reclamation.setSujet(sujetField.getText());
-            reclamation.setDescription(descriptionField.getText());
-            reclamation.setDateReclamation(LocalDate.now());
-            reclamation.setStatut("En attente");
-            
+            // Correction : inclure l'id utilisateur lors de la création de la réclamation
+            Integer userId = (currentUser != null) ? currentUser.getId() : null;
+            if (userId == null) {
+                showAlert("Erreur", "Utilisateur non authentifié !");
+                return;
+            }
+            Reclamation reclamation = new Reclamation(0, sujetField.getText(), descriptionField.getText(), "En attente", LocalDate.now(), userId);
             reclamationService.ajouter(reclamation);
             loadReclamations();
             clearForm();
@@ -221,7 +197,6 @@ public class ReclamationController implements Initializable {
             reclamationService.modifier(selectedReclamation);
             loadReclamations();
             clearForm();
-            tableView.getSelectionModel().clearSelection();
             showAlert("Succès", "Réclamation modifiée avec succès");
         }
     }
@@ -243,7 +218,6 @@ public class ReclamationController implements Initializable {
                 reclamationService.supprimer(selectedReclamation.getId());
                 loadReclamations();
                 clearForm();
-                tableView.getSelectionModel().clearSelection();
                 showAlert("Succès", "Réclamation supprimée avec succès");
             }
         });
@@ -268,5 +242,82 @@ public class ReclamationController implements Initializable {
             e.printStackTrace();
             showAlert("Erreur", "Erreur lors de l'ouverture de la messagerie: " + e.getMessage());
         }
+    }
+
+    @FXML
+    private void handleScrollToForm() {
+        showAllFormButtons();
+        showForm();
+        scrollToForm();
+    }
+
+    // Permet de scroller vers la zone du formulaire d'édition
+    public void scrollToForm() {
+        if (mainScrollPane != null && formContainer != null) {
+            mainScrollPane.layout(); // Force le layout pour que les positions soient correctes
+            double y = formContainer.getBoundsInParent().getMinY();
+            double contentHeight = mainScrollPane.getContent().getBoundsInLocal().getHeight();
+            double scrollValue = y / (contentHeight - mainScrollPane.getViewportBounds().getHeight());
+            mainScrollPane.setVvalue(Math.max(0, Math.min(1, scrollValue)));
+        }
+    }
+
+    // Pré-remplit le formulaire pour modification
+    public void prefillFormForEdit(Reclamation reclamation) {
+        this.selectedReclamation = reclamation;
+        sujetField.setText(reclamation.getSujet());
+        descriptionField.setText(reclamation.getDescription());
+        if (ajouterButton != null) ajouterButton.setVisible(false);
+        if (modifierButton != null) modifierButton.setVisible(true);
+        if (supprimerButton != null) supprimerButton.setVisible(false);
+        if (annulerButton != null) annulerButton.setVisible(true);
+        showForm();
+    }
+
+    // Suppression depuis la card
+    public void deleteReclamationFromCard(Reclamation reclamation) {
+        if (reclamation != null) {
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Confirmation de suppression");
+            confirmAlert.setHeaderText(null);
+            confirmAlert.setContentText("Êtes-vous sûr de vouloir supprimer cette réclamation ?");
+            confirmAlert.showAndWait().ifPresent(response -> {
+                if (response == ButtonType.OK) {
+                    reclamationService.supprimer(reclamation.getId());
+                    loadReclamations();
+                    clearForm();
+                    showAlert("Succès", "Réclamation supprimée avec succès!");
+                }
+            });
+        }
+    }
+
+    // Affiche tous les boutons lors de l'ajout ou après modification/suppression
+    private void showAllFormButtons() {
+        if (ajouterButton != null) ajouterButton.setVisible(true);
+        if (modifierButton != null) modifierButton.setVisible(false);
+        if (supprimerButton != null) supprimerButton.setVisible(false);
+        if (annulerButton != null) annulerButton.setVisible(true);
+    }
+
+    // Affiche et rend visible le formulaire
+    private void showForm() {
+        if (formContainer != null) {
+            formContainer.setVisible(true);
+            formContainer.setManaged(true);
+        }
+    }
+
+    // Cache le formulaire
+    private void hideForm() {
+        if (formContainer != null) {
+            formContainer.setVisible(false);
+            formContainer.setManaged(false);
+        }
+    }
+
+    @FXML
+    private void handleAnnulerForm() {
+        clearForm();
     }
 }

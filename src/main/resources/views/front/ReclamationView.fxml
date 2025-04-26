@@ -27,7 +27,7 @@
                     </StackPane>
                     <Label text="MaSanté" styleClass="app-name"/>
                 </HBox>
-                
+
                 <!-- Navigation Menu -->
                 <HBox spacing="30" alignment="CENTER">
                     <Label text="Accueil" styleClass="nav-item"/>
@@ -44,54 +44,33 @@
 
     <!-- Main Content -->
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="main-scroll">
-            <VBox spacing="30" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
+            <VBox spacing="30" minHeight="800">
                 <padding>
                     <Insets top="20" right="40" bottom="20" left="40"/>
                 </padding>
-
-                <!-- Back Button -->
                 <Button text="Retour" onAction="#handleRetourHome" styleClass="btn-back"/>
-
-                <!-- Action Button: Go to Messenger -->
                 <Button text="Messagerie" onAction="#handleGoToMessenger" styleClass="btn-primary"/>
-
-                <!-- Main Title -->
                 <Label text="Gestion des Réclamations" styleClass="main-title"/>
-
-                <!-- Form Section -->
-                <VBox spacing="20" styleClass="form-container">
+                <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
+                <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
+                <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
                     <Label text="Nouvelle Réclamation" styleClass="section-title"/>
-                    
                     <VBox spacing="10">
                         <Label text="Sujet" styleClass="field-label"/>
                         <TextField fx:id="sujetField" promptText="Entrez le sujet de votre réclamation"/>
                     </VBox>
-                    
                     <VBox spacing="10">
                         <Label text="Description" styleClass="field-label"/>
-                        <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" 
-                                 wrapText="true" prefRowCount="3"/>
+                        <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" wrapText="true" prefRowCount="3"/>
                     </VBox>
-                    
                     <HBox spacing="10">
-                        <Button text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
-                        <Button text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
-                        <Button text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
+                        <Button fx:id="ajouterButton" text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
+                        <Button fx:id="modifierButton" text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
+                        <Button fx:id="supprimerButton" text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
+                        <Button fx:id="annulerButton" text="Annuler" onAction="#handleAnnulerForm" styleClass="btn-secondary"/>
                     </HBox>
                 </VBox>
-
-                <!-- Table Section -->
-                <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn fx:id="sujetColumn" text="Sujet"/>
-                        <TableColumn fx:id="descriptionColumn" text="Description"/>
-                        <TableColumn fx:id="dateColumn" text="Date"/>
-                        <TableColumn fx:id="statutColumn" text="Statut"/>
-                    </columns>
-                </TableView>
-
-                <!-- Responses Section -->
                 <VBox fx:id="reponsesContainer" spacing="10" styleClass="responses-section">
                     <Label text="Réponses" styleClass="section-title"/>
                     <TableView fx:id="reponsesTableView" prefHeight="200">

@@ -7,6 +7,7 @@ public class Reclamation {
         private String description;
         private String statut;
         private LocalDate dateReclamation;
+        private Integer userId;
 
 
 
@@ -16,12 +17,13 @@ public class Reclamation {
         }
 
 
-        public Reclamation(int id, String sujet, String description, String statut, LocalDate dateReclamation) {
+        public Reclamation(int id, String sujet, String description, String statut, LocalDate dateReclamation, Integer userId) {
             this.id = id;
             this.sujet = sujet;
             this.description = description;
             this.statut = statut;
             this.dateReclamation = dateReclamation;
+            this.userId = userId;
         }
 
 
@@ -65,6 +67,14 @@ public class Reclamation {
             this.dateReclamation = dateReclamation;
         }
 
+        public Integer getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Integer userId) {
+            this.userId = userId;
+        }
+
 
         @Override
         public String toString() {
@@ -74,8 +84,7 @@ public class Reclamation {
                     ", description='" + description + '\'' +
                     ", statut='" + statut + '\'' +
                     ", dateReclamation=" + dateReclamation +
+                    ", userId=" + userId +
                     '}';
         }
     }
-
-

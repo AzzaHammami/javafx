@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.shape.Polyline?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.layout.StackPane?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="Controllers.Front.CardReclamationFrontController"
+      spacing="0" style="-fx-background-color: white; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, #d3d6e9, 8,0,0,2);">
+    <!-- Header coloré -->
+    <HBox spacing="0" alignment="CENTER_LEFT" style="-fx-background-color: #4958c5; -fx-background-radius: 12 12 0 0; -fx-padding: 12 18 12 18;">
+        <VBox alignment="CENTER_LEFT" spacing="2" HBox.hgrow="ALWAYS">
+            <Text fx:id="sujetLabel" styleClass="card-title" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-fill: #ffffff;" />
+        </VBox>
+        <Label fx:id="dateLabel" style="-fx-text-fill: #ffffff; -fx-font-size: 13; -fx-font-weight: normal; -fx-padding: 0 12 0 0;" alignment="CENTER_RIGHT" />
+    </HBox>
+    <!-- Partie blanche (body) -->
+    <VBox spacing="12" alignment="TOP_LEFT" style="-fx-padding: 16 18 18 18;">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label fx:id="userNameLabel" style="-fx-font-weight: bold; -fx-font-size: 15px; -fx-text-fill: #222222;" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Label fx:id="statutLabel" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-padding: 3 14 3 14; -fx-background-radius: 8; -fx-text-fill: #ffffff;" />
+            <Button fx:id="editButton" onAction="#handleEdit" styleClass="icon-btn" style="-fx-background-color: transparent;">
+                <graphic>
+                    <StackPane>
+                        <Rectangle width="24" height="24" arcWidth="7" arcHeight="7" fill="#e6eaf3" />
+                        <Group>
+                            <Polyline points="7,17,7,7,17,7" stroke="#4958c5" strokeWidth="2" fill="transparent"/>
+                            <Polyline points="7,7,17,7,17,17" stroke="#4958c5" strokeWidth="2" fill="transparent"/>
+                            <Polyline points="9,15,15,9" stroke="#4958c5" strokeWidth="2.5" fill="transparent"/>
+                            <Polyline points="11,13,13,11" stroke="#4958c5" strokeWidth="2.5" fill="transparent"/>
+                        </Group>
+                        <Polyline points="9,15,15,9" stroke="#4958c5" strokeWidth="2.5" fill="transparent"/>
+                    </StackPane>
+                </graphic>
+            </Button>
+            <Button fx:id="deleteButton" onAction="#handleDelete" styleClass="icon-btn" style="-fx-background-color: transparent;">
+                <graphic>
+                    <Label text="🗑" style="-fx-font-size: 16; -fx-text-fill: #d32f2f;"/>
+                </graphic>
+            </Button>
+        </HBox>
+        <Label fx:id="descriptionLabel" styleClass="card-desc" wrapText="true" maxWidth="350" style="-fx-font-size: 14; -fx-text-fill: #444444;"/>
+    </VBox>
+</VBox>

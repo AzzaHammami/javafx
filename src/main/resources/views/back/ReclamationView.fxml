@@ -10,15 +10,11 @@
            minWidth="900" minHeight="600" prefHeight="800.0" prefWidth="1200.0"
            fx:id="mainContainer">
 
-    <!-- En-tête -->
+    <!-- BARRE MAUVE EN HAUT (sans titre à gauche) -->
     <top>
-        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="20">
-            <padding>
-                <Insets top="15" right="30" bottom="15" left="30"/>
-            </padding>
-            <Text text="Gestion des Réclamations" styleClass="header-title"/>
+        <HBox style="-fx-background-color: #6C5CE7; -fx-padding: 18 30 18 30;" alignment="CENTER_LEFT" spacing="20">
             <Region HBox.hgrow="ALWAYS" />
-            <Label text="Admin Dashboard" styleClass="header-subtitle"/>
+            <Label text="Admin Dashboard" style="-fx-font-size: 16px; -fx-text-fill: white;"/>
         </HBox>
     </top>
 
@@ -48,7 +44,7 @@
 
     <!-- Contenu principal -->
     <center>
-        <ScrollPane fitToWidth="true" styleClass="main-scroll">
+        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
             <VBox spacing="25">
                 <padding>
                     <Insets top="30" right="40" bottom="30" left="40"/>
@@ -61,7 +57,7 @@
                             <Label text="Rechercher" styleClass="field-label"/>
                             <HBox spacing="10" alignment="CENTER_LEFT">
                                 <ComboBox fx:id="searchCriteriaBox" prefWidth="150" promptText="Critère de recherche"/>
-                                <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="300"/>
+                                <TextField fx:id="searchField" promptText="Rechercher..." styleClass="search-field" prefWidth="300" minWidth="200" maxWidth="400"/>
                             </HBox>
                         </VBox>
                         <Region HBox.hgrow="ALWAYS" />
@@ -79,18 +75,11 @@
                 <!-- Liste des réclamations -->
                 <VBox spacing="15" styleClass="content-section">
                     <Label text="Liste des Réclamations" styleClass="section-title"/>
-                    <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
-                        <columns>
-                            <TableColumn fx:id="sujetColumn" text="Sujet"/>
-                            <TableColumn fx:id="descriptionColumn" text="Description"/>
-                            <TableColumn fx:id="dateColumn" text="Date"/>
-                            <TableColumn fx:id="statutColumn" text="Statut"/>
-                        </columns>
-                    </TableView>
+                    <VBox fx:id="cardContainer" spacing="16" VBox.vgrow="ALWAYS"/>
                 </VBox>
 
                 <!-- Section réponses -->
-                <VBox spacing="15" styleClass="content-section">
+                <VBox fx:id="gestionReponseZone" spacing="15" styleClass="content-section" visible="false" managed="false">
                     <Label text="Gestion des Réponses" styleClass="section-title"/>
 
                     <HBox spacing="15" styleClass="status-section">
@@ -102,14 +91,13 @@
 
                     <Separator/>
 
-                    <VBox spacing="10">
+                    <VBox fx:id="reponseZone" spacing="10" visible="false" managed="false">
                         <Label text="Nouvelle Réponse" styleClass="subsection-title"/>
                         <TextArea fx:id="reponseField" promptText="Écrivez votre réponse ici..."
                                  wrapText="true" prefRowCount="3"/>
-
                         <HBox spacing="10" alignment="CENTER_RIGHT">
                             <Button text="Envoyer" onAction="#handleEnvoyerReponse" styleClass="btn-primary"/>
-                            <Button text="Annuler" onAction="#handleAnnulerModification" styleClass="btn-secondary"/>
+                            <Button text="Annuler" onAction="#handleAnnulerModification" styleClass="btn-secondary" prefHeight="32"/>
                         </HBox>
                     </VBox>
 
@@ -131,8 +119,8 @@
                             <padding>
                                 <Insets top="10" />
                             </padding>
-                            <Button fx:id="modifierReponseButton" text="Modifier" onAction="#handleEnvoyerReponse" styleClass="btn-success"/>
-                            <Button fx:id="supprimerReponseButton" text="Supprimer" onAction="#handleSupprimerReponse" styleClass="btn-danger"/>
+                            <Button fx:id="modifierReponseButton" text="Modifier" onAction="#handleEnvoyerReponse" styleClass="btn-success" prefHeight="32"/>
+                            <Button fx:id="supprimerReponseButton" text="Supprimer" onAction="#handleSupprimerReponse" styleClass="btn-danger" prefHeight="32"/>
                         </HBox>
                     </VBox>
                 </VBox>

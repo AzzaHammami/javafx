@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<VBox fx:id="miniMessengerRoot" spacing="0" style="-fx-background-color: white; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" minWidth="340" maxWidth="360" minHeight="420" maxHeight="480">
+    <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #0084ff; -fx-background-radius: 10 10 0 0;">
+        <Label fx:id="conversationTitleLabel" text="Chat" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;" />
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="closeButton" text="✕" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 16px;" />
+    </HBox>
+    <ScrollPane fx:id="messagesScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color:transparent;">
+        <VBox fx:id="messagesContainer" spacing="8" padding="10" style="-fx-background-color:transparent;" />
+    </ScrollPane>
+    <HBox spacing="5" padding="10">
+        <TextField fx:id="messageInput" promptText="Écrivez un message..." HBox.hgrow="ALWAYS" />
+        <Button fx:id="sendButton" text="Envoyer" style="-fx-background-color: #0084ff; -fx-text-fill: white; -fx-background-radius: 5;" />
+    </HBox>
+</VBox>

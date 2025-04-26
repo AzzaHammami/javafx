@@ -7,9 +7,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.stage.Stage;
 import models.User;
 import services.UserService;
+import Controllers.Front.ReclamationController;
+import utils.UserContext;
 
 import java.io.IOException;
 import java.util.List;
@@ -32,6 +35,21 @@ public class LoginController {
             users.removeIf(u -> u.getRolesList().contains("admin"));
         }
         userComboBox.getItems().setAll(users);
+        // Afficher uniquement le nom dans le ComboBox
+        userComboBox.setCellFactory(lv -> new ListCell<User>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        userComboBox.setButtonCell(new ListCell<User>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
     }
 
     @FXML
@@ -54,9 +72,11 @@ public class LoginController {
                 Parent root = loader.load();
                 Scene scene = new Scene(root);
                 scene.getStylesheets().add(getClass().getResource("/styles/theme.css").toExternalForm());
-                Controllers.MainLayoutController adminController = loader.getController();
-                adminController.setCurrentUser(selectedUser);
-                adminController.setCurrentUser(selectedUser);
+                Controllers.MainLayoutController mainLayoutController = loader.getController();
+                mainLayoutController.setCurrentUser(selectedUser);
+                UserContext.getInstance().setCurrentUser(selectedUser);
+                System.out.println("[LoginController] Après setCurrentUser: " + (selectedUser != null ? selectedUser.getName() : "null"));
+                mainLayoutController.showDashboard(null); // Ajouté pour charger la vue dashboard après passage du user
                 stage.setScene(scene);
                 stage.setTitle("Espace Admin - " + selectedUser.getName());
                 stage.setMinWidth(1200);
@@ -67,7 +87,7 @@ public class LoginController {
                 Parent root = loader.load();
                 Scene scene = new Scene(root);
                 scene.getStylesheets().add(getClass().getResource("/styles/theme.css").toExternalForm());
-                Controllers.Front.ReclamationController reclamationController = loader.getController();
+                ReclamationController reclamationController = loader.getController();
                 reclamationController.setCurrentUser(selectedUser);
                 stage.setScene(scene);
                 stage.setTitle("Espace Utilisateur - " + selectedUser.getName());

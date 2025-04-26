@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.text.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Back.CardReclamationController" minWidth="250" minHeight="140" maxWidth="350" styleClass="reclamation-card">
+    <VBox spacing="8" alignment="TOP_LEFT" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10" AnchorPane.topAnchor="10" AnchorPane.bottomAnchor="10">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label fx:id="statutLabel" text="Statut" style="-fx-background-color: #e0e0e0; -fx-padding: 3 12 3 12; -fx-background-radius: 8; -fx-font-weight: bold; -fx-text-fill: #6C5CE7;" minWidth="80" alignment="CENTER_LEFT"/>
+            <Label fx:id="sujetLabel" text="Sujet de la réclamation" styleClass="card-title"/>
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="dateLabel" text="Date" styleClass="card-date" alignment="CENTER_RIGHT"/>
+        </HBox>
+        <Label fx:id="descriptionLabel" text="Description de la réclamation" wrapText="true" styleClass="card-description"/>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label fx:id="userLabel" text="Utilisateur" style="-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: #222;" />
+        </HBox>
+        <!-- Ajoutez ici des boutons d'action si besoin -->
+    </VBox>
+</AnchorPane>

@@ -19,12 +19,14 @@ public class ReclamationService implements IReclamation {
 
     @Override
     public void ajouter(Reclamation r) {
-        String sql = "INSERT INTO reclamation (sujet, description, statut, date_reclamation) VALUES (?, ?, ?, ?)";
+        // Correction : ajout du champ user_id dans l'insertion
+        String sql = "INSERT INTO reclamation (sujet, description, statut, date_reclamation, user_id) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, r.getSujet());
             ps.setString(2, r.getDescription());
             ps.setString(3, r.getStatut());
             ps.setDate(4, Date.valueOf(r.getDateReclamation()));
+            ps.setInt(5, r.getUserId());
             ps.executeUpdate();
             System.out.println("Reclamation ajoutée !");
         } catch (SQLException e) {
@@ -69,12 +71,17 @@ public class ReclamationService implements IReclamation {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
+                // Lors de la récupération des réclamations depuis la base, il faut remplir le champ userId
+                // Exemple pour la méthode getAll() et toute méthode qui crée un objet Reclamation
+                // rs.getInt("user_id")
+                // new Reclamation(id, sujet, description, statut, dateReclamation, userId)
                 Reclamation r = new Reclamation(
                         rs.getInt("id"),
                         rs.getString("sujet"),
                         rs.getString("description"),
                         rs.getString("statut"),
-                        rs.getDate("date_reclamation").toLocalDate()
+                        rs.getDate("date_reclamation").toLocalDate(),
+                        rs.getInt("user_id")
                 );
                 list.add(r);
             }
@@ -92,12 +99,17 @@ public class ReclamationService implements IReclamation {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
+                // Lors de la récupération des réclamations depuis la base, il faut remplir le champ userId
+                // Exemple pour la méthode getAll() et toute méthode qui crée un objet Reclamation
+                // rs.getInt("user_id")
+                // new Reclamation(id, sujet, description, statut, dateReclamation, userId)
                 return new Reclamation(
                         rs.getInt("id"),
                         rs.getString("sujet"),
                         rs.getString("description"),
                         rs.getString("statut"),
-                        rs.getDate("date_reclamation").toLocalDate()
+                        rs.getDate("date_reclamation").toLocalDate(),
+                        rs.getInt("user_id")
                 );
             }
         } catch (SQLException e) {

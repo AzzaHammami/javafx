@@ -23,6 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
 
 public class MessengerController implements Initializable {
     @FXML private Label userNameLabel;
@@ -39,9 +43,16 @@ public class MessengerController implements Initializable {
     private MessageService messageService;
     private User currentUser;
     private Conversation selectedConversation;
+    private ScheduledExecutorService pollingExecutor;
+    private List<Message> lastMessagesSnapshot = new ArrayList<>();
 
     @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    public void initialize(URL location, ResourceBundle resources) {
+        if (currentUser == null) {
+            currentUser = utils.UserContext.getInstance().getCurrentUser();
+            System.out.println("[MessengerController] initialize fallback to UserContext: " + (currentUser != null ? currentUser.getName() : "null"));
+        }
+        System.out.println("[MessengerController] initialize: currentUser = " + (currentUser != null ? currentUser.getName() : "null") + " | instance: " + this);
         userService = new UserService();
 
         // Create services without circular dependencies
@@ -71,21 +82,30 @@ public class MessengerController implements Initializable {
     """);
 
         messagesContainer.setStyle("-fx-background-color: lightblue !important;");
-        setupUI();
         setupEventHandlers();
+        setupPolling();
+    }
+
+    private User getCurrentUser() {
+        if (currentUser != null) return currentUser;
+        return utils.UserContext.getInstance().getCurrentUser();
     }
 
     public void setCurrentUser(User user) {
-        this.currentUser = user;
-        if (userNameLabel != null && user != null) {
-            userNameLabel.setText(user.getName());
-            loadConversationsSafe();
+        System.out.println("[MessengerController] setCurrentUser called on instance: " + this + " with user: " + (user != null ? user.getName() : "null"));
+        if (user == null) {
+            user = utils.UserContext.getInstance().getCurrentUser();
+            System.out.println("[MessengerController] setCurrentUser fallback to UserContext: " + (user != null ? user.getName() : "null"));
         }
+        this.currentUser = user;
+        utils.UserContext.getInstance().setCurrentUser(user);
+        System.out.println("[MessengerController] setCurrentUser: " + (user != null ? user.getName() : "null"));
+        setupUI();
     }
 
     private void setupUI() {
-        if (currentUser != null) {
-            userNameLabel.setText(currentUser.getName());
+        if (getCurrentUser() != null) {
+            userNameLabel.setText(getCurrentUser().getName());
             loadConversationsSafe();
         } else {
             userNameLabel.setText("Non connecté");
@@ -119,7 +139,7 @@ public class MessengerController implements Initializable {
                     nameLabel.setStyle("-fx-font-weight: bold;");
 
                     // Add unread count badge if any
-                    int unreadCount = messageService.getUnreadCount(currentUser.getId());
+                    int unreadCount = messageService.getUnreadCount(getCurrentUser().getId());
                     if (unreadCount > 0) {
                         Circle badge = new Circle(8, Color.RED);
                         HBox header = new HBox(5, nameLabel, badge);
@@ -153,7 +173,7 @@ public class MessengerController implements Initializable {
                         selectedConversation = newVal;
                         loadMessages(newVal);
                         conversationTitleLabel.setText(getConversationTitle(newVal));
-                        messageService.markMessagesAsRead(newVal.getId(), currentUser.getId());
+                        messageService.markMessagesAsRead(newVal.getId(), getCurrentUser().getId());
                     } else {
                         selectedConversation = null;
                     }
@@ -180,7 +200,7 @@ public class MessengerController implements Initializable {
 
         Message message = new Message();
         message.setConversationId(selectedConversation.getId());
-        message.setSender(currentUser);
+        message.setSender(getCurrentUser());
 
         // For direct messages, set the receiver
         if (!selectedConversation.isGroup()) {
@@ -205,6 +225,10 @@ public class MessengerController implements Initializable {
 
     @FXML
     private void handleNewConversation() {
+        if (getCurrentUser() == null) {
+            showError("Utilisateur non connecté. Veuillez vous reconnecter.");
+            return;
+        }
         Dialog<User> dialog = new Dialog<>();
         dialog.setTitle("Nouvelle conversation");
         dialog.setHeaderText("Sélectionnez un utilisateur");
@@ -216,7 +240,7 @@ public class MessengerController implements Initializable {
         // Create the user list
         ListView<User> userListView = new ListView<>();
         List<User> allUsers = userService.getAllUsers();
-        allUsers.removeIf(u -> u.getId() == currentUser.getId());
+        allUsers.removeIf(u -> u.getId() == getCurrentUser().getId());
         userListView.setItems(FXCollections.observableArrayList(allUsers));
         userListView.setCellFactory(lv -> new ListCell<User>() {
             @Override
@@ -247,8 +271,12 @@ public class MessengerController implements Initializable {
     }
 
     private void createNewConversationWith(User otherUser) {
+        if (getCurrentUser() == null) {
+            showError("Utilisateur non connecté. Veuillez vous reconnecter.");
+            return;
+        }
         Conversation conversation = conversationService.getOrCreateDirectConversation(
-                currentUser.getId(),
+                getCurrentUser().getId(),
                 otherUser.getId()
         );
 
@@ -262,7 +290,7 @@ public class MessengerController implements Initializable {
 
     private User getOtherParticipant(Conversation conversation) {
         for (User participant : conversation.getParticipants()) {
-            if (participant.getId() != currentUser.getId()) {
+            if (participant.getId() != getCurrentUser().getId()) {
                 return participant;
             }
         }
@@ -270,14 +298,14 @@ public class MessengerController implements Initializable {
     }
 
     private void loadConversations() {
-        if (currentUser == null) return;
+        if (getCurrentUser() != null) {
+            List<Conversation> conversations = conversationService.getUserConversations(getCurrentUser().getId());
+            ObservableList<Conversation> obsList = FXCollections.observableArrayList(conversations);
+            conversationListView.setItems(obsList);
 
-        List<Conversation> conversations = conversationService.getUserConversations(currentUser.getId());
-        ObservableList<Conversation> obsList = FXCollections.observableArrayList(conversations);
-        conversationListView.setItems(obsList);
-
-        if (obsList.isEmpty()) {
-            showEmptyState();
+            if (obsList.isEmpty()) {
+                showEmptyState();
+            }
         }
     }
 
@@ -296,6 +324,7 @@ public class MessengerController implements Initializable {
         }
 
         List<Message> messages = messageService.getMessagesByConversation(conversation.getId());
+        lastMessagesSnapshot = new ArrayList<>(messages);
         if (messages.isEmpty()) {
             Label emptyLabel = new Label("Aucun message dans cette conversation");
             emptyLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 16px; -fx-padding: 30px;");
@@ -325,7 +354,7 @@ public class MessengerController implements Initializable {
         Label initial = new Label(message.getSender().getName().substring(0, 1).toUpperCase());
         StackPane avatar = new StackPane(avatarBg, initial);
 
-        if (message.getSender().getId() == currentUser.getId()) {
+        if (message.getSender().getId() == getCurrentUser().getId()) {
             messageBox.setAlignment(Pos.CENTER_RIGHT);
             bubbleBox.getStyleClass().add("message-bubble-sent");
             messageBox.getChildren().add(bubbleBox);
@@ -346,7 +375,7 @@ public class MessengerController implements Initializable {
         }
 
         for (User participant : conversation.getParticipants()) {
-            if (participant.getId() != currentUser.getId()) {
+            if (participant.getId() != getCurrentUser().getId()) {
                 return participant.getName();
             }
         }
@@ -372,13 +401,13 @@ public class MessengerController implements Initializable {
     }
 
     private void loadConversationsSafe() {
-        if (currentUser != null) {
+        if (getCurrentUser() != null) {
             loadConversations();
         }
     }
 
     private void filterConversations(String searchText) {
-        List<Conversation> allConversations = conversationService.getUserConversations(currentUser.getId());
+        List<Conversation> allConversations = conversationService.getUserConversations(getCurrentUser().getId());
         ObservableList<Conversation> filteredList = FXCollections.observableArrayList();
 
         for (Conversation conversation : allConversations) {
@@ -389,5 +418,24 @@ public class MessengerController implements Initializable {
         }
 
         conversationListView.setItems(filteredList);
+    }
+
+    private void setupPolling() {
+        pollingExecutor = Executors.newSingleThreadScheduledExecutor();
+        pollingExecutor.scheduleAtFixedRate(() -> {
+            if (selectedConversation != null) {
+                List<Message> currentMessages = messageService.getMessagesByConversation(selectedConversation.getId());
+                if (!currentMessages.equals(lastMessagesSnapshot)) {
+                    lastMessagesSnapshot = new ArrayList<>(currentMessages);
+                    javafx.application.Platform.runLater(() -> loadMessages(selectedConversation));
+                }
+            }
+        }, 0, 2, TimeUnit.SECONDS); // 2 secondes, ajuste si besoin
+    }
+
+    public void stopPolling() {
+        if (pollingExecutor != null && !pollingExecutor.isShutdown()) {
+            pollingExecutor.shutdownNow();
+        }
     }
 }

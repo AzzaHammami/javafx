@@ -5,6 +5,7 @@ import models.Reponse;
 import models.User;
 import services.ReclamationService;
 import services.ReponseService;
+import services.UserService;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -21,6 +22,7 @@ import javafx.scene.Node;
 import javafx.event.ActionEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,15 +33,11 @@ import java.util.ResourceBundle;
 public class ReclamationController implements Initializable {
 
     @FXML
-    private TableView<Reclamation> tableView;
+    private VBox cardContainer;
     @FXML
-    private TableColumn<Reclamation, String> sujetColumn;
+    private TableColumn<Reponse, String> reponseContenuColumn;
     @FXML
-    private TableColumn<Reclamation, String> descriptionColumn;
-    @FXML
-    private TableColumn<Reclamation, LocalDate> dateColumn;
-    @FXML
-    private TableColumn<Reclamation, String> statutColumn;
+    private TableColumn<Reponse, LocalDate> reponseDateColumn;
     @FXML
     private TextArea reponseField;
     @FXML
@@ -53,10 +51,6 @@ public class ReclamationController implements Initializable {
     @FXML
     private TableView<Reponse> reponsesTableView;
     @FXML
-    private TableColumn<Reponse, String> reponseContenuColumn;
-    @FXML
-    private TableColumn<Reponse, LocalDate> reponseDateColumn;
-    @FXML
     private ComboBox<String> statutComboBox;
     @FXML
     private Button modifierReponseButton;
@@ -64,9 +58,22 @@ public class ReclamationController implements Initializable {
     private Button supprimerReponseButton;
     @FXML
     private BorderPane mainContainer;
+    @FXML
+    private TextField sujetField;
+    @FXML
+    private TextArea descriptionField;
+    @FXML
+    private DatePicker dateReclamationPicker;
+    @FXML
+    private VBox reponseZone;
+    @FXML
+    private VBox gestionReponseZone;
+    @FXML
+    private ScrollPane mainScrollPane;
 
     private ReclamationService reclamationService;
     private ReponseService reponseService;
+    private UserService userService;
     private Reclamation selectedReclamation;
     private Reponse selectedReponse;
     private ObservableList<Reclamation> allReclamations;
@@ -80,6 +87,26 @@ public class ReclamationController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         reclamationService = new ReclamationService();
         reponseService = new ReponseService();
+        userService = new UserService();
+
+        // Correction : forcer la zone de réponse à être cachée au démarrage
+        if (reponseZone != null) {
+            reponseZone.setVisible(false);
+            reponseZone.setManaged(false);
+        } else {
+            System.out.println("[DEBUG] reponseZone est null au démarrage !");
+        }
+
+        // DEBUG : afficher si la zone est bien cachée
+        System.out.println("[DEBUG] reponseZone visible=" + (reponseZone != null ? reponseZone.isVisible() : "null") + ", managed=" + (reponseZone != null ? reponseZone.isManaged() : "null"));
+
+        // Cacher toute la section Gestion des Réponses au démarrage
+        if (gestionReponseZone != null) {
+            gestionReponseZone.setVisible(false);
+            gestionReponseZone.setManaged(false);
+        } else {
+            System.out.println("[DEBUG] gestionReponseZone est null au démarrage !");
+        }
 
         // Initialize status ComboBox
         statutComboBox.getItems().addAll("En attente", "En cours", "Traitée", "Résolu");
@@ -90,28 +117,20 @@ public class ReclamationController implements Initializable {
 
         // Initialize sort criteria and order
         sortCriteriaBox.getItems().addAll("Sujet", "Description", "Date", "Statut");
-        sortCriteriaBox.setValue("Date");
-
         sortOrderBox.getItems().addAll("Croissant", "Décroissant");
-        sortOrderBox.setValue("Décroissant");
+        sortOrderBox.setValue("Croissant");
 
-        setupTableColumns();
-        setupReponseColumns();
-        setupSearch();
-        setupSort();
-        loadReclamations();
+        // TableView setup (si besoin)
+        reponseContenuColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getContenu()));
+        reponseDateColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<>(cellData.getValue().getDateReponse()));
+        reponsesTableView.setItems(FXCollections.observableArrayList());
 
-        // Setup selection listeners
-        tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            selectedReclamation = newSelection;
-            if (newSelection != null) {
-                loadReponses();
-                statutComboBox.setValue(newSelection.getStatut());
-            }
-        });
+        // Désactiver les boutons modification/suppression de réponse si rien n'est sélectionné
+        modifierReponseButton.setDisable(true);
+        supprimerReponseButton.setDisable(true);
 
+        // Listener pour activer/désactiver les boutons selon la sélection
         reponsesTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            selectedReponse = newSelection;
             modifierReponseButton.setDisable(newSelection == null);
             supprimerReponseButton.setDisable(newSelection == null);
             if (newSelection != null) {
@@ -119,34 +138,20 @@ public class ReclamationController implements Initializable {
             }
         });
 
+        setupSearch();
+        setupSort();
+        loadReclamations();
+
+        // Plus de TableView pour les réclamations : pas de listener ici
+
         // Add status change listener
         statutComboBox.setOnAction(event -> {
-            if (selectedReclamation != null) {
+            if (selectedReclamation != null && statutComboBox.getValue() != null) {
                 selectedReclamation.setStatut(statutComboBox.getValue());
                 reclamationService.modifier(selectedReclamation);
                 loadReclamations();
             }
         });
-    }
-
-    private void setupTableColumns() {
-        sujetColumn.setCellValueFactory(new PropertyValueFactory<>("sujet"));
-        descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("dateReclamation"));
-        statutColumn.setCellValueFactory(new PropertyValueFactory<>("statut"));
-
-        // Set column widths
-        sujetColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.3));
-        descriptionColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.4));
-        dateColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.15));
-        statutColumn.prefWidthProperty().bind(tableView.widthProperty().multiply(0.15));
-    }
-
-    private void setupReponseColumns() {
-        reponseContenuColumn.setCellValueFactory(cellData ->
-            new SimpleStringProperty(cellData.getValue().getContenu()));
-        reponseDateColumn.setCellValueFactory(cellData ->
-            new SimpleObjectProperty<>(cellData.getValue().getDateReponse()));
     }
 
     private void setupSearch() {
@@ -176,7 +181,7 @@ public class ReclamationController implements Initializable {
 
         if (criteria == null) return;
 
-        ObservableList<Reclamation> items = tableView.getItems();
+        ObservableList<Reclamation> items = FXCollections.observableArrayList(allReclamations);
 
         items.sort((r1, r2) -> {
             int result = 0;
@@ -196,13 +201,33 @@ public class ReclamationController implements Initializable {
             }
             return isAscending ? result : -result;
         });
+        displayReclamations(items);
+    }
+
+    private void displayReclamations(List<Reclamation> reclamations) {
+        cardContainer.getChildren().clear();
+        for (Reclamation rec : reclamations) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/back/CardReclamation.fxml"));
+                Node card = loader.load();
+                CardReclamationController cardController = loader.getController();
+                String userName = "";
+                if (rec.getUserId() != null) {
+                    User user = userService.getUserById(rec.getUserId());
+                    if (user != null) userName = user.getName();
+                }
+                cardController.setData(rec, userName);
+                cardController.getBtnSelect().setOnAction(e -> handleRepondre(rec));
+                cardContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void filterReclamations(String searchText) {
         if (searchText == null || searchText.isEmpty()) {
-            tableView.setItems(allReclamations);
-            updateStatistics(allReclamations);
-            applySort(); // Apply sort after filtering
+            loadReclamations();
             return;
         }
 
@@ -215,54 +240,66 @@ public class ReclamationController implements Initializable {
                     return reclamation.getSujet().toLowerCase().contains(searchLower);
                 case "Description":
                     return reclamation.getDescription().toLowerCase().contains(searchLower);
-                case "Statut":
-                    return reclamation.getStatut().toLowerCase().contains(searchLower);
-                case "Date":
-                    return reclamation.getDateReclamation().toString().contains(searchLower);
-                case "Tout":
                 default:
-                    return reclamation.getSujet().toLowerCase().contains(searchLower) ||
-                           reclamation.getDescription().toLowerCase().contains(searchLower) ||
-                           reclamation.getStatut().toLowerCase().contains(searchLower) ||
-                           reclamation.getDateReclamation().toString().contains(searchLower);
+                    return true;
             }
         });
 
-        tableView.setItems(filteredList);
-        updateStatistics(filteredList);
-        applySort(); // Apply sort after filtering
+        cardContainer.getChildren().clear();
+        for (Reclamation rec : filteredList) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/back/CardReclamation.fxml"));
+                Node card = loader.load();
+                CardReclamationController cardController = loader.getController();
+                String userName = "";
+                if (rec.getUserId() != null) {
+                    User user = userService.getUserById(rec.getUserId());
+                    if (user != null) userName = user.getName();
+                }
+                cardController.setData(rec, userName);
+                cardController.getBtnSelect().setOnAction(e -> handleRepondre(rec));
+                cardContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadReclamations() {
-        allReclamations = FXCollections.observableArrayList();
-        allReclamations.addAll(reclamationService.getAll());
-        tableView.setItems(allReclamations);
-
-        // Update statistics
-        updateStatistics(allReclamations);
+        allReclamations = FXCollections.observableArrayList(reclamationService.getAll());
+        displayReclamations(allReclamations);
     }
 
-    private void updateStatistics(List<Reclamation> reclamations) {
-        long total = reclamations.size();
-        long enAttente = reclamations.stream().filter(r -> "En attente".equals(r.getStatut())).count();
-        long enCours = reclamations.stream().filter(r -> "En cours".equals(r.getStatut())).count();
-        long traitees = reclamations.stream().filter(r -> "Traitée".equals(r.getStatut())).count();
-
-        // Find and update the statistics labels
-        Scene scene = tableView.getScene();
-        if (scene != null) {
-            updateStatLabel(scene, "totalValue", String.valueOf(total));
-            updateStatLabel(scene, "enAttenteValue", String.valueOf(enAttente));
-            updateStatLabel(scene, "enCoursValue", String.valueOf(enCours));
-            updateStatLabel(scene, "traiteesValue", String.valueOf(traitees));
+    private void handleRepondre(Reclamation rec) {
+        selectedReclamation = rec;
+        if (gestionReponseZone != null) {
+            gestionReponseZone.setVisible(true);
+            gestionReponseZone.setManaged(true);
+        }
+        if (reponseZone != null) {
+            reponseZone.setVisible(true);
+            reponseZone.setManaged(true);
+        }
+        if (reponseField != null) {
+            reponseField.requestFocus();
+        }
+        // Scroll automatique vers la zone de réponse
+        if (mainScrollPane != null && gestionReponseZone != null) {
+            mainScrollPane.layout(); // force le layout pour un scroll correct
+            mainScrollPane.setVvalue(gestionReponseZone.getBoundsInParent().getMinY() /
+                    (mainScrollPane.getContent().getBoundsInLocal().getHeight() - mainScrollPane.getViewportBounds().getHeight()));
         }
     }
 
-    private void updateStatLabel(Scene scene, String labelId, String value) {
-        Label label = (Label) scene.lookup("#" + labelId);
-        if (label != null) {
-            label.setText(value);
+    private void onCardSelected(Reclamation rec) {
+        if (rec != null) {
+            sujetField.setText(rec.getSujet());
+            descriptionField.setText(rec.getDescription());
+            dateReclamationPicker.setValue(rec.getDateReclamation());
+            statutComboBox.setValue(rec.getStatut());
         }
+        selectedReclamation = rec;
+        loadReponses();
     }
 
     private void loadReponses() {
@@ -293,9 +330,6 @@ public class ReclamationController implements Initializable {
 
             loadReponses();
             reponseField.clear();
-            showAlert("Succès", "Réponse enregistrée avec succès");
-        } else {
-            showAlert("Erreur", "Veuillez sélectionner une réclamation et écrire une réponse");
         }
     }
 
@@ -306,7 +340,6 @@ public class ReclamationController implements Initializable {
             loadReponses();
             reponseField.clear();
             selectedReponse = null;
-            showAlert("Succès", "Réponse supprimée avec succès");
         }
     }
 
@@ -314,6 +347,14 @@ public class ReclamationController implements Initializable {
     private void handleAnnulerModification() {
         selectedReponse = null;
         reponseField.clear();
+        if (gestionReponseZone != null) {
+            gestionReponseZone.setVisible(false);
+            gestionReponseZone.setManaged(false);
+        }
+        if (reponseZone != null) {
+            reponseZone.setVisible(false);
+            reponseZone.setManaged(false);
+        }
         modifierReponseButton.setDisable(true);
         supprimerReponseButton.setDisable(true);
     }
@@ -365,7 +406,7 @@ public class ReclamationController implements Initializable {
         StackPane contentPane = (StackPane) scene.lookup("#contentPane");
         if (contentPane != null) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MessengerView.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/back/MessengerView.fxml"));
                 Parent messengerView = loader.load();
                 Controllers.MessengerController messengerController = loader.getController();
                 messengerController.setCurrentUser(currentUser);
