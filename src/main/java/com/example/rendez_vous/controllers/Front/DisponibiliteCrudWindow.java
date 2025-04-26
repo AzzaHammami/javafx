@@ -1,8 +1,8 @@
 package com.example.rendez_vous.controllers.Front;
 
 import com.example.rendez_vous.models.Disponibilite;
-import com.example.rendez_vous.models.Medecin;
-import com.example.rendez_vous.services.ServiceMedecin;
+import com.example.rendez_vous.services.ServiceUser;
+import com.example.rendez_vous.models.User;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -20,7 +20,7 @@ public class DisponibiliteCrudWindow {
     private DatePicker datePicker;
     private ComboBox<String> heureDebutCombo;
     private ComboBox<String> heureFinCombo;
-    private ComboBox<Medecin> medecinCombo;
+    private ComboBox<String> medecinCombo;
     private VBox layout;
 
     public DisponibiliteCrudWindow() {
@@ -62,12 +62,16 @@ public class DisponibiliteCrudWindow {
         form.add(heureFinLabel, 0, 2);
         form.add(heureFinCombo, 1, 2);
         
-        // Médecin (par nom)
-        Label medecinLabel = new Label("Médecin:");
+        // Médecin (par ID)
+        Label medecinLabel = new Label("Médecin ID:");
         medecinCombo = new ComboBox<>();
-        ServiceMedecin serviceMedecin = new ServiceMedecin();
-        medecinCombo.setItems(FXCollections.observableArrayList(serviceMedecin.getAllMedecins()));
-        medecinCombo.setPromptText("Sélectionnez le médecin");
+        ServiceUser serviceUser = new ServiceUser();
+        ObservableList<String> medecinIdItems = FXCollections.observableArrayList();
+        for (User medecin : serviceUser.getAllMedecins()) {
+            medecinIdItems.add(String.valueOf(medecin.getId()));
+        }
+        medecinCombo.setItems(medecinIdItems);
+        medecinCombo.setPromptText("ID Médecin");
         form.add(medecinLabel, 0, 3);
         form.add(medecinCombo, 1, 3);
         
@@ -124,8 +128,8 @@ public class DisponibiliteCrudWindow {
             };
         });
 
-        TableColumn<Disponibilite, Integer> medecinCol = new TableColumn<>("ID Médecin");
-        medecinCol.setCellValueFactory(new PropertyValueFactory<>("medecinId"));
+        TableColumn<Disponibilite, String> medecinCol = new TableColumn<>("Médecin");
+        medecinCol.setCellValueFactory(new PropertyValueFactory<>("medecinName"));
 
         TableColumn<Disponibilite, String> statutCol = new TableColumn<>("Statut");
         statutCol.setCellValueFactory(new PropertyValueFactory<>("statut"));
@@ -150,14 +154,13 @@ public class DisponibiliteCrudWindow {
             LocalDate date = datePicker.getValue();
             LocalTime heureDebut = LocalTime.parse(heureDebutCombo.getValue());
             LocalTime heureFin = LocalTime.parse(heureFinCombo.getValue());
-            Medecin medecin = medecinCombo.getValue();
-            int medecinId = medecin != null ? medecin.getId() : 0;
+            String medecinName = medecinCombo.getValue();
 
-            Disponibilite disponibilite = new Disponibilite(
-                medecinId,
-                LocalDateTime.of(date, heureDebut),
-                LocalDateTime.of(date, heureFin)
-            );
+            Disponibilite disponibilite = new Disponibilite();
+            disponibilite.setMedecinId(Integer.parseInt(medecinCombo.getValue()));
+            disponibilite.setDateDebut(LocalDateTime.of(date, heureDebut));
+            disponibilite.setDateFin(LocalDateTime.of(date, heureFin));
+            // Si tu veux stocker le nom du médecin, ajoute un champ ou une propriété dédiée dans Disponibilite
 
             // TODO: Implement API call to save disponibilite
             table.getItems().add(disponibilite);
@@ -177,12 +180,11 @@ public class DisponibiliteCrudWindow {
             LocalDate date = datePicker.getValue();
             LocalTime heureDebut = LocalTime.parse(heureDebutCombo.getValue());
             LocalTime heureFin = LocalTime.parse(heureFinCombo.getValue());
-            Medecin medecin = medecinCombo.getValue();
-            int medecinId = medecin != null ? medecin.getId() : 0;
+            String medecinName = medecinCombo.getValue();
 
             selected.setDateDebut(LocalDateTime.of(date, heureDebut));
             selected.setDateFin(LocalDateTime.of(date, heureFin));
-            selected.setMedecinId(medecinId);
+            // selected.setMedecinName(medecinName); // Méthode inexistante, à commenter ou supprimer
 
             // TODO: Implement API call to update disponibilite
             table.refresh();

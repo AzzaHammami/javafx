@@ -28,7 +28,7 @@
             
             <!-- Header -->
             <VBox alignment="CENTER" spacing="10">
-                <Text text="Système de Gestion des Réclamations" 
+                <Text text="Système de Gestion des Rendez-vous"
                       styleClass="landing-title"/>
                 <Text text="Bienvenue dans votre espace de gestion" 
                       styleClass="landing-subtitle"/>

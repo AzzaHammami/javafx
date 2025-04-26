@@ -21,7 +21,7 @@ public class DisponibiliteRestController {
     private HttpServer server;
 
     public void start() throws IOException {
-        server = HttpServer.create(new InetSocketAddress(8081), 0);
+        server = HttpServer.create(new InetSocketAddress(8082), 0);
         server.setExecutor(Executors.newFixedThreadPool(10));
 
         // Create contexts for each endpoint
@@ -29,7 +29,7 @@ public class DisponibiliteRestController {
         server.createContext("/api/disponibilites/medecin", new MedecinDisponibiliteHandler());
 
         server.start();
-        System.out.println("Server started on port 8081");
+        System.out.println("Server started on port 8082");
     }
 
     public void stop() {

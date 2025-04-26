@@ -10,15 +10,19 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
 import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AjouterRendezVousController extends Application {
     @FXML private TextField patientIdField;
-    @FXML private TextField medecinIdField;
     @FXML private TextField motifField;
     @FXML private DatePicker datePicker;
     @FXML private ComboBox<String> hourComboBox;
@@ -85,9 +89,6 @@ public class AjouterRendezVousController extends Application {
             // Validate patient ID
             int patientId = validateId(patientIdField.getText(), "patient");
 
-            // Validate medecin ID
-            int medecinId = validateId(medecinIdField.getText(), "médecin");
-
             // Validate motif
             String motif = validateMotif(motifField.getText());
 
@@ -97,7 +98,6 @@ public class AjouterRendezVousController extends Application {
             // Create and save appointment
             RendezVous rv = new RendezVous();
             rv.setPatientId(patientId);
-            rv.setMedecinId(medecinId);
             rv.setMotif(motif);
             rv.setDate(appointmentDateTime);
             rv.setDateCreation(LocalDateTime.now());
@@ -266,6 +266,4 @@ public class AjouterRendezVousController extends Application {
             super(message);
         }
     }
-
-
 }

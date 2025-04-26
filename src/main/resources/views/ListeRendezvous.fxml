@@ -7,8 +7,8 @@
         <VBox spacing="10" alignment="CENTER_LEFT">
             <Label text="Motif"/>
             <TextField fx:id="motifField" promptText="Motif" maxWidth="160"/>
-            <Label text="ID Patient"/>
-            <TextField fx:id="patientIdField" promptText="ID Patient" maxWidth="160"/>
+            <Label text="Nom du patient"/>
+            <ComboBox fx:id="patientComboBox" promptText="Sélectionnez un patient" maxWidth="160"/>
             <Label text="ID Médecin"/>
             <TextField fx:id="medecinIdField" promptText="ID Médecin" maxWidth="160"/>
         </VBox>
@@ -32,7 +32,7 @@
         <columns>
             <TableColumn fx:id="idCol" text="ID" />
             <TableColumn fx:id="motifCol" text="Motif" />
-            <TableColumn fx:id="patientIdCol" text="ID Patient" />
+            <TableColumn fx:id="patientIdCol" text="Nom du patient" />
             <TableColumn fx:id="medecinIdCol" text="ID Médecin" />
             <TableColumn fx:id="dateCol" text="Date" />
             <TableColumn fx:id="statutCol" text="Statut" />

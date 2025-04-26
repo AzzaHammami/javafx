@@ -1,11 +1,11 @@
 package com.example.rendez_vous.controllers;
 
 import com.example.rendez_vous.models.RendezVous;
-import com.example.rendez_vous.models.Medecin;
 import com.example.rendez_vous.models.Disponibilite;
+import com.example.rendez_vous.models.User;
 import com.example.rendez_vous.services.Servicerendez_vous;
-import com.example.rendez_vous.services.ServiceMedecin;
 import com.example.rendez_vous.services.Servicedisponibilite;
+import com.example.rendez_vous.services.ServiceUser;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -38,7 +39,7 @@ public class ListeRendezvousController implements Initializable {
     @FXML private Button btnModifier;
     @FXML private Button btnSupprimer;
     @FXML private TextField motifField;
-    @FXML private TextField patientIdField;
+    @FXML private ComboBox<User> patientComboBox;
     @FXML private TextField medecinIdField;
     @FXML private DatePicker datePicker;
     @FXML private ComboBox<String> heureCombo;
@@ -46,8 +47,8 @@ public class ListeRendezvousController implements Initializable {
     @FXML private ComboBox<String> statutComboBox;
 
     private final Servicerendez_vous service = new Servicerendez_vous();
-    private final ServiceMedecin serviceMedecin = new ServiceMedecin();
     private final Servicedisponibilite serviceDisponibilite = new Servicedisponibilite();
+    private final ServiceUser userService = new ServiceUser();
 
     private RendezVous selectedRendezVous = null;
 
@@ -67,11 +68,29 @@ public class ListeRendezvousController implements Initializable {
         minuteCombo.setItems(FXCollections.observableArrayList("00", "15", "30", "45"));
         statutComboBox.setItems(FXCollections.observableArrayList("En attente", "Confirmé", "Annulé"));
 
+        // Remplir la ComboBox des patients par leur nom
+        List<User> patients = userService.getAllPatients();
+        patientComboBox.setItems(FXCollections.observableArrayList(patients));
+        patientComboBox.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+        patientComboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(User item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
+            }
+        });
+
         tableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) -> {
             if (newSel != null) {
                 selectedRendezVous = newSel;
                 motifField.setText(newSel.getMotif());
-                patientIdField.setText(String.valueOf(newSel.getPatientId()));
+                patientComboBox.setValue(userService.getUserById(newSel.getPatientId()));
                 medecinIdField.setText(String.valueOf(newSel.getMedecinId()));
                 if (newSel.getDate() != null) {
                     datePicker.setValue(newSel.getDate().toLocalDate());
@@ -97,7 +116,7 @@ public class ListeRendezvousController implements Initializable {
 
     private boolean validateInputs() {
         String motif = motifField.getText();
-        String patientId = patientIdField.getText();
+        User patient = patientComboBox.getValue();
         String medecinId = medecinIdField.getText();
         LocalDate date = datePicker.getValue();
         String heure = heureCombo.getValue();
@@ -105,7 +124,7 @@ public class ListeRendezvousController implements Initializable {
         String statut = statutComboBox.getValue();
         StringBuilder errorMsg = new StringBuilder();
         if (motif == null || motif.trim().isEmpty()) errorMsg.append("- Le motif est obligatoire.\n");
-        if (patientId == null || !patientId.matches("\\d+") || Integer.parseInt(patientId) <= 0) errorMsg.append("- L'ID patient doit être un nombre positif.\n");
+        if (patient == null) errorMsg.append("- Le patient est obligatoire.\n");
         if (medecinId == null || !medecinId.matches("\\d+") || Integer.parseInt(medecinId) <= 0) errorMsg.append("- L'ID médecin doit être un nombre positif.\n");
         if (date == null) errorMsg.append("- La date est obligatoire.\n");
         if (heure == null) errorMsg.append("- L'heure est obligatoire.\n");
@@ -124,8 +143,8 @@ public class ListeRendezvousController implements Initializable {
                         boolean disponible = false;
                         for (Disponibilite disp : serviceDisponibilite.getDisponibilitesByMedecin(Integer.parseInt(medecinId))) {
                             if (disp.getDateDebut() != null && disp.getDateFin() != null &&
-                                (dateTime.isEqual(disp.getDateDebut()) || dateTime.isEqual(disp.getDateFin()) ||
-                                 (dateTime.isAfter(disp.getDateDebut()) && dateTime.isBefore(disp.getDateFin())))) {
+                                    (dateTime.isEqual(disp.getDateDebut()) || dateTime.isEqual(disp.getDateFin()) ||
+                                            (dateTime.isAfter(disp.getDateDebut()) && dateTime.isBefore(disp.getDateFin())))) {
                                 disponible = true;
                                 break;
                             }
@@ -143,10 +162,10 @@ public class ListeRendezvousController implements Initializable {
         }
         // Vérification existence du médecin
         if (medecinId != null && medecinId.matches("\\d+") && Integer.parseInt(medecinId) > 0) {
-            Medecin medecin = serviceMedecin.getMedecinById(Integer.parseInt(medecinId));
-            if (medecin == null) {
-                errorMsg.append("- Aucun médecin trouvé avec cet ID.\n");
-            }
+            // Medecin medecin = serviceMedecin.getMedecinById(Integer.parseInt(medecinId));
+            // if (medecin == null) {
+            //     errorMsg.append("- Aucun médecin trouvé avec cet ID.\n");
+            // }
         }
         // Vérification chevauchement avec d'autres rendez-vous du même médecin
         if (medecinId != null && medecinId.matches("\\d+") && Integer.parseInt(medecinId) > 0 && date != null && heure != null && minute != null) {
@@ -178,7 +197,8 @@ public class ListeRendezvousController implements Initializable {
         if (!validateInputs()) return;
         try {
             String motif = motifField.getText();
-            int patientId = Integer.parseInt(patientIdField.getText());
+            User patient = patientComboBox.getValue();
+            int patientId = patient != null ? patient.getId() : -1;
             int medecinId = Integer.parseInt(medecinIdField.getText());
             LocalDate date = datePicker.getValue();
             String heure = heureCombo.getValue();
@@ -209,7 +229,8 @@ public class ListeRendezvousController implements Initializable {
         if (!validateInputs()) return;
         try {
             String motif = motifField.getText();
-            int patientId = Integer.parseInt(patientIdField.getText());
+            User patient = patientComboBox.getValue();
+            int patientId = patient != null ? patient.getId() : -1;
             int medecinId = Integer.parseInt(medecinIdField.getText());
             LocalDate date = datePicker.getValue();
             String heure = heureCombo.getValue();
@@ -254,7 +275,7 @@ public class ListeRendezvousController implements Initializable {
 
     private void clearFields() {
         motifField.clear();
-        patientIdField.clear();
+        patientComboBox.setValue(null);
         medecinIdField.clear();
         datePicker.setValue(null);
         heureCombo.setValue(null);

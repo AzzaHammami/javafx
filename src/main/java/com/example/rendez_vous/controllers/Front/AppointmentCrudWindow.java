@@ -1,6 +1,7 @@
 package com.example.rendez_vous.controllers.Front;
 
 import com.example.rendez_vous.services.Servicerendez_vous;
+import com.example.rendez_vous.services.SmsService;
 import com.example.rendez_vous.models.RendezVous;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -18,6 +19,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.fxml.FXMLLoader;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.io.IOException;
 
 public class AppointmentCrudWindow {
     private static final Logger logger = Logger.getLogger(AppointmentCrudWindow.class.getName());
@@ -32,6 +35,7 @@ public class AppointmentCrudWindow {
     private TableView<RendezVous> tableView;
     private TextField motifField;
     private TextField patientIdField;
+    private TextField phoneNumberField;
     private TextField medecinIdField;
     private DatePicker datePicker;
     private Button selectedHourBtn = new Button();
@@ -40,6 +44,8 @@ public class AppointmentCrudWindow {
     private String medecinImageUrl;
     private String selectedTime = "";
     private int medecinId;
+    // Ajout du champ SmsService
+    private SmsService smsService = new SmsService();
 
     public AppointmentCrudWindow(int medecinId, String medecinNom, String specialiteMedecin, String medecinImageUrl) {
         logger.log(Level.INFO, "Creating AppointmentCrudWindow with doctor: ID={0}, Name={1}, Specialty={2}",
@@ -53,6 +59,7 @@ public class AppointmentCrudWindow {
         this.selectedHourBtn = new Button();
         this.motifField = new TextField();
         this.patientIdField = new TextField();
+        this.phoneNumberField = new TextField();
         this.medecinIdField = new TextField(String.valueOf(medecinId));
 
         logger.log(Level.FINE, "Initialized fields - MedecinIDField: {0}", medecinIdField.getText());
@@ -64,6 +71,7 @@ public class AppointmentCrudWindow {
         this.selectedHourBtn = new Button();
         this.motifField = new TextField();
         this.patientIdField = new TextField();
+        this.phoneNumberField = new TextField();
         this.medecinIdField = new TextField();
     }
 
@@ -455,60 +463,138 @@ public class AppointmentCrudWindow {
             }
         }
 
-        VBox formBox = new VBox(12);
-        formBox.setAlignment(Pos.CENTER);
-        formBox.setPadding(new Insets(40, 0, 0, 0));
-
-        // Patient ID Field
+        // Bloc ID du patient en haut
+        VBox idBox = new VBox(6);
+        idBox.setAlignment(Pos.CENTER);
         Label patientIdLabel = new Label("ID du patient:");
         patientIdLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
         patientIdField = new TextField();
         patientIdField.setPromptText("Entrez votre ID patient");
         patientIdField.setStyle("-fx-font-size: 16px; -fx-pref-width: 350;");
+        
+        Label phoneNumberLabel = new Label("Numéro de téléphone:");
+        phoneNumberLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
+        phoneNumberField = new TextField();
+        phoneNumberField.setPromptText("Entrez votre numéro de téléphone");
+        phoneNumberField.setStyle("-fx-font-size: 16px; -fx-pref-width: 350;");
+        
+        VBox patientBox = new VBox(8);
+        patientBox.getChildren().addAll(patientIdLabel, patientIdField, phoneNumberLabel, phoneNumberField);
 
-        // Motif Field
         Label motifLabel = new Label("Veuillez saisir le motif du rendez-vous :");
-        motifLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
-        motifField = new TextField();
-        motifField.setPromptText("Motif de consultation");
-        motifField.setStyle("-fx-font-size: 16px; -fx-pref-width: 350;");
+        motifLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a237e; -fx-padding: 10 0 10 0;");
 
-        formBox.getChildren().addAll(
-                patientIdLabel,
-                patientIdField,
-                new Label(""), // Spacer
-                motifLabel,
-                motifField
-        );
+        // Les checkboxes des motifs fines et élégantes
+        CheckBox checkControle = new CheckBox("Contrôle");
+        CheckBox checkVaccination = new CheckBox("Vaccination");
+        CheckBox checkOrdonnance = new CheckBox("Renouvellement d'ordonnance");
+        CheckBox checkUrgence = new CheckBox("Urgence");
+        CheckBox checkSpecialiste = new CheckBox("Consultation spécialiste");
+        CheckBox checkExamen = new CheckBox("Examen médical");
+        CheckBox checkSuivi = new CheckBox("Suivi de traitement");
+        CheckBox checkAutre = new CheckBox("Autre :");
+        CheckBox[] allChecks = {checkControle, checkVaccination, checkOrdonnance, checkUrgence, checkSpecialiste, checkExamen, checkSuivi, checkAutre};
+        for (CheckBox cb : allChecks) {
+            cb.setStyle("-fx-font-size: 15px; -fx-font-weight: normal; -fx-padding: 6 0 6 0;");
+            cb.setPrefHeight(26);
+            cb.setScaleX(1.05);
+            cb.setScaleY(1.05);
+        }
 
-        Button suivantBtn = new Button("Suivant");
-        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 6; -fx-padding: 12 25;");
-
-        suivantBtn.setOnAction(e -> {
-            if (patientIdField.getText().trim().isEmpty()) {
-                logger.warning("No patient ID entered");
-                showError("Erreur", "Veuillez saisir votre ID patient");
-            } else if (motifField.getText().trim().isEmpty()) {
-                logger.warning("No motif entered");
-                showError("Erreur", "Veuillez saisir un motif pour le rendez-vous");
-            } else {
-                try {
-                    // Validate patient ID is numeric
-                    Integer.parseInt(patientIdField.getText().trim());
-                    logger.info("Proceeding to confirmation");
-                    root.getChildren().clear();
-                    root.getChildren().add(getContentWithConfirmationSelector());
-                } catch (NumberFormatException ex) {
-                    logger.warning("Invalid patient ID format");
-                    showError("Erreur", "L'ID patient doit être un nombre valide");
-                }
-            }
+        // Zone de texte pour "Autre"
+        TextArea autreDetailsArea = new TextArea();
+        autreDetailsArea.setPromptText("Veuillez préciser votre besoin...");
+        autreDetailsArea.setPrefRowCount(2);
+        autreDetailsArea.setPrefWidth(350);
+        autreDetailsArea.setDisable(true);
+        autreDetailsArea.setStyle("-fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 8 8 8;");
+        checkAutre.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            autreDetailsArea.setDisable(!newVal);
+            if (newVal) autreDetailsArea.requestFocus();
         });
 
-        VBox center = new VBox(30, formBox, suivantBtn);
-        center.setAlignment(Pos.CENTER);
+        // Organisation en deux colonnes fines et centrées
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(6);
+        grid.setAlignment(Pos.CENTER);
+        grid.setMaxWidth(340);
+        grid.setPadding(new Insets(2, 0, 2, 0));
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(100);
+        col1.setPrefWidth(120);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(col1, col2);
 
-        root.getChildren().addAll(progressBar, center);
+        grid.add(checkControle, 0, 0);
+        grid.add(checkVaccination, 0, 1);
+        grid.add(checkOrdonnance, 0, 2);
+        grid.add(checkUrgence, 0, 3);
+        grid.add(checkSpecialiste, 1, 0);
+        grid.add(checkExamen, 1, 1);
+        grid.add(checkSuivi, 1, 2);
+        grid.add(checkAutre, 0, 4);
+        grid.add(autreDetailsArea, 0, 5, 2, 1);
+
+        Button suivantBtn = new Button("Suivant");
+        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 18px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-padding: 10 40; -fx-effect: dropshadow(gaussian, rgba(255,214,0,0.13), 4, 0, 0, 1);");
+        suivantBtn.setOnAction(e -> {
+            if (patientIdField.getText().trim().isEmpty()) {
+                showError("Erreur", "Veuillez saisir votre ID patient");
+                return;
+            }
+            try {
+                Integer.parseInt(patientIdField.getText().trim());
+            } catch (NumberFormatException ex) {
+                showError("Erreur", "L'ID patient doit être un nombre valide");
+                return;
+            }
+            if (phoneNumberField.getText().trim().isEmpty()) {
+                showError("Erreur", "Veuillez saisir votre numéro de téléphone");
+                return;
+            }
+            StringBuilder motifs = new StringBuilder();
+            if (checkControle.isSelected()) motifs.append("Contrôle, ");
+            if (checkVaccination.isSelected()) motifs.append("Vaccination, ");
+            if (checkOrdonnance.isSelected()) motifs.append("Renouvellement d'ordonnance, ");
+            if (checkUrgence.isSelected()) motifs.append("Urgence, ");
+            if (checkSpecialiste.isSelected()) motifs.append("Consultation spécialiste, ");
+            if (checkExamen.isSelected()) motifs.append("Examen médical, ");
+            if (checkSuivi.isSelected()) motifs.append("Suivi de traitement, ");
+            if (checkAutre.isSelected() && !autreDetailsArea.getText().isEmpty()) {
+                motifs.append("Autre: ").append(autreDetailsArea.getText());
+            } else if (motifs.length() > 2) {
+                motifs.delete(motifs.length() - 2, motifs.length());
+            }
+            String motifComplet = motifs.toString();
+            if (motifComplet.isEmpty()) {
+                showError("Erreur", "Veuillez sélectionner au moins un motif ou saisir un besoin.");
+                return;
+            }
+            motifField.setText(motifComplet); // Pour la suite du workflow
+            logger.info("Motif sélectionné: " + motifComplet);
+            root.getChildren().clear();
+            root.getChildren().add(getContentWithConfirmationSelector());
+        });
+
+        // Bloc central motif + bouton
+        VBox motifBox = new VBox(16, motifLabel, grid);
+        motifBox.setAlignment(Pos.CENTER);
+        motifBox.setPadding(new Insets(8, 0, 0, 0));
+        motifBox.setMaxWidth(350);
+        motifBox.setMaxHeight(180);
+        motifBox.setStyle("-fx-background-color: #f8fafd; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 4, 0, 0, 1);");
+
+        // Bouton bien visible, rapproché du champ
+        HBox boutonBox = new HBox(suivantBtn);
+        boutonBox.setAlignment(Pos.CENTER);
+        boutonBox.setPadding(new Insets(6, 0, 10, 0));
+        VBox motifZone = new VBox(motifBox, boutonBox);
+        motifZone.setAlignment(Pos.CENTER);
+        motifZone.setPadding(new Insets(0, 0, 0, 0));
+
+        root.getChildren().addAll(progressBar, patientBox, motifZone);
         return root;
     }
 
@@ -521,73 +607,126 @@ public class AppointmentCrudWindow {
         }
 
         VBox root = new VBox();
-        root.setStyle("-fx-background-color: white;");
+        root.setStyle("-fx-background-color: #f9fbfd;");
         root.setAlignment(Pos.TOP_CENTER);
         root.setPadding(new Insets(0, 0, 0, 0));
 
-        HBox progressBar = new HBox(0);
-        progressBar.setAlignment(Pos.CENTER);
-        progressBar.setPadding(new Insets(22, 0, 0, 0));
-        String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
+        // Stepper progress bar (modern style)
+        HBox progressBar = createStepper(3);
 
-        for (int i = 0; i < steps.length; i++) {
-            VBox step = new VBox(5);
-            step.setAlignment(Pos.CENTER);
-            Circle circle = new Circle(15);
-            Label stepLabel = new Label(steps[i]);
+        // Title
+        Label confirmationTitle = new Label("Confirmation du rendez-vous");
+        confirmationTitle.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
+        VBox.setMargin(confirmationTitle, new Insets(10, 0, 20, 0));
 
-            if (i < 3) {
-                circle.setFill(Color.web("#ffd600"));
-                Label check = new Label("✓");
-                check.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-                StackPane circlePane = new StackPane(circle, check);
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circlePane, stepLabel);
-            } else {
-                circle.setFill(Color.web("#ffd600"));
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circle, stepLabel);
-            }
+        // Card summary (styled like the reference)
+        VBox card = new VBox();
+        card.setMaxWidth(500);
+        card.setStyle("-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3); -fx-background-radius: 15;");
 
-            if (i < steps.length - 1) {
-                Rectangle line = new Rectangle(80, 4);
-                line.setFill(Color.web("#ffd600"));
-                progressBar.getChildren().addAll(step, line);
-            } else {
-                progressBar.getChildren().add(step);
-            }
-        }
+        // Card header
+        HBox cardHeader = new HBox();
+        cardHeader.setAlignment(Pos.CENTER_LEFT);
+        cardHeader.setStyle("-fx-background-color: #f0f8ff; -fx-background-radius: 15 15 0 0; -fx-padding: 15;");
+        StackPane iconPane = new StackPane();
+        iconPane.setMinSize(40, 40);
+        iconPane.setStyle("-fx-background-color: #6a5acd33; -fx-background-radius: 40;");
+        Label checkIcon = new Label("✓");
+        checkIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #6a5acd;");
+        iconPane.getChildren().add(checkIcon);
+        Label headerLabel = new Label("Résumé de votre rendez-vous");
+        headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        HBox.setMargin(headerLabel, new Insets(0, 0, 0, 15));
+        cardHeader.getChildren().addAll(iconPane, headerLabel);
 
-        VBox confirmationBox = new VBox(20);
-        confirmationBox.setAlignment(Pos.CENTER);
-        confirmationBox.setPadding(new Insets(40, 0, 0, 0));
-
-        VBox summaryBox = new VBox(10);
-        summaryBox.setStyle("-fx-background-color: #f8f9fa; -fx-background-radius: 10; -fx-padding: 20;");
+        // Card content grid
+        GridPane grid = new GridPane();
+        grid.setHgap(30);
+        grid.setVgap(15);
+        grid.setStyle("-fx-padding: 25;");
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setMinWidth(100);
+        col1.setPrefWidth(120);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        grid.getColumnConstraints().addAll(col1, col2);
 
         String formattedDate = datePicker.getValue().format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
-        logger.log(Level.FINE, "Formatted appointment date: {0}", formattedDate);
 
-        Label confirmationLabel = new Label("Confirmation du rendez-vous");
-        confirmationLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
+        // Médecin
+        Label medecinLabel = new Label("Médecin:");
+        medecinLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label medecinValue = new Label(medecinNom != null ? medecinNom : "Non sélectionné");
+        medecinValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        grid.add(medecinLabel, 0, 0);
+        grid.add(medecinValue, 1, 0);
 
-        Label doctorLabel = new Label("Médecin: " + (medecinNom != null ? medecinNom : "Non sélectionné"));
-        doctorLabel.setStyle("-fx-font-size: 16px;");
+        // Spécialité
+        Label specialiteLabel = new Label("Spécialité:");
+        specialiteLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label specialiteValue = new Label(specialiteMedecin != null ? specialiteMedecin : "");
+        specialiteValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        grid.add(specialiteLabel, 0, 1);
+        grid.add(specialiteValue, 1, 1);
 
-        Label dateLabel = new Label("Date: " + formattedDate);
-        dateLabel.setStyle("-fx-font-size: 16px;");
+        // Date
+        Label dateLabel = new Label("Date:");
+        dateLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label dateValue = new Label(formattedDate);
+        dateValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        grid.add(dateLabel, 0, 2);
+        grid.add(dateValue, 1, 2);
 
-        Label timeLabel = new Label("Heure: " + selectedTime);
-        timeLabel.setStyle("-fx-font-size: 16px;");
+        // Heure
+        Label heureLabel = new Label("Heure:");
+        heureLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label heureValue = new Label(selectedTime);
+        heureValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        grid.add(heureLabel, 0, 3);
+        grid.add(heureValue, 1, 3);
 
-        Label reasonLabel = new Label("Motif: " + motifField.getText());
-        reasonLabel.setStyle("-fx-font-size: 16px;");
+        // Motif
+        Label motifLabel = new Label("Motif:");
+        motifLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label motifValue = new Label(motifField.getText());
+        motifValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        motifValue.setWrapText(true);
+        grid.add(motifLabel, 0, 4);
+        grid.add(motifValue, 1, 4);
 
-        summaryBox.getChildren().addAll(confirmationLabel, doctorLabel, dateLabel, timeLabel, reasonLabel);
+        // Adresse (optionnel, à personnaliser selon vos données)
+        Label adresseLabel = new Label("Adresse:");
+        adresseLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
+        Label adresseValue = new Label("Centre médical MaSanté, 123 Avenue de la Santé");
+        adresseValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
+        adresseValue.setWrapText(true);
+        grid.add(adresseLabel, 0, 5);
+        grid.add(adresseValue, 1, 5);
 
+        card.getChildren().addAll(cardHeader, grid);
+
+        // Info box (reminder)
+        VBox infoBox = new VBox();
+        infoBox.setStyle("-fx-background-color: #fffdea; -fx-border-color: #ffd600; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 15; -fx-max-width: 500;");
+        HBox infoRow = new HBox(10);
+        infoRow.setAlignment(Pos.CENTER_LEFT);
+        Label infoIcon = new Label("ℹ️");
+        infoIcon.setStyle("-fx-font-size: 16px;");
+        VBox infoTexts = new VBox(8);
+        Label infoText1 = new Label("Un rappel sera envoyé 24h avant votre rendez-vous.");
+        infoText1.setStyle("-fx-font-size: 14px; -fx-text-fill: #333;");
+        Label infoText2 = new Label("En cas d'empêchement, merci d'annuler au moins 48h à l'avance.");
+        infoText2.setStyle("-fx-font-size: 14px; -fx-text-fill: #333;");
+        infoTexts.getChildren().addAll(infoText1, infoText2);
+        infoRow.getChildren().addAll(infoIcon, infoTexts);
+        infoBox.getChildren().add(infoRow);
+        VBox.setMargin(infoBox, new Insets(20, 0, 20, 0));
+
+        // Action buttons
+        HBox actions = new HBox(20);
+        actions.setAlignment(Pos.CENTER);
         Button confirmBtn = new Button("Confirmer le rendez-vous");
-        confirmBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 25;");
-
+        confirmBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 25; -fx-background-radius: 25;");
         confirmBtn.setOnAction(e -> {
             try {
                 if (medecinNom == null || medecinNom.trim().isEmpty() || medecinIdField.getText().trim().isEmpty()) {
@@ -595,19 +734,25 @@ public class AppointmentCrudWindow {
                     showError("Erreur", "Veuillez sélectionner un médecin");
                     return;
                 }
-
                 logger.info("Confirming appointment creation");
                 handleAdd();
                 showInfo("Succès", "Votre rendez-vous a été confirmé avec succès!");
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "Error confirming appointment", ex);
-                showError("Erreur", "Une erreur est survenue lors de la confirmation: " + ex.getMessage());
+                showError("Erreur", "Erreur lors de la confirmation: " + ex.getMessage());
             }
         });
+        Button cancelBtn = new Button("Annuler");
+        cancelBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16px; -fx-border-color: #e74c3c; -fx-border-radius: 25; -fx-padding: 12 25;");
+        cancelBtn.setOnAction(e -> {
+            // Retour à la page précédente (motif)
+            root.getChildren().clear();
+            root.getChildren().add(getContentWithMotifSelector());
+        });
+        actions.getChildren().addAll(confirmBtn, cancelBtn);
 
-        confirmationBox.getChildren().addAll(summaryBox, confirmBtn);
-        root.getChildren().addAll(progressBar, confirmationBox);
-
+        // Assemble all
+        root.getChildren().addAll(progressBar, confirmationTitle, card, infoBox, actions);
         return root;
     }
 
@@ -626,31 +771,36 @@ public class AppointmentCrudWindow {
             StringBuilder missingFields = new StringBuilder();
             if (motifField.getText().trim().isEmpty()) missingFields.append("motif, ");
             if (patientIdField.getText().trim().isEmpty()) missingFields.append("patient ID, ");
+            if (phoneNumberField.getText().trim().isEmpty()) missingFields.append("téléphone, ");
+            if (medecinIdField.getText().trim().isEmpty()) missingFields.append("médecin, ");
             if (datePicker.getValue() == null) missingFields.append("date, ");
-            if (selectedTime.isEmpty()) missingFields.append("time, ");
-
+            if (selectedTime.isEmpty()) missingFields.append("heure, ");
             if (missingFields.length() > 0) {
-                String errorMsg = "Missing fields: " + missingFields.substring(0, missingFields.length() - 2);
-                logger.warning(errorMsg);
-                showError("Erreur", "Veuillez remplir tous les champs: " + missingFields.substring(0, missingFields.length() - 2));
-                return;  // This return was missing in your original code
+                showError("Champs manquants", "Veuillez remplir les champs suivants : " + missingFields.toString());
+                return;
             }
 
-            RendezVous rv = new RendezVous();
-            rv.setMotif(motifField.getText());
-            rv.setPatientId(Integer.parseInt(patientIdField.getText()));
-            rv.setMedecinId(this.medecinId);
-            rv.setDate(datePicker.getValue().atTime(LocalTime.parse(selectedTime)));
-            rv.setStatut("En attente");
+            int userId = Integer.parseInt(patientIdField.getText().trim());
+            String phoneNumber = phoneNumberField.getText().trim();
+            String motif = motifField.getText().trim();
+            LocalDate date = datePicker.getValue();
+            String time = selectedTime;
 
-            logger.log(Level.INFO, "Creating appointment: {0}", rv);
+            // Création du message personnalisé pour le SMS
+            String message = String.format(
+                "Bonjour, votre rendez-vous avec le %s est confirmé pour le %s à %s. Motif : %s. Merci pour votre confiance. À bientôt ! 👋",
+                medecinNom,
+                date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                time,
+                motif
+            );
 
-            service.ajouterRendezVous(rv);
-            logger.info("Appointment successfully added to service");
+            // Utilisation du Messaging Service SID pour envoyer le SMS
+            smsService.sendSmsWithServiceSid(phoneNumber, message);
+
+            showInfo("Succès", "Votre rendez-vous a été confirmé avec succès! Un SMS de confirmation a été envoyé.");
 
             clearFields();
-            showInfo("Succès", "Rendez-vous ajouté avec succès");
-
         } catch (NumberFormatException e) {
             logger.log(Level.SEVERE, "Invalid patient ID format", e);
             showError("Erreur", "L'ID du patient doit être un nombre valide");
@@ -664,6 +814,7 @@ public class AppointmentCrudWindow {
         logger.info("Clearing form fields");
         if (motifField != null) motifField.clear();
         if (patientIdField != null) patientIdField.clear();
+        if (phoneNumberField != null) phoneNumberField.clear();
         if (medecinIdField != null) medecinIdField.clear();
         if (datePicker != null) datePicker.setValue(null);
         selectedTime = "";
@@ -731,13 +882,7 @@ public class AppointmentCrudWindow {
                 VBox lineBox = new VBox();
                 lineBox.setAlignment(Pos.CENTER);
                 Rectangle line = new Rectangle(56, 5);
-                line.setArcWidth(5);
-                line.setArcHeight(5);
-                if (i < currentStep) {
-                    line.setFill(Color.web("#FFD600"));
-                } else {
-                    line.setFill(Color.web("#e0e0e0"));
-                }
+                line.setFill(i < currentStep ? Color.web("#FFD600") : Color.web("#e0e0e0"));
                 lineBox.getChildren().add(line);
                 stepper.getChildren().add(lineBox);
             }
@@ -780,10 +925,12 @@ public class AppointmentCrudWindow {
         actionCol.setCellFactory(col -> new TableCell<>() {
             final Button modifBtn = new Button("Modifier");
             final Button supprBtn = new Button("Supprimer");
-            final HBox box = new HBox(6, modifBtn, supprBtn);
+            final Button rateBtn = new Button("Évaluer");
+            final HBox box = new HBox(6, modifBtn, supprBtn, rateBtn);
             {
                 modifBtn.setStyle("-fx-background-color: #26c6da; -fx-text-fill: white;");
                 supprBtn.setStyle("-fx-background-color: #ef5350; -fx-text-fill: white;");
+                rateBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
                 modifBtn.setOnAction(e -> {
                     RendezVous rv = getTableView().getItems().get(getIndex());
                     showEditDialog(rv);
@@ -791,6 +938,10 @@ public class AppointmentCrudWindow {
                 supprBtn.setOnAction(e -> {
                     RendezVous rv = getTableView().getItems().get(getIndex());
                     supprimerRendezVous(rv);
+                });
+                rateBtn.setOnAction(e -> {
+                    RendezVous rv = getTableView().getItems().get(getIndex());
+                    handleRateButton(rv);
                 });
             }
             @Override
@@ -835,5 +986,28 @@ public class AppointmentCrudWindow {
                 tableView.getItems().remove(rv);
             }
         });
+    }
+
+    private void handleRateButton(RendezVous rv) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/frontend/src/views/Rating.fxml"));
+            Stage ratingStage = new Stage();
+            ratingStage.setScene(new Scene(loader.load()));
+            ratingStage.setTitle("Évaluation du médecin");
+
+            RatingController controller = loader.getController();
+            controller.initialize(medecinId, getCurrentUserId()); // À adapter selon ta logique utilisateur
+
+            ratingStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Erreur", "Erreur de chargement de la fenêtre d'évaluation");
+        }
+    }
+
+    // Méthode utilitaire fictive pour récupérer l'ID utilisateur courant
+    private int getCurrentUserId() {
+        // TODO: Remplacer par la vraie logique d'authentification/utilisateur
+        return 1;
     }
 }

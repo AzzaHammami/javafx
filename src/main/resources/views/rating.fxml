@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.171"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.rendez_vous.controllers.Front.RatingController"
+            prefHeight="400.0" prefWidth="600.0"
+            style="-fx-background-color: #f5f5f5;">
+
+    <VBox alignment="CENTER" spacing="20" AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+        <!-- Title -->
+        <Label text="Évaluer votre expérience" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+        <!-- Doctor Info -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <ImageView fx:id="doctorImage" fitHeight="80" fitWidth="80" preserveRatio="true"/>
+            <VBox spacing="5">
+                <Label fx:id="doctorNameLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <Label fx:id="doctorSpecialityLabel" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Rating Stars -->
+        <VBox spacing="10" alignment="CENTER">
+            <Label text="Votre note:" style="-fx-font-size: 16px;"/>
+            <HBox fx:id="starsContainer" spacing="5" alignment="CENTER">
+                <!-- Stars will be added dynamically -->
+            </HBox>
+            <Label fx:id="ratingText" style="-fx-font-size: 14px; -fx-text-fill: #e67e22;"/>
+        </VBox>
+
+        <!-- Comment Section -->
+        <VBox spacing="5" style="-fx-pref-width: 400;">
+            <Label text="Commentaire (optionnel):" style="-fx-font-size: 14px;"/>
+            <TextArea fx:id="commentField" prefHeight="100" wrapText="true"
+                      style="-fx-font-size: 14px; -fx-padding: 5;"/>
+        </VBox>
+
+        <!-- Action Buttons -->
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Annuler" style="-fx-font-size: 14px; -fx-pref-width: 120; -fx-background-color: #95a5a6; -fx-text-fill: white;"
+                    onAction="#handleCancel"/>
+            <Button text="Soumettre" style="-fx-font-size: 14px; -fx-pref-width: 120; -fx-background-color: #2ecc71; -fx-text-fill: white;"
+                    onAction="#handleSubmitRating"/>
+        </HBox>
+
+        <!-- Average Rating -->
+        <VBox spacing="5" alignment="CENTER" visible="false" fx:id="averageRatingBox">
+            <Label text="Note moyenne:" style="-fx-font-size: 14px;"/>
+            <HBox spacing="5" alignment="CENTER">
+                <Label fx:id="averageRatingValue" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #e67e22;"/>
+                <Label text="/5" style="-fx-font-size: 14px;"/>
+            </HBox>
+        </VBox>
+    </VBox>
+
+    <!-- Status Message -->
+    <Label fx:id="statusMessage" style="-fx-font-size: 14px; -fx-text-fill: #e74c3c;"
+           alignment="CENTER" visible="false"
+           AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"/>
+</AnchorPane>

@@ -6,26 +6,26 @@
 <?import javafx.scene.text.*?>
 <?import javafx.scene.shape.*?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml" 
-      fx:controller="com.example.rendez_vous.controllers.RendezVousController"
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.rendez_vous.controllers.Back.RendezVousController"
       stylesheets="@styles.css">
-    
+
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
     </padding>
 
     <Label text="Gestion des Rendez-vous" styleClass="title-label"/>
-    
+
     <VBox styleClass="date-picker-container">
         <StackPane styleClass="date-input-wrapper">
-            <TextField fx:id="dateInput" styleClass="date-input" editable="false" 
+            <TextField fx:id="dateInput" styleClass="date-input" editable="false"
                        promptText="Sélectionner une date" text="17 avril 2025"/>
             <Label styleClass="calendar-icon" text="📅" StackPane.alignment="CENTER_RIGHT">
                 <padding>
                     <Insets right="12"/>
                 </padding>
             </Label>
-            
+
             <VBox fx:id="customDatePicker" styleClass="date-picker,hidden">
                 <HBox styleClass="date-picker-header">
                     <Label fx:id="monthYearLabel" styleClass="month-year" text="Avril 2025"/>
@@ -37,13 +37,13 @@
                         </HBox>
                     </HBox>
                 </HBox>
-                
+
                 <HBox styleClass="view-buttons">
                     <Button text="Mois" styleClass="view-button"/>
                     <Button text="Semaine" styleClass="view-button,active"/>
                     <Button text="Jour" styleClass="view-button"/>
                 </HBox>
-                
+
                 <GridPane fx:id="calendarGrid" styleClass="calendar-grid">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="40" prefWidth="40" />
@@ -57,7 +57,7 @@
                     <rowConstraints>
                         <RowConstraints vgrow="SOMETIMES" minHeight="30" prefHeight="30" />
                     </rowConstraints>
-                    
+
                     <Label text="Dim" GridPane.columnIndex="0" styleClass="days-header"/>
                     <Label text="Lun" GridPane.columnIndex="1" styleClass="days-header"/>
                     <Label text="Mar" GridPane.columnIndex="2" styleClass="days-header"/>
@@ -66,7 +66,7 @@
                     <Label text="Ven" GridPane.columnIndex="5" styleClass="days-header"/>
                     <Label text="Sam" GridPane.columnIndex="6" styleClass="days-header"/>
                 </GridPane>
-                
+
                 <GridPane fx:id="weekViewGrid" styleClass="week-view,visible">
                     <VBox styleClass="time-column">
                         <Label styleClass="time-slot" text="8:00"/>
@@ -82,7 +82,7 @@
                         <Label styleClass="time-slot" text="18:00"/>
                         <Label styleClass="time-slot" text="19:00"/>
                     </VBox>
-                    
+
                     <FlowPane styleClass="color-legend">
                         <HBox styleClass="legend-item">
                             <Circle radius="4" styleClass="event-dot,event-consultation"/>
