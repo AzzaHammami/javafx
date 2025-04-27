@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controller.MedecinDashboardController"
+      stylesheets="@../styles/dashboard.css"
+      style="-fx-background-color: #f0f2f5;"
+      prefWidth="1000" 
+      prefHeight="700">
+
+    <!-- Barre de navigation -->
+    <HBox fx:id="headerBox" alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 30; -fx-spacing: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);">
+        <Label text="Cabinet Médical" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Déconnexion" 
+                onAction="#handleLogout"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 8 20; -fx-font-size: 13px; -fx-background-radius: 5; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- Contenu principal -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS" style="-fx-padding: 30;">
+        <!-- Carte du profil -->
+        <VBox spacing="20" HBox.hgrow="ALWAYS">
+            <!-- En-tête de section -->
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 0 0 20 0;">
+                <Label text="Mon Profil Médical" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+            </HBox>
+
+            <!-- Carte principale -->
+            <VBox styleClass="profile-card" 
+                  style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                
+                <!-- En-tête du profil -->
+                <HBox spacing="20" style="-fx-padding: 0 0 20 0;">
+                    <Circle radius="40" style="-fx-fill: #3498db;"/>
+                    <VBox spacing="5">
+                        <Label fx:id="nameLabel" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                        <Label fx:id="specialityLabel" style="-fx-font-size: 16px; -fx-text-fill: #3498db;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Informations de contact -->
+                <VBox spacing="15" style="-fx-padding: 20 0;">
+                    <Label text="Informations de Contact" 
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    
+                    <GridPane vgap="15" hgap="30" style="-fx-padding: 10 0;">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="120" prefWidth="120"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+
+                        <Label text="Email :" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                               style="-fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="emailLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Téléphone :" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                               style="-fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="phoneLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               style="-fx-text-fill: #2c3e50;"/>
+                    </GridPane>
+                </VBox>
+
+                <Separator style="-fx-padding: 10 0;"/>
+
+                <!-- Informations professionnelles -->
+                <VBox spacing="15" style="-fx-padding: 20 0;">
+                    <Label text="Informations Professionnelles" 
+                           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    
+                    <GridPane vgap="15" hgap="30">
+                        <columnConstraints>
+                            <ColumnConstraints minWidth="120" prefWidth="120"/>
+                            <ColumnConstraints hgrow="ALWAYS"/>
+                        </columnConstraints>
+
+                        <Label text="Numéro RPPS :" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                               style="-fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="rppsLabel" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                               style="-fx-text-fill: #2c3e50;"/>
+
+                        <Label text="Cabinet :" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                               style="-fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="addressLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                               style="-fx-text-fill: #2c3e50;"/>
+                    </GridPane>
+                </VBox>
+
+                <!-- Bouton modifier -->
+                <HBox alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+                    <Button text="Modifier mon profil" onAction="#handleEditProfile"
+                            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 10 25; -fx-font-size: 14px; -fx-background-radius: 5; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);">
+                        <HBox.margin>
+                            <Insets top="10"/>
+                        </HBox.margin>
+                    </Button>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- Panneau latéral avec statistiques -->
+        <VBox prefWidth="300" spacing="20">
+            <VBox spacing="15" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                <Label text="Statistiques" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                
+                <!-- Statistiques -->
+                <VBox spacing="15">
+                    <!-- Patients -->
+                    <VBox spacing="5" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 10;">
+                        <Label text="Patients" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="totalPatientsLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    </VBox>
+
+                    <!-- Rendez-vous aujourd'hui -->
+                    <VBox spacing="5" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 10;">
+                        <Label text="Rendez-vous aujourd'hui" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="todayAppointmentsLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    </VBox>
+
+                    <!-- Consultations du mois -->
+                    <VBox spacing="5" style="-fx-background-color: #f8f9fa; -fx-padding: 15; -fx-background-radius: 10;">
+                        <Label text="Consultations ce mois" style="-fx-font-size: 14px; -fx-text-fill: #7f8c8d;"/>
+                        <Label fx:id="monthlyConsultationsLabel" text="0" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox> 

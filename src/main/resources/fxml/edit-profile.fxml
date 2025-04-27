@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controller.EditProfileController"
+      spacing="15" styleClass="edit-profile-dialog"
+      prefWidth="400" prefHeight="500">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Modifier mon profil" styleClass="dialog-title"/>
+
+    <GridPane vgap="10" hgap="10">
+        <Label text="Nom complet :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Spécialité :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField fx:id="specialityField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+        <Label text="Email :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+        <Label text="Numéro RPPS :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="rppsField" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+        <Label text="Adresse cabinet :" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField fx:id="addressField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+
+        <Label text="Téléphone :" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+        <TextField fx:id="phoneField" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    </GridPane>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#handleCancel" styleClass="cancel-button"/>
+        <Button text="Enregistrer" onAction="#handleSave" styleClass="save-button"/>
+    </HBox>
+
+</VBox> 

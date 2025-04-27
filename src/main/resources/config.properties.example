@@ -1,0 +1,3 @@
+# Configuration Mailtrap
+# Remplacer YOUR_API_TOKEN par votre token Mailtrap
+mailtrap.api.token=YOUR_API_TOKEN 

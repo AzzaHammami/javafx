@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox spacing="10" alignment="CENTER" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.EditUserController"
+      stylesheets="@../styles/dashboard.css"
+      prefWidth="400" prefHeight="300">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Modifier l'utilisateur" styleClass="title-label"/>
+
+    <GridPane vgap="10" hgap="10">
+        <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+        <Label text="Rôle:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="roleComboBox" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Enregistrer" onAction="#handleSave" styleClass="primary-button"/>
+        <Button text="Annuler" onAction="#handleCancel" styleClass="secondary-button"/>
+    </HBox>
+
+</VBox> 

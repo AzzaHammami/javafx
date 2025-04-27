@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controller.EditPatientProfileController"
+      spacing="15" styleClass="edit-profile-dialog"
+      prefWidth="400" prefHeight="600">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Modifier mon profil" styleClass="dialog-title"/>
+
+    <TabPane>
+        <Tab text="Informations personnelles" closable="false">
+            <VBox spacing="10">
+                <GridPane vgap="10" hgap="10">
+                    <Label text="Nom complet :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Email :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="emailField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Téléphone :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="phoneField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                    <Label text="Date de naissance :" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <DatePicker fx:id="birthDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <Tab text="Informations médicales" closable="false">
+            <VBox spacing="10">
+                <GridPane vgap="10" hgap="10">
+                    <Label text="Groupe sanguin :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <ComboBox fx:id="bloodGroupCombo" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Allergies :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextArea fx:id="allergiesArea" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Maladies chroniques :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextArea fx:id="chronicDiseasesArea" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                </GridPane>
+            </VBox>
+        </Tab>
+
+        <Tab text="Contact d'urgence" closable="false">
+            <VBox spacing="10">
+                <GridPane vgap="10" hgap="10">
+                    <Label text="Nom du contact :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="emergencyContactNameField" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Relation :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="emergencyContactRelationField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Téléphone :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextField fx:id="emergencyContactPhoneField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                </GridPane>
+            </VBox>
+        </Tab>
+    </TabPane>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Annuler" onAction="#handleCancel" styleClass="cancel-button"/>
+        <Button text="Enregistrer" onAction="#handleSave" styleClass="save-button"/>
+    </HBox>
+
+</VBox> 

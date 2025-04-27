@@ -1,0 +1,932 @@
+.root {
+    -fx-background-color: #f5f6fa;
+    -fx-font-family: 'Segoe UI', sans-serif;
+}
+
+/* Barre de navigation */
+.nav-bar {
+    -fx-background-color: #6c5ce7;
+    -fx-padding: 10 20 10 20;
+    -fx-spacing: 20;
+    -fx-alignment: center-left;
+}
+
+.logo-circle {
+    -fx-fill: white;
+}
+
+.logo-text {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-padding: 5 10;
+    -fx-background-radius: 5;
+}
+
+.nav-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-button:pressed {
+    -fx-background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Style spécial pour le bouton de déconnexion */
+.nav-button:last-child {
+    -fx-border-color: white;
+    -fx-border-radius: 5;
+    -fx-border-width: 1;
+}
+
+.nav-button:last-child:hover {
+    -fx-background-color: white;
+    -fx-text-fill: #6c5ce7;
+}
+
+.user-avatar {
+    -fx-fill: white;
+}
+
+/* Contenu principal */
+.main-content {
+    -fx-background-color: transparent;
+    -fx-padding: 30;
+}
+
+.main-content > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Section de bienvenue */
+.welcome-section {
+    -fx-padding: 30 0;
+}
+
+.welcome-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.welcome-subtitle {
+    -fx-font-size: 18px;
+    -fx-text-fill: #636e72;
+}
+
+/* Cartes d'information */
+.info-card {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-min-width: 250;
+    -fx-max-width: 300;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 10 0;
+}
+
+.card-content {
+    -fx-spacing: 10;
+}
+
+/* Section titre */
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 20 0 10 0;
+}
+
+/* Graphique */
+.chart {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.chart-series-line {
+    -fx-stroke: #6c5ce7;
+    -fx-stroke-width: 2px;
+}
+
+.chart-line-symbol {
+    -fx-background-color: #6c5ce7, white;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
+}
+
+/* Toggle Buttons */
+.toggle-button {
+    -fx-background-color: #f0f0f0;
+    -fx-text-fill: #666666;
+    -fx-padding: 5 15;
+    -fx-background-radius: 15;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+}
+
+/* Boutons d'accès rapide */
+.quick-access-button {
+    -fx-background-color: white;
+    -fx-text-fill: #333333;
+    -fx-padding: 15 30;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2);
+}
+
+.quick-access-button:hover {
+    -fx-background-color: #f8f9fe;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+/* Styles pour la recherche */
+.search-field {
+    -fx-background-color: #f5f6fa;
+    -fx-padding: 8 15;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20;
+    -fx-min-width: 300;
+}
+
+.search-field:focused {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(108, 92, 231, 0.2), 10, 0, 0, 0);
+    -fx-border-color: #6c5ce7;
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+}
+
+/* Styles pour le tableau */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #e1e1e1;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header {
+    -fx-background-color: #6c5ce7;
+    -fx-padding: 10;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view .column-header:hover {
+    -fx-background-color: #5f4edb;
+}
+
+/* Style pour le tri */
+.table-view .column-header .sort-order-dot {
+    -fx-fill: white;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f1f2f6 transparent;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #f8f9fe;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #eeeeff;
+}
+
+/* Boutons d'action */
+.action-cell {
+    -fx-alignment: CENTER;
+    -fx-spacing: 10;
+    -fx-padding: 5;
+}
+
+.edit-button, .delete-button {
+    -fx-padding: 5 10;
+    -fx-cursor: hand;
+}
+
+.edit-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+}
+
+.delete-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Style pour la colonne d'actions */
+.table-cell.action-column {
+    -fx-alignment: CENTER;
+    -fx-padding: 5 10;
+}
+
+/* Pagination */
+.pagination {
+    -fx-page-information-visible: false;
+}
+
+.pagination .pagination-control {
+    -fx-spacing: 0;
+}
+
+.pagination .page-button {
+    -fx-background-color: white;
+    -fx-border-color: #6c5ce7;
+    -fx-border-width: 1;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-min-width: 35;
+    -fx-min-height: 35;
+    -fx-cursor: hand;
+}
+
+.pagination .page-button:hover {
+    -fx-background-color: #f0edff;
+}
+
+.pagination .page-button:selected {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+}
+
+/* Menu latéral */
+.sidebar {
+    -fx-background-color: #6c5ce7;
+    -fx-min-width: 250;
+    -fx-pref-width: 250;
+    -fx-padding: 20;
+    -fx-spacing: 20;
+}
+
+.sidebar-header {
+    -fx-padding: 0 0 20 0;
+}
+
+.logo-circle {
+    -fx-fill: white;
+}
+
+.logo-text {
+    -fx-text-fill: white;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.menu-items {
+    -fx-spacing: 10;
+}
+
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 15;
+    -fx-cursor: hand;
+    -fx-min-width: 200;
+}
+
+.menu-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+}
+
+.active-menu-button {
+    -fx-background-color: white;
+    -fx-text-fill: #6c5ce7;
+}
+
+.logout-button {
+    -fx-border-color: white;
+    -fx-border-radius: 5;
+}
+
+/* En-tête */
+.header {
+    -fx-padding: 10 0;
+    -fx-spacing: 20;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.user-avatar {
+    -fx-fill: #6c5ce7;
+}
+
+/* Cartes statistiques */
+.stats-cards {
+    -fx-padding: 20;
+    -fx-spacing: 20;
+    -fx-alignment: CENTER;
+}
+
+.stat-card {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-min-width: 200;
+    -fx-alignment: CENTER;
+    -fx-spacing: 10;
+}
+
+.stat-title {
+    -fx-font-size: 18px;
+    -fx-text-fill: #636e72;
+}
+
+.stat-value {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c5ce7;
+}
+
+.stat-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #636e72;
+}
+
+/* Section utilisateurs */
+.users-section {
+    -fx-padding: 20;
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.search-field {
+    -fx-background-color: #f5f6fa;
+    -fx-padding: 8 15;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20;
+    -fx-min-width: 300;
+}
+
+.search-field:focused {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(108, 92, 231, 0.2), 10, 0, 0, 0);
+    -fx-border-color: #6c5ce7;
+    -fx-border-width: 2;
+    -fx-border-radius: 20;
+}
+
+.add-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.add-button:hover {
+    -fx-background-color: #5f4edb;
+}
+
+/* Tableau */
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #e1e1e1;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header {
+    -fx-background-color: #6c5ce7;
+    -fx-padding: 10;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #f1f2f6 transparent;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #f8f9fe;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #eeeeff;
+}
+
+.table-view .table-cell {
+    -fx-alignment: CENTER-LEFT;
+    -fx-font-size: 14px;
+    -fx-padding: 15;
+}
+
+/* Boutons d'action */
+.action-button {
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+}
+
+.edit-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+}
+
+.delete-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Pagination */
+.pagination {
+    -fx-page-information-visible: false;
+}
+
+.pagination .pagination-control {
+    -fx-spacing: 0;
+}
+
+.pagination .page-button {
+    -fx-background-color: white;
+    -fx-border-color: #6c5ce7;
+    -fx-border-width: 1;
+    -fx-background-radius: 3;
+    -fx-border-radius: 3;
+    -fx-min-width: 35;
+    -fx-min-height: 35;
+    -fx-cursor: hand;
+}
+
+.pagination .page-button:hover {
+    -fx-background-color: #f0edff;
+}
+
+.pagination .page-button:selected {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+}
+
+/* Styles pour les cartes de rendez-vous */
+.appointments-container {
+    -fx-padding: 20;
+}
+
+.appointment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-min-width: 300;
+    -fx-max-width: 300;
+}
+
+.appointment-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(108, 92, 231, 0.2), 15, 0, 0, 5);
+}
+
+.appointment-header {
+    -fx-padding: 0 0 10 0;
+    -fx-border-color: #f1f2f6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.appointment-patient {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.appointment-time {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6c5ce7;
+}
+
+.appointment-type {
+    -fx-font-size: 14px;
+    -fx-text-fill: #636e72;
+}
+
+.appointment-status {
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+    -fx-background-radius: 15;
+}
+
+.status-confirmed {
+    -fx-background-color: #00b894;
+    -fx-text-fill: white;
+}
+
+.status-pending {
+    -fx-background-color: #fdcb6e;
+    -fx-text-fill: #2d3436;
+}
+
+.status-cancelled {
+    -fx-background-color: #d63031;
+    -fx-text-fill: white;
+}
+
+.dashboard-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z";
+}
+
+.patients-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z";
+}
+
+.appointments-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z";
+}
+
+.documents-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z";
+}
+
+.logout-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z";
+}
+
+.appointments-section {
+    -fx-padding: 20;
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.add-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.add-button:hover {
+    -fx-background-color: #5f4edb;
+}
+
+.appointments-container {
+    -fx-padding: 20;
+    -fx-background-color: transparent;
+}
+
+.appointment-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-padding: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+    -fx-min-width: 300;
+    -fx-max-width: 300;
+}
+
+.appointment-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(108, 92, 231, 0.2), 15, 0, 0, 5);
+}
+
+.appointment-header {
+    -fx-padding: 0 0 10 0;
+    -fx-border-color: #f1f2f6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.appointment-patient {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.appointment-time {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6c5ce7;
+}
+
+.appointment-type {
+    -fx-font-size: 14px;
+    -fx-text-fill: #636e72;
+}
+
+.appointment-status {
+    -fx-font-size: 12px;
+    -fx-padding: 5 10;
+    -fx-background-radius: 15;
+}
+
+.status-confirmé {
+    -fx-background-color: #00b894;
+    -fx-text-fill: white;
+}
+
+.status-en.attente {
+    -fx-background-color: #fdcb6e;
+    -fx-text-fill: #2d3436;
+}
+
+.status-annulé {
+    -fx-background-color: #d63031;
+    -fx-text-fill: white;
+}
+
+.profile-section {
+    -fx-padding: 20;
+    -fx-spacing: 20;
+}
+
+.profile-card {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.profile-avatar {
+    -fx-fill: #6c5ce7;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
+}
+
+.profile-name {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.profile-speciality {
+    -fx-font-size: 16px;
+    -fx-text-fill: #636e72;
+}
+
+.profile-email {
+    -fx-font-size: 14px;
+    -fx-text-fill: #6c5ce7;
+}
+
+.card-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+    -fx-padding: 0 0 10 0;
+}
+
+.schedule-grid {
+    -fx-padding: 10 0 0 0;
+}
+
+.edit-profile-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.edit-profile-button:hover {
+    -fx-background-color: #5f4edb;
+}
+
+.profile-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z";
+}
+
+.edit-profile-dialog {
+    -fx-background-color: white;
+}
+
+.dialog-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.cancel-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.cancel-button:hover {
+    -fx-background-color: #c0392b;
+}
+
+.save-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.save-button:hover {
+    -fx-background-color: #5f4edb;
+}
+
+.main-content-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.main-content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.main-content {
+    -fx-padding: 30;
+    -fx-spacing: 20;
+}
+
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+    -fx-padding: 10 0 5 0;
+}
+
+.info-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #636e72;
+}
+
+.info-value {
+    -fx-font-size: 16px;
+    -fx-text-fill: #2d3436;
+    -fx-font-weight: bold;
+}
+
+.stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c5ce7;
+}
+
+.appointment-card {
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-spacing: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 3);
+}
+
+.appointment-date {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6c5ce7;
+}
+
+.doctor-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2d3436;
+}
+
+.appointment-type {
+    -fx-font-size: 14px;
+    -fx-text-fill: #636e72;
+}
+
+.appointment-actions {
+    -fx-padding: 10 0 0 0;
+}
+
+.add-appointment-button {
+    -fx-background-color: #6c5ce7;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10 20;
+    -fx-background-radius: 20;
+    -fx-cursor: hand;
+}
+
+.add-appointment-button:hover {
+    -fx-background-color: #5f4edb;
+}
+
+.prescription-icon {
+    -fx-background-color: currentColor;
+    -fx-min-width: 20;
+    -fx-min-height: 20;
+    -fx-shape: "M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z";
+}
+
+/* Styles pour les cards utilisateurs */
+.users-scroll {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.users-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.users-container {
+    -fx-background-color: transparent;
+}
+
+.user-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 10, 0, 0, 5);
+    -fx-transition: all 0.3s ease;
+}
+
+.user-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 15, 0, 0, 8);
+    -fx-translate-y: -2;
+}
+
+.user-card .user-avatar {
+    -fx-fill: #e0e0e0;
+    -fx-stroke: transparent;
+}
+
+.user-card .user-name {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.user-card .user-email {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.user-card .user-role {
+    -fx-font-size: 14px;
+    -fx-text-fill: #3498db;
+    -fx-padding: 5 10;
+    -fx-background-color: #ebf5fb;
+    -fx-background-radius: 15;
+}
+
+.user-card .edit-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.user-card .edit-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.user-card .delete-button {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-background-radius: 5;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.user-card .delete-button:hover {
+    -fx-background-color: #c0392b;
+} 

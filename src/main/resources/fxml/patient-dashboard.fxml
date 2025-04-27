@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.Priority?>
+
+<HBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="tn.esprit.controller.PatientDashboardController"
+      stylesheets="@../styles/dashboard.css"
+      prefHeight="800.0" prefWidth="1200.0">
+
+    <!-- Menu latéral -->
+    <VBox styleClass="sidebar">
+        <VBox alignment="CENTER" spacing="10" styleClass="sidebar-header">
+            <Circle radius="20" styleClass="logo-circle"/>
+            <Label text="MaSanté" styleClass="logo-text"/>
+        </VBox>
+
+        <VBox spacing="5" styleClass="menu-items" VBox.vgrow="ALWAYS">
+            <Button text="Mon Profil" styleClass="menu-button,active-menu-button">
+                <graphic><Region styleClass="profile-icon"/></graphic>
+            </Button>
+        </VBox>
+
+        <Button text="Déconnexion" styleClass="menu-button,logout-button" onAction="#handleLogout">
+            <graphic><Region styleClass="logout-icon"/></graphic>
+        </Button>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <ScrollPane fitToWidth="true" styleClass="main-content-scroll" HBox.hgrow="ALWAYS">
+        <content>
+            <VBox styleClass="main-content" spacing="20">
+
+                <!-- En-tête -->
+                <HBox styleClass="header">
+                    <Label text="Mon Profil" styleClass="page-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Circle fx:id="userAvatar" radius="20" styleClass="user-avatar"/>
+                </HBox>
+
+                <!-- Message de bienvenue -->
+                <VBox styleClass="welcome-section">
+                    <Label fx:id="welcomeLabel" styleClass="welcome-text" wrapText="true"/>
+                </VBox>
+
+                <!-- Section Profil -->
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <!-- Infos perso -->
+                    <VBox styleClass="profile-card" prefWidth="500" minHeight="250" spacing="20">
+                        <padding>
+                            <Insets top="25" right="30" bottom="25" left="30"/>
+                        </padding>
+                        <HBox alignment="CENTER" spacing="40">
+                            <VBox alignment="CENTER" spacing="15">
+                                <Circle fx:id="profileAvatar" radius="60" styleClass="profile-avatar"/>
+                                <Button text="Changer la photo" onAction="#handleUploadPhoto" styleClass="upload-photo-button">
+                                    <graphic><Region styleClass="upload-icon"/></graphic>
+                                </Button>
+                            </VBox>
+                            <VBox spacing="15">
+                                <Label fx:id="nameLabel" text="Nom Prénom" styleClass="profile-name">
+                                    <style>
+                                        -fx-font-size: 24px;
+                                        -fx-font-weight: bold;
+                                    </style>
+                                </Label>
+                                <Label fx:id="emailLabel" text="email@example.com" styleClass="profile-email">
+                                    <style>
+                                        -fx-font-size: 16px;
+                                    </style>
+                                </Label>
+                                <Label fx:id="phoneLabel" text="+216 XX XXX XXX" styleClass="profile-phone">
+                                    <style>
+                                        -fx-font-size: 16px;
+                                    </style>
+                                </Label>
+                            </VBox>
+                        </HBox>
+                        <Button text="Modifier mon profil" onAction="#handleEditProfile" styleClass="edit-profile-button">
+                            <graphic><Region styleClass="edit-icon"/></graphic>
+                            <style>
+                                -fx-font-size: 14px;
+                                -fx-padding: 10 20 10 20;
+                            </style>
+                        </Button>
+                    </VBox>
+                </HBox>
+
+                <!-- Infos médicales -->
+                <VBox spacing="20">
+                    <Label text="Informations Médicales" styleClass="section-title"/>
+                    <HBox spacing="20">
+                        <!-- Base -->
+                        <VBox styleClass="profile-card" prefWidth="300">
+                            <Label text="Informations de Base" styleClass="card-title"/>
+                            <GridPane vgap="10" hgap="20">
+                                <Label text="Date de naissance :" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                                <Label fx:id="birthDateLabel" text="01/01/1990" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                <Label text="Âge :" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                                <Label fx:id="ageLabel" text="33 ans" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="Groupe sanguin :" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                                <Label fx:id="bloodGroupLabel" text="A+" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </GridPane>
+                        </VBox>
+
+                        <!-- Conditions -->
+                        <VBox styleClass="profile-card" prefWidth="300">
+                            <Label text="Conditions Médicales" styleClass="card-title"/>
+                            <VBox spacing="10">
+                                <Label text="Allergies :" styleClass="info-label"/>
+                                <Label fx:id="allergiesLabel" text="Aucune" wrapText="true" styleClass="info-value"/>
+                                <Label text="Maladies chroniques :" styleClass="info-label"/>
+                                <Label fx:id="chronicDiseasesLabel" text="Aucune" wrapText="true" styleClass="info-value"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Médicaments -->
+                        <VBox styleClass="profile-card" prefWidth="300">
+                            <Label text="Médicaments Actuels" styleClass="card-title"/>
+                            <VBox fx:id="currentMedicationsBox" spacing="5">
+                                <Label text="Aucun médicament en cours" styleClass="info-value"/>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Contact urgence -->
+                <VBox spacing="10">
+                    <Label text="Contact d'Urgence" styleClass="section-title"/>
+                    <VBox styleClass="profile-card">
+                        <HBox spacing="20">
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Nom du contact" styleClass="info-label"/>
+                                <Label fx:id="emergencyContactNameLabel" text="Contact" styleClass="info-value"/>
+                            </VBox>
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Relation" styleClass="info-label"/>
+                                <Label fx:id="emergencyContactRelationLabel" text="Parent" styleClass="info-value"/>
+                            </VBox>
+                            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                                <Label text="Téléphone" styleClass="info-label"/>
+                                <Label fx:id="emergencyContactPhoneLabel" text="+216 XX XXX XXX" styleClass="info-value"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</HBox>

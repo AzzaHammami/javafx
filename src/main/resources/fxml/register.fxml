@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Circle?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.RegisterController"
+      stylesheets="@../styles/auth.css">
+
+    <!-- Partie gauche avec le logo et le texte de bienvenue -->
+    <VBox styleClass="left-side">
+        <VBox alignment="CENTER" spacing="20" styleClass="logo-container">
+            <Circle radius="40" styleClass="logo-circle"/>
+            <Label text="MaSanté" styleClass="logo-text"/>
+            <Label text="Votre santé, notre priorité" styleClass="logo-subtitle"/>
+        </VBox>
+        
+        <VBox alignment="CENTER" styleClass="welcome-text">
+            <Label text="Bienvenue" styleClass="welcome-title"/>
+            <Label text="Créez votre compte pour accéder à nos services" styleClass="welcome-subtitle"/>
+        </VBox>
+    </VBox>
+
+    <!-- Partie droite avec le formulaire d'inscription -->
+    <VBox styleClass="right-side">
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox styleClass="form-container">
+                <Label text="Inscription" styleClass="form-title"/>
+                
+                <VBox styleClass="form-group">
+                    <Label text="Email:" styleClass="field-label"/>
+                    <TextField fx:id="emailField" promptText="Entrez votre email" styleClass="form-field"/>
+                </VBox>
+
+                <VBox styleClass="form-group">
+                    <Label text="Mot de passe:" styleClass="field-label"/>
+                    <PasswordField fx:id="passwordField" promptText="Entrez votre mot de passe" styleClass="form-field"/>
+                </VBox>
+
+                <VBox styleClass="form-group">
+                    <Label text="Confirmer le mot de passe:" styleClass="field-label"/>
+                    <PasswordField fx:id="confirmPasswordField" promptText="Confirmez votre mot de passe" styleClass="form-field"/>
+                </VBox>
+
+                <VBox styleClass="form-group">
+                    <Label text="Rôle:" styleClass="field-label"/>
+                    <ComboBox fx:id="roleComboBox" promptText="Sélectionnez votre rôle" styleClass="form-field"/>
+                </VBox>
+
+                <CheckBox fx:id="recaptchaCheckBox" text="Je ne suis pas un robot" styleClass="recaptcha-checkbox"/>
+                
+                <Label fx:id="messageLabel" styleClass="message-label"/>
+
+                <Button text="S'inscrire" onAction="#handleRegister" styleClass="submit-button"/>
+
+                <HBox alignment="CENTER" styleClass="register-link">
+                    <Label text="Vous avez déjà un compte ? "/>
+                    <Hyperlink text="Se connecter" onAction="#handleLogin"/>
+                </HBox>
+            </VBox>
+        </ScrollPane>
+    </VBox>
+</HBox> 

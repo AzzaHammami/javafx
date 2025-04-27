@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.UserListController"
+      stylesheets="@../styles/dashboard.css"
+      prefHeight="800.0" prefWidth="1200.0">
+
+    <!-- Menu latéral -->
+    <VBox styleClass="sidebar">
+        <VBox alignment="CENTER" spacing="10" styleClass="sidebar-header">
+            <Circle radius="20" styleClass="logo-circle"/>
+            <Label text="MaSanté" styleClass="logo-text"/>
+        </VBox>
+
+        <VBox spacing="5" styleClass="menu-items" VBox.vgrow="ALWAYS">
+            <Button text="Tableau de bord" styleClass="menu-button" onAction="#handleAccueil">
+                <graphic>
+                    <Region styleClass="dashboard-icon"/>
+                </graphic>
+            </Button>
+            <Button text="Utilisateurs" styleClass="menu-button, active-menu-button">
+                <graphic>
+                    <Region styleClass="users-icon"/>
+                </graphic>
+            </Button>
+            <Button text="Statistiques" styleClass="menu-button" onAction="#handleStatistiques">
+                <graphic>
+                    <Region styleClass="stats-icon"/>
+                </graphic>
+            </Button>
+        </VBox>
+
+        <Button text="Déconnexion" styleClass="menu-button, logout-button" onAction="#handleLogout">
+            <graphic>
+                <Region styleClass="logout-icon"/>
+            </graphic>
+        </Button>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <VBox HBox.hgrow="ALWAYS" styleClass="main-content">
+        <!-- En-tête -->
+        <HBox styleClass="header">
+            <Label text="Liste des Utilisateurs" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Circle fx:id="userAvatar" radius="20" styleClass="user-avatar"/>
+        </HBox>
+
+        <!-- Liste des utilisateurs -->
+        <VBox spacing="30" VBox.vgrow="ALWAYS" styleClass="users-section">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+
+            <HBox alignment="CENTER_RIGHT" spacing="30">
+                <TextField fx:id="searchField" promptText="Rechercher un utilisateur..." styleClass="search-field"/>
+                <Button text="+ Ajouter" styleClass="add-button" onAction="#handleAddUser"/>
+            </HBox>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="users-scroll">
+                <FlowPane fx:id="userCardsContainer" hgap="20" vgap="20" styleClass="users-container">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                </FlowPane>
+            </ScrollPane>
+
+            <HBox alignment="CENTER">
+                <Pagination fx:id="pagination"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</HBox> 
