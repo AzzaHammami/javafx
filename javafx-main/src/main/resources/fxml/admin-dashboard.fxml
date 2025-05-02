@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.AdminDashboardController"
+      stylesheets="@../styles/dashboard.css">
+
+    <!-- Menu latéral -->
+    <VBox styleClass="sidebar">
+        <VBox alignment="CENTER" spacing="10" styleClass="sidebar-header">
+            <Circle radius="20" styleClass="logo-circle"/>
+            <Label text="MaSanté" styleClass="logo-text"/>
+        </VBox>
+
+        <VBox spacing="5" styleClass="menu-items" VBox.vgrow="ALWAYS">
+            <Button text="Tableau de bord" styleClass="menu-button, active-menu-button" onAction="#handleDashboard">
+                <graphic>
+                    <Region styleClass="dashboard-icon"/>
+                </graphic>
+            </Button>
+            <Button text="Utilisateurs" styleClass="menu-button" onAction="#handleUsers">
+                <graphic>
+                    <Region styleClass="users-icon"/>
+                </graphic>
+                 </Button>
+</VBox>
+
+    
+        <Button text="Déconnexion" styleClass="menu-button, logout-button" onAction="#handleLogout">
+            <graphic>
+                <Region styleClass="logout-icon"/>
+            </graphic>
+        </Button>
+    </VBox>
+
+    <!-- Contenu principal -->
+    <VBox HBox.hgrow="ALWAYS" styleClass="main-content">
+        <!-- En-tête -->
+        <HBox styleClass="header">
+            <Label text="Tableau de bord" styleClass="page-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Circle fx:id="userAvatar" radius="20" styleClass="user-avatar"/>
+        </HBox>
+
+        <!-- Cartes statistiques -->
+        <HBox spacing="20" styleClass="stats-cards">
+            <!-- Carte Nombre total d'utilisateurs -->
+            <VBox styleClass="stat-card">
+                <Label text="Total Utilisateurs" styleClass="stat-title"/>
+                <Label fx:id="totalUsersLabel" text="0" styleClass="stat-value"/>
+            </VBox>
+
+            <!-- Carte Nombre de médecins -->
+            <VBox styleClass="stat-card">
+                <Label text="Médecins" styleClass="stat-title"/>
+                <Label fx:id="totalDoctorsLabel" text="0" styleClass="stat-value"/>
+            </VBox>
+
+            <!-- Carte Nombre de patients -->
+            <VBox styleClass="stat-card">
+                <Label text="Patients" styleClass="stat-title"/>
+                <Label fx:id="totalPatientsLabel" text="0" styleClass="stat-value"/>
+            </VBox>
+        </HBox>
+
+        <!-- Liste des utilisateurs -->
+        <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="users-section">
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <Label text="Liste des Utilisateurs" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="searchField" promptText="Rechercher un utilisateur..." styleClass="search-field"/>
+                <Button text="+ Ajouter" styleClass="add-button" onAction="#handleAddUser"/>
+            </HBox>
+
+            <TableView fx:id="userTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="50"/>
+                    <TableColumn fx:id="emailColumn" text="Email" prefWidth="200"/>
+                    <TableColumn fx:id="firstNameColumn" text="Prénom" prefWidth="150"/>
+                    <TableColumn fx:id="lastNameColumn" text="Nom" prefWidth="150"/>
+                    <TableColumn fx:id="roleColumn" text="Rôle" prefWidth="0"/>
+                    <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="200"/>
+                </columns>
+                <placeholder>
+                    <Label text="Aucun utilisateur trouvé"/>
+                </placeholder>
+            </TableView>
+
+            <HBox alignment="CENTER">
+                <Pagination fx:id="pagination"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</HBox> 

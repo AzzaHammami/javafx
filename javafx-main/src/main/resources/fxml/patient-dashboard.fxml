@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.shape.Circle?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="tn.esprit.controller.PatientDashboardController"
+      stylesheets="@../styles/dashboard.css"
+      prefHeight="800.0" prefWidth="1200.0">
+
+    <!-- Barre de navigation -->
+    <HBox styleClass="nav-bar">
+        <HBox alignment="CENTER_LEFT" spacing="10" HBox.hgrow="ALWAYS">
+            <Circle radius="20" styleClass="logo-circle" />
+            <Label text="MaSanté" styleClass="logo-text"/>
+        </HBox>
+        
+        <HBox alignment="CENTER" spacing="30">
+            <Button text="Accueil" styleClass="nav-button" />
+            <Button text="Rendez-vous" styleClass="nav-button" onAction="#handleAppointments" />
+            <Button text="Documents" styleClass="nav-button" onAction="#handleDocuments" />
+            <Button text="Messages" styleClass="nav-button" onAction="#handleMessages" />
+        </HBox>
+        
+        <HBox alignment="CENTER_RIGHT" spacing="15">
+            <Circle fx:id="userAvatar" radius="20" styleClass="user-avatar" />
+            <Button text="Déconnexion" styleClass="nav-button" onAction="#handleLogout" />
+        </HBox>
+    </HBox>
+
+    <!-- Contenu principal -->
+    <ScrollPane fitToWidth="true" styleClass="main-content">
+        <VBox spacing="30">
+            <!-- En-tête de bienvenue -->
+            <VBox styleClass="welcome-section">
+                <Label fx:id="welcomeLabel" text="Bonjour, Thomas" styleClass="welcome-text"/>
+                <Label text="Voici le résumé de votre santé" styleClass="subtitle-text"/>
+            </VBox>
+
+            <!-- Cartes d'information -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <!-- Carte Prochain RDV -->
+                <VBox styleClass="info-card">
+                    <Label text="Prochain RDV" styleClass="card-title"/>
+                    <VBox styleClass="card-content">
+                        <Label fx:id="nextAppointmentDate" text="Mercredi 23 Avril"/>
+                        <Label fx:id="doctorName" text="Dr. Marie Laurent"/>
+                        <Label fx:id="appointmentType" text="Consultation générale"/>
+                    </VBox>
+                </VBox>
+
+                <!-- Carte Médicaments -->
+                <VBox styleClass="info-card">
+                    <Label text="Médicaments" styleClass="card-title"/>
+                    <VBox styleClass="card-content">
+                        <Label text="Amoxicilline - 2x/jour"/>
+                        <Label text="Doliprane - si besoin"/>
+                    </VBox>
+                </VBox>
+
+                <!-- Carte Notifications -->
+                <VBox styleClass="info-card">
+                    <Label text="Notifications" styleClass="card-title"/>
+                    <VBox styleClass="card-content">
+                        <Label text="Résultats disponibles"/>
+                        <Label text="Rappel vaccination"/>
+                    </VBox>
+                </VBox>
+            </HBox>
+
+            <!-- Section Suivi de santé -->
+            <VBox spacing="10">
+                <HBox alignment="CENTER_LEFT" spacing="20">
+                    <Label text="Suivi de votre santé" styleClass="section-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <ToggleButton text="Mois" selected="true"/>
+                    <ToggleButton text="Année"/>
+                </HBox>
+
+                <!-- Graphique d'activité -->
+                <LineChart fx:id="activityChart">
+                    <xAxis>
+                        <CategoryAxis label="Date"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Activité"/>
+                    </yAxis>
+                </LineChart>
+            </VBox>
+
+            <!-- Section Accès rapides -->
+            <VBox spacing="10">
+                <Label text="Accès rapides" styleClass="section-title"/>
+                <HBox spacing="20">
+                    <Button text="Prendre RDV" styleClass="quick-access-button"/>
+                    <Button text="Mes documents" styleClass="quick-access-button"/>
+                    <Button text="Mes ordonnances" styleClass="quick-access-button"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </ScrollPane>
+</VBox> 
