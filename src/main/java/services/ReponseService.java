@@ -110,30 +110,36 @@ public class ReponseService implements IReponse {
         return null;
     }
 
-    public List<Reponse> getReponsesByReclamation(int reclamationId) {
-        List<Reponse> list = new ArrayList<>();
-        String sql = "SELECT * FROM reponse WHERE reclamation_id = ?";
+    public List<Reponse> getReponsesByReclamationId(int reclamationId) {
+    // Version principale utilisée côté Front
+    List<Reponse> list = new ArrayList<>();
+    String sql = "SELECT * FROM reponse WHERE reclamation_id = ?";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setInt(1, reclamationId);
-            ResultSet rs = ps.executeQuery();
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        ps.setInt(1, reclamationId);
+        ResultSet rs = ps.executeQuery();
 
-            ReclamationService reclamationService = new ReclamationService();
-            Reclamation reclamation = reclamationService.getById(reclamationId);
+        ReclamationService reclamationService = new ReclamationService();
+        Reclamation reclamation = reclamationService.getById(reclamationId);
 
-            while (rs.next()) {
-                int id = rs.getInt("id");
-                String contenu = rs.getString("contenu");
-                LocalDate dateReponse = rs.getDate("date_reponse").toLocalDate();
+        while (rs.next()) {
+            int id = rs.getInt("id");
+            String contenu = rs.getString("contenu");
+            LocalDate dateReponse = rs.getDate("date_reponse").toLocalDate();
 
-                Reponse reponse = new Reponse(id, contenu, dateReponse, reclamation);
-                list.add(reponse);
-            }
-
-        } catch (SQLException e) {
-            System.err.println("Erreur lors de la récupération des réponses : " + e.getMessage());
+            Reponse reponse = new Reponse(id, contenu, dateReponse, reclamation);
+            list.add(reponse);
         }
 
-        return list;
+    } catch (SQLException e) {
+        System.err.println("Erreur lors de la récupération des réponses : " + e.getMessage());
     }
+
+    return list;
+}
+
+// Ajouté pour compatibilité avec l'ancien code BackOffice
+public java.util.List<models.Reponse> getReponsesByReclamation(int reclamationId) {
+    return getReponsesByReclamationId(reclamationId);
+}
 }

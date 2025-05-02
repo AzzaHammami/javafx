@@ -30,6 +30,7 @@ public class CompactConversationListController implements Initializable {
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
+        System.out.println("[DEBUG] currentUser in CompactConversationListController: " + (currentUser != null ? currentUser.getId() : "null"));
         loadConversations();
     }
 
@@ -64,10 +65,11 @@ public class CompactConversationListController implements Initializable {
             }
         });
 
-        conversationListView.setOnMouseClicked((MouseEvent event) -> {
-            if (event.getClickCount() == 2) {
+        conversationListView.setOnMouseClicked(event -> {
+            if (event.getClickCount() >= 1) {
                 Conversation selected = conversationListView.getSelectionModel().getSelectedItem();
                 if (selected != null && onConversationSelected != null) {
+                    System.out.println("[DEBUG] Conversation cliquée: " + selected.getId());
                     onConversationSelected.accept(selected);
                 }
             }
@@ -77,8 +79,28 @@ public class CompactConversationListController implements Initializable {
     private void loadConversations() {
         if (currentUser == null) return;
         List<Conversation> conversations = conversationService.getUserConversations(currentUser.getId());
+        // --- FIXED ORDER: sort by last_message_at DESC and then by id ASC for stability ---
+        conversations.sort((c1, c2) -> {
+            int cmp = 0;
+            if (c1.getLastMessageAt() != null && c2.getLastMessageAt() != null) {
+                cmp = c2.getLastMessageAt().compareTo(c1.getLastMessageAt());
+            } else if (c1.getLastMessageAt() != null) {
+                return -1;
+            } else if (c2.getLastMessageAt() != null) {
+                return 1;
+            }
+            if (cmp == 0) {
+                cmp = Integer.compare(c1.getId(), c2.getId());
+            }
+            return cmp;
+        });
+        System.out.println("[DEBUG] Conversations trouvées: " + conversations.size());
         ObservableList<Conversation> obsList = FXCollections.observableArrayList(conversations);
         conversationListView.setItems(obsList);
+        // Affiche un message si la liste est vide
+        if (obsList.isEmpty()) {
+            conversationListView.setPlaceholder(new Label("Aucune conversation trouvée"));
+        }
     }
 
     private String getTitle(Conversation conv) {

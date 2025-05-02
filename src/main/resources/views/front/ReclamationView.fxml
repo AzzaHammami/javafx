@@ -44,44 +44,56 @@
 
     <!-- Main Content -->
     <center>
-        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
-            <VBox spacing="30" minHeight="800">
-                <padding>
-                    <Insets top="20" right="40" bottom="20" left="40"/>
-                </padding>
-                <Button text="Retour" onAction="#handleRetourHome" styleClass="btn-back"/>
-                <Button text="Messagerie" onAction="#handleGoToMessenger" styleClass="btn-primary"/>
-                <Label text="Gestion des Réclamations" styleClass="main-title"/>
-                <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
-                <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
-                <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
-                    <Label text="Nouvelle Réclamation" styleClass="section-title"/>
-                    <VBox spacing="10">
-                        <Label text="Sujet" styleClass="field-label"/>
-                        <TextField fx:id="sujetField" promptText="Entrez le sujet de votre réclamation"/>
+        <StackPane>
+            <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
+                <VBox spacing="30" minHeight="800">
+                    <padding>
+                        <Insets top="20" right="40" bottom="20" left="40"/>
+                    </padding>
+                    <Button text="Retour" onAction="#handleRetourHome" styleClass="btn-back"/>
+                    <Button text="Messagerie" onAction="#handleGoToMessenger" styleClass="btn-primary"/>
+                    <Label text="Gestion des Réclamations" styleClass="main-title"/>
+                    <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
+                    <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
+                    <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
+                        <Label text="Nouvelle Réclamation" styleClass="section-title"/>
+                        <VBox spacing="10">
+                            <Label text="Sujet" styleClass="field-label"/>
+                            <TextField fx:id="sujetField" promptText="Entrez le sujet de votre réclamation"/>
+                        </VBox>
+                        <VBox spacing="10">
+                            <Label text="Description" styleClass="field-label"/>
+                            <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" wrapText="true" prefRowCount="3"/>
+                        </VBox>
+                        <HBox spacing="10">
+                            <Button fx:id="ajouterButton" text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
+                            <Button fx:id="modifierButton" text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
+                            <Button fx:id="supprimerButton" text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
+                            <Button fx:id="annulerButton" text="Annuler" onAction="#handleAnnulerForm" styleClass="btn-secondary"/>
+                        </HBox>
                     </VBox>
-                    <VBox spacing="10">
-                        <Label text="Description" styleClass="field-label"/>
-                        <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" wrapText="true" prefRowCount="3"/>
+                    <VBox fx:id="reponsesContainer" spacing="10" styleClass="responses-section">
+                        <Label text="Réponses" styleClass="section-title"/>
+                        <TableView fx:id="reponsesTableView" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="reponseContenuColumn" text="Réponse"/>
+                                <TableColumn fx:id="reponseDateColumn" text="Date"/>
+                            </columns>
+                        </TableView>
                     </VBox>
-                    <HBox spacing="10">
-                        <Button fx:id="ajouterButton" text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
-                        <Button fx:id="modifierButton" text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
-                        <Button fx:id="supprimerButton" text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
-                        <Button fx:id="annulerButton" text="Annuler" onAction="#handleAnnulerForm" styleClass="btn-secondary"/>
-                    </HBox>
+                    <ListView fx:id="notificationsListView" prefHeight="120" prefWidth="600" />
                 </VBox>
-                <VBox fx:id="reponsesContainer" spacing="10" styleClass="responses-section">
-                    <Label text="Réponses" styleClass="section-title"/>
-                    <TableView fx:id="reponsesTableView" prefHeight="200">
-                        <columns>
-                            <TableColumn fx:id="reponseContenuColumn" text="Réponse"/>
-                            <TableColumn fx:id="reponseDateColumn" text="Date"/>
-                        </columns>
-                    </TableView>
-                </VBox>
-            </VBox>
-        </ScrollPane>
+            </ScrollPane>
+            <!-- Bouton Messenger flottant -->
+            <Button fx:id="floatingMessengerButton"
+                    style="-fx-background-radius: 50%; -fx-background-color: #0084ff; -fx-text-fill: white; -fx-font-size: 22px; -fx-pref-width: 54; -fx-pref-height: 54; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);"
+                    text="💬"
+                    StackPane.alignment="BOTTOM_RIGHT"
+                    translateY="-32" translateX="-32"/>
+            <!-- Conteneur pour les mini-messageries -->
+            <StackPane fx:id="miniMessengersContainer" pickOnBounds="false" style="-fx-background-color: transparent;"
+                      visible="true" managed="true" mouseTransparent="true"/>
+        </StackPane>
     </center>
     
     <!-- Barre latérale -->

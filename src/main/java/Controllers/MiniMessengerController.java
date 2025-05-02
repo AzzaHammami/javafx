@@ -41,7 +41,17 @@ public class MiniMessengerController {
         this.conversation = conversation;
         this.currentUser = currentUser;
         this.onClose = onClose;
-        conversationTitleLabel.setText(conversation.getTitle());
+        // Affiche le nom du destinataire dans une conversation privée
+        if (!conversation.isGroup() && conversation.getParticipants() != null) {
+            for (User participant : conversation.getParticipants()) {
+                if (participant.getId() != currentUser.getId()) {
+                    conversationTitleLabel.setText(participant.getName());
+                    break;
+                }
+            }
+        } else {
+            conversationTitleLabel.setText(conversation.getTitle());
+        }
         setupPolling();
         loadMessages();
     }
@@ -71,6 +81,20 @@ public class MiniMessengerController {
         message.setSender(currentUser);
         message.setContent(content);
         message.setSentAt(java.time.LocalDateTime.now());
+        // --- DEBUG LOGGING ---
+        System.out.println("[DEBUG] Sending message:");
+        System.out.println("  conversationId=" + message.getConversationId());
+        System.out.println("  senderId=" + currentUser.getId());
+        // Set receiverId for direct conversations
+        if (!conversation.isGroup() && conversation.getParticipants() != null) {
+            for (User participant : conversation.getParticipants()) {
+                if (participant.getId() != currentUser.getId()) {
+                    message.setReceiverId(participant.getId());
+                    System.out.println("  receiverId=" + participant.getId());
+                    break;
+                }
+            }
+        }
         try {
             messageService.sendMessage(message);
             messageInput.clear();

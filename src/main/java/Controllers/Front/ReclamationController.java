@@ -1,8 +1,10 @@
 package Controllers.Front;
 
+import models.Conversation;
 import models.Reclamation;
 import models.Reponse;
 import models.User;
+import services.ConversationService;
 import services.ReclamationService;
 import services.ReponseService;
 import services.UserService;
@@ -16,6 +18,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
@@ -30,12 +36,17 @@ import javafx.geometry.Pos;
 import javafx.beans.binding.Bindings;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.control.ListView;
 
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.HashMap;
+import java.util.Map;
+import com.google.firebase.database.*;
+import javafx.application.Platform;
 
 public class ReclamationController implements Initializable {
 
@@ -61,11 +72,18 @@ public class ReclamationController implements Initializable {
     private Button supprimerButton;
     @FXML
     private Button annulerButton;
+    @FXML
+    private StackPane miniMessengersContainer;
+    @FXML
+    private Button floatingMessengerButton;
+    @FXML
+    private ListView<String> notificationsListView;
 
     private ReclamationService reclamationService;
     private ReponseService reponseService;
     private Reclamation selectedReclamation;
     private UserService userService = new UserService();
+    private ConversationService conversationService = new ConversationService();
     // Ajout pour gestion utilisateur courant
     private models.User currentUser;
     public void setCurrentUser(models.User user) {
@@ -76,37 +94,70 @@ public class ReclamationController implements Initializable {
         }
     }
 
+    private final Map<Integer, Node> openMessengerNodesMap = new HashMap<>();
+
     @FXML
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        System.out.println("[DEBUG] ReclamationController.initialize() appelé");
         reclamationService = new ReclamationService();
         reponseService = new ReponseService();
-        
         loadReclamations();
-        
-        // Initialize responses container
         reponsesContainer.setVisible(false);
+        
+        // Vérifie si la ListView est bien injectée
+        if (notificationsListView != null) {
+            System.out.println("[DEBUG] notificationsListView injectée avec succès");
+        } else {
+            System.out.println("[DEBUG] ERREUR: notificationsListView n'est pas injectée");
+        }
+        
+        listenForUserNotifications();
         reponsesContainer.setManaged(false);
         hideForm();
+        if (floatingMessengerButton != null) {
+            floatingMessengerButton.setOnAction(e -> showConversationListPopup());
+        }
+        miniMessengersContainer.setDisable(false);
+        miniMessengersContainer.setFocusTraversable(true);
     }
 
     private void loadReclamations() {
+        if (currentUser == null) {
+            System.out.println("[DEBUG] Aucun utilisateur courant trouvé pour charger les réclamations !");
+            return;
+        }
+        List<Reclamation> reclamations = reclamationService.getReclamationsByUserId(currentUser.getId());
+        displayReclamations(reclamations);
+    }
+
+    private void displayReclamations(List<Reclamation> reclamations) {
         cardContainer.getChildren().clear();
-        if (currentUser == null) return;
-        List<Reclamation> reclamations = reclamationService.getAll();
         for (Reclamation rec : reclamations) {
-            if (rec.getUserId() != null && rec.getUserId().equals(currentUser.getId())) {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/front/CardReclamationFront.fxml"));
-                    Node card = loader.load();
-                    CardReclamationFrontController cardController = loader.getController();
-                    String userName = currentUser.getName();
-                    cardController.setData(rec, userName);
-                    cardController.setParentController(this);
-                    cardContainer.getChildren().add(card);
-                } catch (IOException e) {
-                    e.printStackTrace();
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/front/CardReclamationFront.fxml"));
+                Node card = loader.load();
+                CardReclamationFrontController cardController = loader.getController();
+                String userName = "";
+                if (rec.getUserId() != null) {
+                    User user = userService.getUserById(rec.getUserId());
+                    if (user != null) userName = user.getName();
                 }
+                cardController.setReclamation(rec, userName);
+                cardController.setReponses(reponseService.getReponsesByReclamationId(rec.getId()));
+                cardController.setReclamationController(this);
+                cardController.setUserService(userService);
+                cardController.setReponseService(reponseService);
+                cardController.setConversationService(conversationService);
+                cardController.setMiniMessengersContainer(miniMessengersContainer);
+                cardController.setFloatingMessengerButton(floatingMessengerButton);
+                
+                // Style conditionnel pour la sélection
+                card.setStyle("-fx-border-color: transparent; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, #6C5CE7, 10, 0.2, 0, 0);");
+                cardController.getBtnSelect().setOnAction(e -> handleRepondre(rec));
+                cardContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -152,12 +203,10 @@ public class ReclamationController implements Initializable {
     @FXML
     private void handleRetourHome(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Home.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/front/Home.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
-            // Ajout explicite du CSS pour Home
-            scene.getStylesheets().add(getClass().getResource("/styles/theme.css").toExternalForm());
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -320,4 +369,228 @@ public class ReclamationController implements Initializable {
     private void handleAnnulerForm() {
         clearForm();
     }
+
+    // Affiche une liste de conversations dans une VBox flottante
+    private VBox conversationListPopup = null;
+
+    private void showConversationListPopup() {
+        // Avant d'afficher la popup, réactive le conteneur
+        miniMessengersContainer.setMouseTransparent(false);
+        miniMessengersContainer.setDisable(false);
+        miniMessengersContainer.setFocusTraversable(true);
+        if (conversationListPopup != null && miniMessengersContainer.getChildren().contains(conversationListPopup)) {
+            miniMessengersContainer.getChildren().remove(conversationListPopup);
+            conversationListPopup = null;
+            return;
+        }
+        if (currentUser == null) return;
+        java.util.List<models.Conversation> conversations = conversationService.getUserConversations(currentUser.getId());
+        conversationListPopup = new VBox(10);
+        conversationListPopup.setStyle("-fx-background-color: white; -fx-padding: 16; -fx-border-radius: 8; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 8, 0, 0, 3);");
+        conversationListPopup.setMaxWidth(260);
+        conversationListPopup.setMinWidth(180);
+        conversationListPopup.setMouseTransparent(false);
+        conversationListPopup.setPickOnBounds(false);
+        conversationListPopup.setDisable(false);
+        conversationListPopup.setFocusTraversable(true);
+        System.out.println("[DEBUG] Nb conversations trouvées : " + conversations.size());
+        
+        // Ajout d'un bouton de debug tout en haut de la popup Messenger
+        Button debugBtn = new Button("DEBUG TEST");
+        debugBtn.setStyle("-fx-background-color: #ffaaaa; -fx-font-size: 16px; -fx-font-weight: bold;");
+        debugBtn.setOnAction(ev -> System.out.println("[DEBUG] BOUTON DEBUG CLICKED"));
+        conversationListPopup.getChildren().add(0, debugBtn);
+        
+        for (models.Conversation conv : conversations) {
+            System.out.println("[DEBUG] Conversation : " + conv.getId() + " - " + conv.getTitle());
+            System.out.println("[DEBUG] Participants for conversation id=" + conv.getId() + " : " + (conv.getParticipants() != null ? conv.getParticipants().size() : "null"));
+            String displayTitle = conv.getTitle();
+            if ((displayTitle == null || displayTitle.trim().isEmpty()) && !conv.isGroup() && conv.getParticipants() != null) {
+                for (models.User participant : conv.getParticipants()) {
+                    if (participant.getId() != currentUser.getId()) {
+                        displayTitle = participant.getName();
+                        break;
+                    }
+                }
+            }
+            if (displayTitle == null || displayTitle.trim().isEmpty()) displayTitle = "Conversation";
+            Button btn = new Button(displayTitle);
+            btn.setMaxWidth(Double.MAX_VALUE);
+            btn.setDisable(false);
+            btn.setFocusTraversable(true);
+            btn.setMouseTransparent(false);
+            btn.setPickOnBounds(false);
+            btn.setStyle("-fx-background-color: #f1f0f0; -fx-background-radius: 6; -fx-font-size: 15px; -fx-text-fill: #222; -fx-padding: 8 12; -fx-alignment: CENTER_LEFT;");
+            btn.setOnAction(e -> {
+                System.out.println("[DEBUG] Clic sur le bouton conversation id=" + conv.getId());
+                e.consume();
+                miniMessengersContainer.getChildren().remove(conversationListPopup);
+                conversationListPopup = null;
+                openMiniMessenger(conv);
+            });
+            conversationListPopup.getChildren().add(btn);
+        }
+        // Si aucune conversation
+        if (conversations.isEmpty()) {
+            Label emptyLabel = new Label("Aucune conversation trouvée");
+            emptyLabel.setStyle("-fx-text-fill: #888; -fx-font-size: 14px;");
+            conversationListPopup.getChildren().add(emptyLabel);
+        }
+        // Correction : forcer la popup et ses parents à être interactifs et au premier plan
+        conversationListPopup.setMouseTransparent(false);
+        conversationListPopup.setPickOnBounds(false);
+        conversationListPopup.setDisable(false);
+        conversationListPopup.setFocusTraversable(true);
+        if (miniMessengersContainer != null) {
+            miniMessengersContainer.setMouseTransparent(false);
+            miniMessengersContainer.setPickOnBounds(false);
+            miniMessengersContainer.setDisable(false);
+            miniMessengersContainer.setFocusTraversable(true);
+        }
+        System.out.println("[DEBUG] miniMessengersContainer children count: " + miniMessengersContainer.getChildren().size());
+        StackPane.setAlignment(conversationListPopup, javafx.geometry.Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(conversationListPopup, new javafx.geometry.Insets(0, 80, 90, 0));
+        if (!miniMessengersContainer.getChildren().contains(conversationListPopup)) {
+            miniMessengersContainer.getChildren().add(conversationListPopup);
+        }
+        conversationListPopup.toFront();
+        System.out.println("[DEBUG] conversationListPopup added. Children now: " + miniMessengersContainer.getChildren().size());
+    }
+
+    private void openMiniMessenger(models.Conversation conversation) {
+        if (conversation == null) return;
+        if (openMessengerNodesMap.containsKey(conversation.getId())) {
+            Node node = openMessengerNodesMap.get(conversation.getId());
+            node.toFront();
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/front/MiniMessengerView.fxml"));
+            VBox miniMessengerPane = loader.load();
+            Controllers.Front.MiniMessengerController messengerController = loader.getController();
+            messengerController.setConversation(conversation, currentUser, () -> closeMiniMessenger(conversation.getId()));
+            miniMessengerPane.setVisible(true);
+            miniMessengerPane.setManaged(true);
+            miniMessengerPane.setMouseTransparent(false);
+            miniMessengerPane.setPickOnBounds(false);
+            int index = miniMessengersContainer.getChildren().size();
+            int horizontalOffset = 90 + (index * 360);
+            int bottomOffset = 90;
+            StackPane.setAlignment(miniMessengerPane, javafx.geometry.Pos.BOTTOM_RIGHT);
+            StackPane.setMargin(miniMessengerPane, new javafx.geometry.Insets(0, horizontalOffset, bottomOffset, 0));
+            miniMessengersContainer.getChildren().add(miniMessengerPane);
+            miniMessengerPane.toFront();
+            openMessengerNodesMap.put(conversation.getId(), miniMessengerPane);
+            System.out.println("[DEBUG] miniMessengersContainer children: " + miniMessengersContainer.getChildren().size());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void closeMiniMessenger(int conversationId) {
+        Node node = openMessengerNodesMap.get(conversationId);
+        if (node != null) {
+            miniMessengersContainer.getChildren().remove(node);
+            openMessengerNodesMap.remove(conversationId);
+        }
+    reponseService = new ReponseService();
+    loadReclamations();
+    reponsesContainer.setVisible(false);
+    
+    // Vérifie si la ListView est bien injectée
+    if (notificationsListView != null) {
+        System.out.println("[DEBUG] notificationsListView injectée avec succès");
+    } else {
+        System.out.println("[DEBUG] ERREUR: notificationsListView n'est pas injectée");
+    }
+    
+    listenForUserNotifications();
+    reponsesContainer.setManaged(false);
+    hideForm();
+    if (floatingMessengerButton != null) {
+        floatingMessengerButton.setOnAction(e -> showConversationListPopup());
+    }
+    miniMessengersContainer.setDisable(false);
+    miniMessengersContainer.setFocusTraversable(true);
+    }
+
+    private void listenForUserNotifications() {
+        if (currentUser == null) {
+            return;
+        }
+        
+        String userId = String.valueOf(currentUser.getId());
+        
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("notifications/" + userId);
+        
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot snapshot, String previousChildName) {
+                String message = snapshot.getValue(String.class);
+                
+                if (message != null) {
+                    Platform.runLater(() -> {
+                        notificationsListView.getItems().add(0, message);
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
+                        alert.setTitle("Nouvelle notification");
+                        alert.setHeaderText(null);
+                        alert.show();
+                    });
+                }
+            }
+            
+            @Override
+            public void onChildChanged(DataSnapshot snapshot, String previousChildName) {}
+            
+            public void onChildRemoved(DataSnapshot s) {}
+            
+            public void onChildMoved(DataSnapshot s, String p) {}
+            
+            public void onCancelled(DatabaseError e) {}
+        });
+    }
+
+    // Handler pour répondre à une réclamation
+    private void handleRepondre(Reclamation rec) {
+        if (rec == null) {
+            showAlert("Erreur", "Aucune réclamation sélectionnée.");
+            return;
+        }
+        // Création d'une boîte de dialogue personnalisée pour saisir la réponse
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Répondre à la réclamation");
+        dialog.setHeaderText("Saisissez votre réponse à la réclamation :");
+
+        ButtonType sendButtonType = new ButtonType("Envoyer", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(sendButtonType, ButtonType.CANCEL);
+
+        TextArea reponseField = new TextArea();
+        reponseField.setPromptText("Votre réponse...");
+        reponseField.setWrapText(true);
+        reponseField.setPrefRowCount(4);
+        dialog.getDialogPane().setContent(reponseField);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == sendButtonType) {
+                return reponseField.getText();
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(contenu -> {
+            if (contenu == null || contenu.trim().isEmpty()) {
+                showAlert("Erreur", "Le contenu de la réponse ne peut pas être vide.");
+                return;
+            }
+            try {
+                Reponse reponse = new Reponse(0, contenu.trim(), java.time.LocalDate.now(), rec);
+                reponseService.ajouter(reponse);
+                showAlert("Succès", "Réponse envoyée avec succès !");
+            } catch (Exception ex) {
+                showAlert("Erreur", "Erreur lors de l'envoi de la réponse : " + ex.getMessage());
+            }
+        });
+    }
 }
+
+

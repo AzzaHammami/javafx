@@ -36,6 +36,11 @@
                     </StackPane>
                 </graphic>
             </Button>
+            <Button fx:id="btnSelect" styleClass="icon-btn" style="-fx-background-color: #e0e7ff; -fx-text-fill: #4958c5; -fx-font-weight: bold;">
+                <graphic>
+                    <Label text="Sélectionner" style="-fx-font-size: 13; -fx-text-fill: #4958c5;"/>
+                </graphic>
+            </Button>
             <Button fx:id="deleteButton" onAction="#handleDelete" styleClass="icon-btn" style="-fx-background-color: transparent;">
                 <graphic>
                     <Label text="🗑" style="-fx-font-size: 16; -fx-text-fill: #d32f2f;"/>

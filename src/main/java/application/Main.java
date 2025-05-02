@@ -4,14 +4,30 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.Stage;
 import utils.MyDataBase;
 import java.sql.Connection;
+import services.FirebaseService;
+import services.FirebaseListener;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Demander dynamiquement l'ID utilisateur au lancement
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Sélection de l'utilisateur");
+        dialog.setHeaderText("Tester les notifications pour un utilisateur spécifique");
+        dialog.setContentText("Entrez l'ID utilisateur :");
+        String userId = dialog.showAndWait().orElse("");
+        if (userId == null || userId.isBlank()) {
+            System.out.println("Aucun ID utilisateur saisi. Arrêt de l'application.");
+            System.exit(0);
+        }
+        // Écouter dynamiquement les notifications pour l'utilisateur choisi
+        FirebaseListener.ecouterNotifications(userId);
+
         // Tester la connexion
         Connection cnx = MyDataBase.getInstance().getConnection();
         if (cnx != null) {
@@ -42,6 +58,12 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        try {
+            // Force le chargement de la classe FirebaseService pour garantir l'initialisation statique
+            Class.forName("services.FirebaseService");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Erreur lors du chargement de FirebaseService: " + e.getMessage());
+        }
         launch(args);
     }
 }

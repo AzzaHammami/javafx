@@ -21,7 +21,7 @@ public class ReclamationService implements IReclamation {
     public void ajouter(Reclamation r) {
         // Correction : ajout du champ user_id dans l'insertion
         String sql = "INSERT INTO reclamation (sujet, description, statut, date_reclamation, user_id) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, r.getSujet());
             ps.setString(2, r.getDescription());
             ps.setString(3, r.getStatut());
@@ -29,6 +29,30 @@ public class ReclamationService implements IReclamation {
             ps.setInt(5, r.getUserId());
             ps.executeUpdate();
             System.out.println("Reclamation ajoutée !");
+
+            // Notifier l'utilisateur (Firebase Realtime DB)
+            try {
+                services.NotificationService.envoyerNotification(
+                    String.valueOf(r.getUserId()),
+                    "Votre réclamation a bien été créée ! Sujet : " + r.getSujet()
+                );
+            } catch (Exception ex) {
+                System.err.println("Erreur lors de l'envoi de la notification Firebase : " + ex.getMessage());
+            }
+
+            // Envoi de la notification FCM à l'utilisateur (créateur de la réclamation)
+            // Récupérer les tokens via UserFcmTokenService
+            services.UserFcmTokenService tokenService = new services.UserFcmTokenService();
+            java.util.List<String> tokens = tokenService.getTokensByUserId(r.getUserId());
+            String title = "Nouvelle réclamation créée";
+            String body = "Votre réclamation a été enregistrée : " + r.getSujet();
+            for (String token : tokens) {
+                try {
+                    services.FCMService.sendNotification(token, title, body);
+                } catch (Exception ex) {
+                    System.err.println("Erreur lors de l'envoi de la notification FCM : " + ex.getMessage());
+                }
+            }
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'ajout de la réclamation : " + e.getMessage());
         }
@@ -71,10 +95,6 @@ public class ReclamationService implements IReclamation {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                // Lors de la récupération des réclamations depuis la base, il faut remplir le champ userId
-                // Exemple pour la méthode getAll() et toute méthode qui crée un objet Reclamation
-                // rs.getInt("user_id")
-                // new Reclamation(id, sujet, description, statut, dateReclamation, userId)
                 Reclamation r = new Reclamation(
                         rs.getInt("id"),
                         rs.getString("sujet"),
@@ -88,6 +108,30 @@ public class ReclamationService implements IReclamation {
 
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'affichage : " + e.getMessage());
+        }
+        return list;
+    }
+
+    // Ajouté pour compatibilité avec ReclamationController
+    public List<Reclamation> getReclamationsByUserId(int userId) {
+        List<Reclamation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reclamation WHERE user_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reclamation r = new Reclamation(
+                        rs.getInt("id"),
+                        rs.getString("sujet"),
+                        rs.getString("description"),
+                        rs.getString("statut"),
+                        rs.getDate("date_reclamation").toLocalDate(),
+                        rs.getInt("user_id")
+                );
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de l'affichage par userId : " + e.getMessage());
         }
         return list;
     }

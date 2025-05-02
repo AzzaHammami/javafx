@@ -24,6 +24,8 @@ public class MyDataBase {
             System.out.println(" Connexion à la base de données réussie !");
         } catch (SQLException e) {
             System.err.println(" Erreur de connexion : " + e.getMessage());
+            e.printStackTrace(); 
+            connection = null;
         }
     }
 
@@ -37,6 +39,16 @@ public class MyDataBase {
 
 
     public Connection getConnection() {
+        if (connection == null) {
+            System.err.println("[CRITICAL] Database connection is null. Attempting to reconnect...");
+            try {
+                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+                System.out.println("[INFO] Reconnection to the database successful!");
+            } catch (SQLException e) {
+                System.err.println("[CRITICAL] Reconnection failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
         return connection;
     }
 }

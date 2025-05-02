@@ -74,9 +74,18 @@ public class ConversationService {
         Conversation conversation = null;
         try {
             conn.setAutoCommit(false);
-            String query = "INSERT INTO conversation (created_at, last_message_at, is_group) VALUES (NOW(), NOW(), ?)";
+            // Correction : Ajout du champ title avec une valeur par défaut
+            String query = "INSERT INTO conversation (title, created_at, last_message_at, is_group) VALUES (?, NOW(), NOW(), ?)";
             try (PreparedStatement pstmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setBoolean(1, participants.size() > 2); // Mark as group if more than 2 participants
+                // Détermine le titre : si groupe, "Groupe", sinon concatène les noms
+                String title;
+                if (participants.size() > 2) {
+                    title = "Groupe";
+                } else {
+                    title = participants.get(0).getName() + " & " + participants.get(1).getName();
+                }
+                pstmt.setString(1, title);
+                pstmt.setBoolean(2, participants.size() > 2); // Mark as group if more than 2 participants
                 pstmt.executeUpdate();
                 ResultSet rs = pstmt.getGeneratedKeys();
                 if (rs.next()) {
@@ -114,6 +123,7 @@ public class ConversationService {
                 while (rs.next()) {
                     Conversation conversation = new Conversation();
                     conversation.setId(rs.getInt("id"));
+                    try { conversation.setTitle(rs.getString("title")); } catch (Exception ex) { conversation.setTitle(null); }
                     conversation.setGroup(rs.getBoolean("is_group"));
                     conversation.setCreatedAt(rs.getTimestamp("created_at"));
                     conversation.setLastMessageAt(rs.getTimestamp("last_message_at"));

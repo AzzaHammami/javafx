@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
-<VBox fx:id="compactListRoot" spacing="0" style="-fx-background-color: white; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" minWidth="260" maxWidth="280" minHeight="340" maxHeight="420">
+<VBox fx:id="compactListRoot" spacing="0" style="-fx-background-color: white; -fx-border-radius: 10; -fx-background-radius: 10; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 4);" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" minWidth="260" maxWidth="280" minHeight="340" maxHeight="420" fx:controller="Controllers.CompactConversationListController">
     <Label text="Discussions" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-background-color: #0084ff; -fx-text-fill: white; -fx-padding: 10 0 10 12; -fx-background-radius: 10 10 0 0;" />
     <ListView fx:id="conversationListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;" />
 </VBox>
