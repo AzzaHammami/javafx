@@ -207,6 +207,34 @@ public class Servicerendez_vous implements IRendez_Vous<RendezVous> {
         return null;
     }
 
+    // Nouvelle méthode : obtenir le prochain rendez-vous pour un patient
+    public RendezVous getProchainRdv(int patientId) {
+        try {
+            String sql = "SELECT * FROM rendez_vous WHERE patient_id = ? AND date > NOW() ORDER BY date ASC LIMIT 1";
+            PreparedStatement pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, patientId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                RendezVous rv = new RendezVous();
+                rv.setId(rs.getInt("id"));
+                rv.setDate(rs.getTimestamp("date").toLocalDateTime());
+                rv.setStatut(rs.getString("statut"));
+                rv.setMotif(rs.getString("motif"));
+                rv.setPatientId(rs.getInt("patient_id"));
+                rv.setMedecinId(rs.getInt("medecin_id"));
+                Timestamp dateCreation = rs.getTimestamp("date_creation");
+                if (dateCreation != null) {
+                    rv.setDateCreation(dateCreation.toLocalDateTime());
+                }
+                return rv;
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de la récupération du prochain rendez-vous: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     // --- STATISTIQUES ---
     // 1. Nombre total de rendez-vous
     public int countAllRendezVous() throws SQLException {

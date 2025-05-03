@@ -51,9 +51,9 @@ public class PatientDashboardView extends BorderPane {
     // Pour accès depuis AppointmentCrudWindow
     public void addAppointmentNotification(String nomMedecin, String date, String heure) {
         notifications.add(0, new Notification(
-            "Nouveau rendez-vous",
-            "Vous avez un rendez-vous avec Dr. " + nomMedecin + " le " + date + " à " + heure,
-            "Maintenant", "NORMAL", "Voir", false
+                "Nouveau rendez-vous",
+                "Vous avez un rendez-vous avec Dr. " + nomMedecin + " le " + date + " à " + heure,
+                "Maintenant", "NORMAL", "Voir", false
         ));
         updateNotifBadge();
     }

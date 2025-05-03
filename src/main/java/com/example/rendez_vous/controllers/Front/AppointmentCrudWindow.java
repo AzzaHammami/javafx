@@ -286,8 +286,12 @@ public class AppointmentCrudWindow {
         ImageView avatar = createDoctorAvatar(); // Reuse avatar creation
         VBox medLabels = new VBox();
         medLabels.setAlignment(Pos.CENTER_LEFT);
-        Label nameLabel = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom inconnu"));
-        nameLabel.setStyle("-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
+        String displayName = medecinNom != null ? medecinNom.trim() : "Nom inconnu";
+        if (displayName.toLowerCase().startsWith("dr ")) {
+            displayName = displayName.substring(3).trim();
+        }
+        Label nameLabel = new Label("Dr " + displayName);
+        nameLabel.setStyle("-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: white;");
         Label specialiteLabel = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité inconnue");
         specialiteLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #757575; -fx-font-weight: bold;");
         medLabels.getChildren().addAll(nameLabel, specialiteLabel);
@@ -465,7 +469,11 @@ public class AppointmentCrudWindow {
             ImageView avatar = createDoctorAvatar(); // Get the styled avatar
             VBox medLabels = new VBox();
             medLabels.setAlignment(Pos.CENTER_LEFT);
-            Label nameLabel = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom inconnu"));
+            String displayName = medecinNom != null ? medecinNom.trim() : "Nom inconnu";
+            if (displayName.toLowerCase().startsWith("dr ")) {
+                displayName = displayName.substring(3).trim();
+            }
+            Label nameLabel = new Label("Dr " + displayName);
             nameLabel.setStyle("-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: white;");
             Label specialiteLabel = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité inconnue");
             specialiteLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #757575; -fx-font-weight: bold;");
@@ -524,11 +532,15 @@ public class AppointmentCrudWindow {
 
     private VBox createDoctorLabels() {
         VBox medLabels = new VBox(4); // Spacing between name and specialty
-        Label nomMed = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom Indisponible"));
-        nomMed.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;");
+        String displayName = medecinNom != null ? medecinNom.trim() : "Nom Indisponible";
+        if (displayName.toLowerCase().startsWith("dr ")) {
+            displayName = displayName.substring(3).trim();
+        }
+        Label nameLabel = new Label("Dr " + displayName);
+        nameLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;");
         Label specMed = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité Indisponible");
         specMed.setStyle("-fx-font-size: 15px; -fx-text-fill: #e1f5fe;"); // Lighter blue/white for specialty
-        medLabels.getChildren().addAll(nomMed, specMed);
+        medLabels.getChildren().addAll(nameLabel, specMed);
         return medLabels;
     }
 

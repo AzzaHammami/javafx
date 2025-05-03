@@ -8,9 +8,9 @@ import java.util.logging.Logger;
 public class SmsService {
     private static final Logger logger = Logger.getLogger(SmsService.class.getName());
     // Clés Twilio réelles (ne pas partager publiquement)
-    private static final String ACCOUNT_SID = "AC852a83dfe035b3d9bb3dde7519ce85cb";
-    private static final String AUTH_TOKEN = "46e3a4b4c483e7d6e452c49efd84c6d6";
-    private static final String FROM_PHONE = "+16203171921"; // Ton numéro Twilio trial
+    private static final String ACCOUNT_SID = "ACac56b056f6c3b2d8add39202cea1ccf5";
+    private static final String AUTH_TOKEN = "01bc75b93277430fd1347d8c59c444e3";
+    private static final String FROM_PHONE = "+18548889601"; // Ton numéro Twilio trial
     private static final String MESSAGING_SERVICE_SID = "MGc36e1515ce8652399594b5a10780d2d2"; // Vérifie que c'est bien ton Messaging Service SID
     private static boolean initialized = false;
 
