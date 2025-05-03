@@ -24,7 +24,7 @@ public class LandingController {
     @FXML
     private void handleAdminSpace(ActionEvent event) throws IOException {
         // Navigate to admin dashboard
-        Parent root = FXMLLoader.load(getClass().getResource("/Views/Back/reclamation.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/views/Back/Dash.fxml"));
         Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
         Scene scene = new Scene(root, 1024, 768);
         stage.setScene(scene);

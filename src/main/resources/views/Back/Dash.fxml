@@ -6,7 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
 
-<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.rendez_vous.controllers.Back.ReclamationController"
+<HBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.rendez_vous.controllers.Back.DashController"
       stylesheets="@../../styles/theme.css" spacing="0">
 
     <!-- Barre latérale -->

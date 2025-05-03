@@ -27,17 +27,14 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.LineChart;
-import java.util.Map;
-import javafx.scene.control.Tooltip;
-import javafx.scene.paint.Color;
+
 import java.time.LocalDate;
 import javafx.geometry.Pos;
-import javafx.scene.layout.StackPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 
-public class ReclamationController {
+public class DashController {
     @FXML
     private TableView<?> tableView;
     
