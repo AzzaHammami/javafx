@@ -117,4 +117,15 @@ public class ServiceUser {
         }
         return null;
     }
+
+    // --- AJOUT TEMPORAIRE POUR EXPORTER LES IDS DES MEDECINS ---
+    public static void printAllMedecinIds() {
+        ServiceUser service = new ServiceUser();
+        List<User> medecins = service.getAllMedecins();
+        System.out.println("IDs des médecins :");
+        for (User m : medecins) {
+            System.out.print(m.getId() + ", ");
+        }
+        System.out.println();
+    }
 }

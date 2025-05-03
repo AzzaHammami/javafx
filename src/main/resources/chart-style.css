@@ -1,0 +1,56 @@
+/* ---- BarChart couleurs harmonisées ---- */
+.default-color0.chart-bar { -fx-bar-fill: #673ab7; }  /* Violet */
+.default-color1.chart-bar { -fx-bar-fill: #ff9800; }  /* Orange */
+.default-color2.chart-bar { -fx-bar-fill: #4caf50; }  /* Vert */
+.default-color3.chart-bar { -fx-bar-fill: #2196f3; }  /* Bleu */
+
+/* Arrondis et ombre sur les barres */
+.chart-bar {
+    -fx-background-radius: 8;
+    -fx-effect: dropshadow(gaussian, #b0bec5, 8, 0.15, 0, 2);
+}
+
+/* ---- PieChart couleurs harmonisées ---- */
+.default-color0.chart-pie { -fx-pie-color: #673ab7; }
+.default-color1.chart-pie { -fx-pie-color: #ff9800; }
+.default-color2.chart-pie { -fx-pie-color: #4caf50; }
+.default-color3.chart-pie { -fx-pie-color: #2196f3; }
+
+/* Arrondis et ombre sur le PieChart */
+.chart-pie {
+    -fx-effect: dropshadow(gaussian, #b0bec5, 8, 0.15, 0, 2);
+}
+
+/* ---- LineChart ---- */
+.chart-series-line {
+    -fx-stroke-width: 3px;
+    -fx-effect: dropshadow(gaussian, #b0bec5, 8, 0.18, 0, 2);
+    -fx-stroke-line-cap: round;
+}
+.chart-line-symbol {
+    -fx-background-radius: 8;
+    -fx-background-color: #ff9800, white;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, #b0bec5, 4, 0.12, 0, 1);
+}
+
+/* ---- Légendes et axes ---- */
+.chart-legend {
+    -fx-background-color: transparent;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.axis-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+.axis {
+    -fx-tick-label-fill: #666;
+    -fx-font-size: 13px;
+}
+.chart-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #673ab7;
+}

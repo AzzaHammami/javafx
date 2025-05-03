@@ -24,6 +24,7 @@
             <Button text="Ajouter Médecin" styleClass="menu-item, menu-item-active" onAction="#showAjouterMedecinForm"/>
             <Button text="Prise de rendez-vous" styleClass="menu-item" onAction="#showRendezVousCrud"/>
             <Button text="Disponibilité Médecin" styleClass="menu-item" onAction="#showDisponibiliteCrud"/>
+            <Button text="RDV_statistique" styleClass="menu-item" fx:id="rdvStatBtn"/>
             <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
                 <Button text="Retour" onAction="#handleRetourHome" styleClass="menu-item, logout-button"/>
             </VBox>

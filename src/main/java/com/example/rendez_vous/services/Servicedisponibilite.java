@@ -155,4 +155,28 @@ public class Servicedisponibilite {
         }
         return null;
     }
+
+    // Statistiques sur les disponibilités : nombre total, par médecin, etc.
+    public int countAllDisponibilites() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM disponibilite";
+        try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    public int countDisponibilitesByMedecin(int medecinId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM disponibilite WHERE medecin_id = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, medecinId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        }
+        return 0;
+    }
 }

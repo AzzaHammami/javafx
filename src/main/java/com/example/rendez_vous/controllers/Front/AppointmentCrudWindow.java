@@ -1,167 +1,424 @@
 package com.example.rendez_vous.controllers.Front;
 
+import com.example.rendez_vous.models.RendezVous;
 import com.example.rendez_vous.services.Servicerendez_vous;
 import com.example.rendez_vous.services.SmsService;
-import com.example.rendez_vous.models.RendezVous;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import com.example.rendez_vous.controllers.Front.PatientDashboardView; // Import PatientDashboardView pour garantir l'accès au dashboard
+import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.TextAlignment;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.fxml.FXMLLoader;
+import javafx.stage.Window;
+
+import java.sql.SQLException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
-import java.io.IOException;
+import java.util.logging.Logger;
 
 public class AppointmentCrudWindow {
     private static final Logger logger = Logger.getLogger(AppointmentCrudWindow.class.getName());
     private final Servicerendez_vous service;
-    private TableView<RendezVous> tableView;
+    // UI Components that need to be accessed across methods
     private TextField motifField;
     private TextField patientIdField;
-    private TextField phoneNumberField;
-    private TextField medecinIdField;
+    private TextField phoneNumberField; // Added for confirmation and SMS
+    private TextField medecinIdField; // To store the selected medecin's ID
     private DatePicker datePicker;
-    private Button selectedHourBtn = new Button();
+    private Button selectedHourBtn = new Button(); // Might not be needed if selectedTime is stored directly
+
+    // Data related to the selected doctor and appointment
     private String medecinNom;
     private String specialiteMedecin;
     private String medecinImageUrl;
-    private String selectedTime = "";
+    private String selectedTime = ""; // Store selected time slot as "HH:mm" string
     private int medecinId;
-    // Ajout du champ SmsService
-    private SmsService smsService = new SmsService();
 
+    // Services
+    private SmsService smsService = new SmsService(); // Initialize SMS service
+
+    // Constructor for when a doctor is pre-selected
     public AppointmentCrudWindow(int medecinId, String medecinNom, String specialiteMedecin, String medecinImageUrl) {
-        logger.log(Level.INFO, "Creating AppointmentCrudWindow with doctor: ID={0}, Name={1}, Specialty={2}",
-                new Object[]{medecinId, medecinNom, specialiteMedecin});
-
-        service = new Servicerendez_vous();
+        this.service = new Servicerendez_vous();
         this.medecinId = medecinId;
         this.medecinNom = medecinNom;
         this.specialiteMedecin = specialiteMedecin;
         this.medecinImageUrl = medecinImageUrl;
-        this.selectedHourBtn = new Button();
+
+        // Initialize UI fields (even if they are created later in methods)
         this.motifField = new TextField();
         this.patientIdField = new TextField();
         this.phoneNumberField = new TextField();
-        this.medecinIdField = new TextField(String.valueOf(medecinId));
+        this.medecinIdField = new TextField(String.valueOf(medecinId)); // Pre-fill medecin ID field
+        this.datePicker = new DatePicker(LocalDate.now()); // Initialize date picker
 
-        logger.log(Level.FINE, "Initialized fields - MedecinIDField: {0}", medecinIdField.getText());
     }
 
+    // Constructor for when no doctor is initially selected (e.g., starting from scratch)
     public AppointmentCrudWindow() {
-        logger.info("Creating empty AppointmentCrudWindow");
-        service = new Servicerendez_vous();
-        this.selectedHourBtn = new Button();
+        this.service = new Servicerendez_vous();
+
+        // Initialize UI fields
         this.motifField = new TextField();
         this.patientIdField = new TextField();
         this.phoneNumberField = new TextField();
-        this.medecinIdField = new TextField();
+        this.medecinIdField = new TextField(); // Empty medecin ID field
+        this.datePicker = new DatePicker(LocalDate.now()); // Initialize date picker
+
+        // Doctor details will be set later via setMedecin or selection process
+        this.medecinId = 0; // Or some indicator for no doctor selected
+        this.medecinNom = null;
+        this.specialiteMedecin = null;
+        this.medecinImageUrl = null;
     }
 
-    public void setMedecin(String nom, String specialite, String imageUrl) {
-        logger.log(Level.INFO, "Setting doctor: Name={0}, Specialty={1}", new Object[]{nom, specialite});
+    // Method to explicitly set doctor details if using the default constructor
+    public void setMedecin(int id, String nom, String specialite, String imageUrl) {
+        this.medecinId = id;
         this.medecinNom = nom;
         this.specialiteMedecin = specialite;
         this.medecinImageUrl = imageUrl;
+        if(this.medecinIdField != null) {
+            this.medecinIdField.setText(String.valueOf(id));
+        } else {
+            this.medecinIdField = new TextField(String.valueOf(id)); // Ensure it's initialized
+        }
     }
 
-    public VBox getContentWithDateSelector() {
-        logger.info("Building date selector view");
-        VBox root = new VBox();
-        root.setStyle("-fx-background-color: white;");
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(0, 0, 0, 0));
+    // --- Step 1: Date/Time Selection View ---
 
-        VBox scrollContent = new VBox(18);
+    public VBox getContentWithDateSelector() {
+        VBox root = new VBox(18);
+        root.setPadding(new Insets(0));
+        root.setStyle("-fx-background-color: #f8fafd;");
+        // --- Contenu principal pleine largeur ---
+        VBox mainContent = new VBox(15);
+        mainContent.setAlignment(Pos.TOP_CENTER);
+        mainContent.setPadding(new Insets(40, 0, 0, 0));
+        mainContent.setMinHeight(900); // Force un contenu plus haut pour activer le scroll si besoin
+        // Progress Bar - Step 1 (Date/Heure is step 1 in this flow if doctor is pre-selected)
+        HBox progressBar = createProgressBar(1); // Index 1 for Date/Heure
+
+        // Doctor Card (Reused)
+        VBox medCard = createDoctorCard(); // Shows selected doctor or prompt to choose
+
+        // Calendar Section (Reused)
+        VBox calendarSection = createCalendarSection(); // Contains DatePicker and Time Slots
+
+        mainContent.getChildren().addAll(progressBar, medCard, calendarSection);
+
+        // Action Buttons (Reused)
+        HBox actions = createActionButtonsForDateStep(root); // Pass root to allow navigation
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(30, 0, 30, 0));
+
+        mainContent.getChildren().add(actions);
+
+        ScrollPane scrollPane = new ScrollPane(mainContent);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background: white; -fx-border-color: transparent;");
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        VBox.setVgrow(mainContent, Priority.NEVER); // Pour laisser le scroll gérer la hauteur
+        root.getChildren().add(scrollPane);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        return root;
+    }
+
+    // --- Step 2: Motif Selection View ---
+
+    public VBox getContentWithMotifSelector() {
+        VBox root = new VBox();
+        root.setStyle("-fx-background-color: #f8fafd;");
+        root.setAlignment(Pos.TOP_CENTER);
+        root.setPadding(new Insets(40, 0, 0, 0));
+
+        // Ajout de la barre de progression étape 2 (Motif)
+        HBox progressBar = createProgressBar(2);
+        root.getChildren().add(progressBar);
+
+        // Carte centrale
+        VBox card = new VBox(28);
+        card.setAlignment(Pos.TOP_CENTER);
+        card.setPadding(new Insets(32, 38, 38, 38));
+        card.setStyle("-fx-background-color: white; -fx-background-radius: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);");
+        card.setMaxWidth(600);
+
+        // Partie infos patient (inchangée)
+        VBox patientBox = new VBox(15);
+        patientBox.setAlignment(Pos.CENTER_LEFT);
+        patientBox.setMaxWidth(450);
+        Label patientIdLabel = new Label("Votre ID Patient:");
+        patientIdLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        patientIdField.setPromptText("Entrez votre numéro d'identification");
+        patientIdField.setStyle("-fx-font-size: 15px; -fx-pref-height: 40px;");
+        Label phoneLabel = new Label("Votre Numéro de Téléphone:");
+        phoneLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        phoneNumberField.setPromptText("Veuillez saisir votre numéro (ex: +216XXXXXXXX)");
+        phoneNumberField.setStyle("-fx-font-size: 15px; -fx-pref-height: 40px;");
+        patientBox.getChildren().addAll(patientIdLabel, patientIdField, phoneLabel, phoneNumberField);
+
+        Label title = new Label("Veuillez saisir le motif du rendez-vous :");
+        title.setStyle("-fx-font-size: 21px; -fx-font-weight: bold; -fx-text-fill: #1a237e; -fx-alignment: center;");
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.setAlignment(Pos.CENTER);
+
+        // Motifs en 2 colonnes
+        GridPane grid = new GridPane();
+        grid.setHgap(32);
+        grid.setVgap(16);
+        grid.setAlignment(Pos.CENTER);
+
+        CheckBox cb1 = new CheckBox("Contrôle");
+        CheckBox cb2 = new CheckBox("Vaccination");
+        CheckBox cb3 = new CheckBox("Renouvellement d'ordonnance");
+        CheckBox cb4 = new CheckBox("Urgence");
+        CheckBox cb5 = new CheckBox("Consultation spécialiste");
+        CheckBox cb6 = new CheckBox("Examen médical");
+        CheckBox cb7 = new CheckBox("Suivi de traitement");
+        grid.add(cb1, 0, 0); grid.add(cb5, 1, 0);
+        grid.add(cb2, 0, 1); grid.add(cb6, 1, 1);
+        grid.add(cb3, 0, 2); grid.add(cb7, 1, 2);
+        grid.add(cb4, 0, 3);
+
+        CheckBox cbAutre = new CheckBox("Autre :");
+        grid.add(cbAutre, 1, 3);
+
+        TextArea autreDetails = new TextArea();
+        autreDetails.setPromptText("Veuillez préciser votre besoin...");
+        autreDetails.setDisable(true);
+        autreDetails.setPrefRowCount(2);
+        autreDetails.setMaxWidth(Double.MAX_VALUE);
+        autreDetails.setStyle("-fx-font-size: 15px; -fx-background-radius: 8; -fx-border-radius: 8;");
+        cbAutre.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            autreDetails.setDisable(!newVal);
+            if (newVal) autreDetails.requestFocus();
+            else autreDetails.clear();
+        });
+
+        // Bouton Suivant (centré en bas de la carte)
+        HBox actions = new HBox();
+        actions.setAlignment(Pos.CENTER);
+        actions.setPadding(new Insets(18, 0, 0, 0));
+        Button suivantBtn = new Button("Suivant");
+        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;");
+        suivantBtn.setOnAction(e -> handleGoToConfirmation(root));
+        actions.getChildren().add(suivantBtn);
+
+        card.getChildren().addAll(patientBox, title, grid, autreDetails, actions);
+        root.getChildren().add(card);
+        return root;
+    }
+
+
+    // --- Step 3: Confirmation View ---
+
+    public VBox getContentWithConfirmationSelector() {
+
+        // Basic validation before building the view
+        if (datePicker == null || datePicker.getValue() == null) {
+            showError("Erreur Interne", "La date n'a pas été sélectionnée.");
+            return getContentWithDateSelector(); // Go back to date selection
+        }
+        if (selectedTime.isEmpty()) {
+            showError("Erreur Interne", "L'heure n'a pas été sélectionnée.");
+            return getContentWithDateSelector(); // Go back to date selection
+        }
+        if (motifField == null || motifField.getText().trim().isEmpty()) {
+            showError("Champ requis", "Veuillez sélectionner ou saisir un motif de consultation.");
+            return getContentWithMotifSelector(); // Retour à l'étape motif
+        }
+        if (patientIdField == null || patientIdField.getText().trim().isEmpty()) {
+            showError("Erreur Interne", "L'ID Patient n'a pas été saisi.");
+            return getContentWithMotifSelector(); // Go back to motif selection
+        }
+        if (phoneNumberField == null || phoneNumberField.getText().trim().isEmpty()) {
+            showError("Erreur Interne", "Le numéro de téléphone n'a pas été saisi.");
+            return getContentWithMotifSelector(); // Go back to motif selection
+        }
+
+
+        VBox root = new VBox();
+        root.setStyle("-fx-background-color: white;"); // Consistent background
+        root.setAlignment(Pos.TOP_CENTER);
+        root.setPadding(new Insets(0)); // No padding for root if scrollpane is used
+
+        VBox scrollContent = new VBox(20); // Spacing between elements
         scrollContent.setAlignment(Pos.TOP_CENTER);
-        scrollContent.setPadding(new Insets(0, 0, 0, 0));
+        scrollContent.setPadding(new Insets(0, 30, 30, 30)); // Padding for content inside scrollpane
         scrollContent.setStyle("-fx-background-color: transparent;");
 
-        HBox progressBar = createProgressBar(1);
-        VBox medCard = createDoctorCard();
-        VBox calendarSection = createCalendarSection();
+        // Progress Bar - Step 3 (Confirmation)
+        HBox progressBar = createProgressBar(3); // Index 3 for Confirmation step
 
-        scrollContent.getChildren().addAll(progressBar, medCard, calendarSection);
+        // Title
+        Label confirmationTitle = new Label("Confirmation du rendez-vous");
+        confirmationTitle.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
+        VBox.setMargin(confirmationTitle, new Insets(5, 0, 10, 0)); // Top margin adjusted
+
+        // Summary Card
+        VBox card = new VBox(15); // Spacing inside the card
+        card.setMaxWidth(600);
+        card.setStyle("-fx-background-color: #f8fafd; -fx-padding: 25px; -fx-border-radius: 12px; -fx-background-radius: 12px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);");
+
+        // --- Doctor Info Section ---
+        HBox medInfo = new HBox(20);
+        medInfo.setAlignment(Pos.CENTER_LEFT);
+        ImageView avatar = createDoctorAvatar(); // Reuse avatar creation
+        VBox medLabels = new VBox();
+        medLabels.setAlignment(Pos.CENTER_LEFT);
+        Label nameLabel = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom inconnu"));
+        nameLabel.setStyle("-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
+        Label specialiteLabel = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité inconnue");
+        specialiteLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #757575; -fx-font-weight: bold;");
+        medLabels.getChildren().addAll(nameLabel, specialiteLabel);
+        medInfo.getChildren().addAll(avatar, medLabels);
+        card.getChildren().add(medInfo);
+
+        // --- Appointment Details Section ---
+        Separator separator = new Separator();
+        separator.setPadding(new Insets(5, 0, 5, 0));
+        VBox detailsBox = new VBox(12); // Spacing for details
+        detailsBox.setAlignment(Pos.CENTER_LEFT);
+        LocalDate date = datePicker.getValue();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH);
+        String formattedDate = date.format(dateFormatter);
+        String formattedTime = selectedTime; // Assuming selectedTime is "HH:mm"
+        detailsBox.getChildren().addAll(
+                createDetailRow("Date:", formattedDate),
+                createDetailRow("Heure:", formattedTime),
+                createDetailRow("Motif:", motifField.getText()),
+                createDetailRow("ID Patient:", patientIdField.getText()),
+                createDetailRow("Téléphone:", phoneNumberField.getText())
+        );
+        card.getChildren().addAll(separator, detailsBox);
+
+        // Action Buttons
+        HBox actions = new HBox(20);
+        actions.setAlignment(Pos.CENTER); // Center buttons
+        actions.setPadding(new Insets(25, 0, 10, 0)); // Padding around buttons
+
+        Button retourBtn = new Button("Retour");
+        retourBtn.setStyle("-fx-background-color: #BDBDBD; -fx-text-fill: #424242; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 30;");
+        retourBtn.setOnAction(e -> {
+            // Go back to the motif selector view
+            VBox parentContainer = findParentContainer(root); // Helper to find the main content area
+            if (parentContainer != null) {
+                parentContainer.getChildren().clear();
+                parentContainer.getChildren().add(getContentWithMotifSelector());
+            } else { // Fallback
+                root.getChildren().clear();
+                root.getChildren().add(getContentWithMotifSelector());
+            }
+        });
+
+
+        Button confirmerBtn = new Button("Confirmer le RDV");
+        confirmerBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 30; -fx-effect: dropshadow(gaussian, rgba(46,204,113,0.3), 5, 0, 0, 1);");
+        confirmerBtn.setOnAction(e -> {
+            handleConfirmAppointment(e); // Pass the event to close the stage later
+        });
+
+
+        actions.getChildren().addAll(retourBtn, confirmerBtn);
+
+        // Assemble the view
+        scrollContent.getChildren().addAll(progressBar, confirmationTitle, card, actions);
+
+        // Use ScrollPane for potentially long content
         ScrollPane scrollPane = new ScrollPane(scrollContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setStyle("-fx-background: white; -fx-border-color: transparent;");
-        root.getChildren().add(scrollPane);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS); // Allow scrollpane to grow
 
-        HBox actions = createActionButtons(root);
-        root.getChildren().add(actions);
+        root.getChildren().add(scrollPane);
+        root.setId("confirmationArea"); // Optional ID
 
         return root;
     }
 
-    private HBox createProgressBar(int currentStep) {
-        logger.log(Level.FINE, "Creating progress bar at step {0}", currentStep);
+
+    // --- Helper Methods for UI Construction ---
+
+    private HBox createProgressBar(int currentStepIndex) {
+        // Adjusted steps based on flow where doctor is selected first
         String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
         HBox progressBar = new HBox();
         progressBar.setAlignment(Pos.CENTER);
-        progressBar.setSpacing(0);
-        progressBar.setPadding(new Insets(22, 0, 0, 0));
+        progressBar.setSpacing(0); // No space between elements for continuous look
+        progressBar.setPadding(new Insets(22, 0, 20, 0)); // Padding top/bottom
 
         for (int i = 0; i < steps.length; i++) {
-            VBox stepBox = new VBox(6);
+            VBox stepBox = new VBox(6); // Spacing between circle and label
             stepBox.setAlignment(Pos.CENTER);
             StackPane circlePane = new StackPane();
-            Circle circle = new Circle(18);
+            Circle circle = new Circle(16); // Slightly smaller circle
 
-            Label iconLabel;
-            if (i < currentStep) {
-                circle.setFill(Color.web("#FFD600"));
-                iconLabel = new Label("✓");
-                iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
-            } else if (i == currentStep) {
-                circle.setFill(Color.web("#FFD600"));
-                iconLabel = new Label("●");
-                iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;");
-            } else {
-                circle.setFill(Color.web("#e0e0e0"));
-                iconLabel = new Label(String.valueOf(i + 1));
-                iconLabel.setStyle("-fx-text-fill: #bdbdbd; -fx-font-size: 18px; -fx-font-weight: bold;");
+            Label iconLabel = new Label();
+            iconLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+            if (i < currentStepIndex) { // Completed step
+                circle.setFill(Color.web("#FFD600")); // Gold color for completed
+                iconLabel.setText("✓");
+                iconLabel.setTextFill(Color.WHITE);
+            } else if (i == currentStepIndex) { // Current step
+                circle.setFill(Color.web("#0288d1")); // Blue color for current
+                // iconLabel.setText(String.valueOf(i + 1)); // Number for current step
+                // iconLabel.setTextFill(Color.WHITE);
+                // Using a filled circle symbol for current step might look cleaner
+                iconLabel.setText("●"); // Or use a specific icon
+                iconLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;");
+
+
+            } else { // Future step
+                circle.setFill(Color.web("#e0e0e0")); // Gray for future
+                iconLabel.setText(String.valueOf(i + 1)); // Number for future step
+                iconLabel.setTextFill(Color.web("#bdbdbd")); // Gray text
             }
             circlePane.getChildren().addAll(circle, iconLabel);
 
             Label label = new Label(steps[i]);
-            label.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-            if (i <= currentStep) {
-                label.setTextFill(Color.web("#FFD600"));
+            label.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;"); // Slightly smaller label
+            if (i <= currentStepIndex) {
+                label.setTextFill(Color.web("#333")); // Darker text for active/completed
             } else {
-                label.setTextFill(Color.web("#bdbdbd"));
+                label.setTextFill(Color.web("#bdbdbd")); // Gray text for future
             }
 
             stepBox.getChildren().addAll(circlePane, label);
             progressBar.getChildren().add(stepBox);
 
-            // Ligne de progression sauf après la dernière étape
+            // Line connecting steps
             if (i < steps.length - 1) {
-                VBox lineBox = new VBox();
+                VBox lineBox = new VBox(); // Use VBox to center the line vertically if needed
                 lineBox.setAlignment(Pos.CENTER);
-                Rectangle line = new Rectangle(60, 4);
-                line.setArcWidth(4);
-                line.setArcHeight(4);
-                if (i < currentStep) {
-                    line.setFill(Color.web("#FFD600"));
+                lineBox.setPadding(new Insets(0, 5, 20, 5)); // Add horizontal padding, adjust bottom to align with circles
+                Rectangle line = new Rectangle(60, 3); // Thinner line
+                line.setArcWidth(3);
+                line.setArcHeight(3);
+                if (i < currentStepIndex) {
+                    line.setFill(Color.web("#FFD600")); // Gold line for completed segments
                 } else {
-                    line.setFill(Color.web("#e0e0e0"));
+                    line.setFill(Color.web("#e0e0e0")); // Gray line for future segments
                 }
                 lineBox.getChildren().add(line);
                 progressBar.getChildren().add(lineBox);
@@ -170,39 +427,49 @@ public class AppointmentCrudWindow {
         return progressBar;
     }
 
+
     private VBox createDoctorCard() {
-        logger.info("Creating doctor card component");
         VBox medCard = new VBox();
-        medCard.setAlignment(Pos.TOP_LEFT);
-        medCard.setStyle("-fx-background-color: #0288d1; -fx-background-radius: 10; -fx-padding: 18 24 10 24; -fx-min-width: 600; -fx-max-width: 700;");
+        medCard.setAlignment(Pos.TOP_LEFT); // Default alignment
+        medCard.setStyle("-fx-background-color: #0288d1; -fx-background-radius: 10; -fx-padding: 18 24 18 24; -fx-min-width: 600; -fx-max-width: 700; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);");
+        VBox.setMargin(medCard, new Insets(0, 0, 20, 0)); // Add bottom margin
 
         if (medecinNom == null || medecinNom.trim().isEmpty()) {
-            logger.fine("No doctor selected - showing empty card");
+            // Card prompting user to select a doctor
             VBox noMedecinBox = new VBox(12);
             noMedecinBox.setAlignment(Pos.CENTER);
             Label aucunLabel = new Label("Aucun médecin choisi");
-            aucunLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;");
+            aucunLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: white;");
             Button choisirBtn = new Button("Choisir un médecin");
-            choisirBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #0288d1; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 6; -fx-padding: 10 25;");
+            choisirBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #01579b; -fx-font-size: 15px; -fx-font-weight: bold; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10 20; -fx-cursor: hand;");
             choisirBtn.setOnAction(e -> {
                 try {
-                    logger.info("User clicked to choose a doctor");
-                    PatientDashboardView dashboard = new PatientDashboardView();
-                    BorderPane borderPane = (BorderPane) choisirBtn.getScene().getRoot();
-                    borderPane.setCenter(dashboard.createMainContent());
+                    Node sourceNode = (Node) e.getSource();
+                    Scene scene = sourceNode.getScene();
+                    if (scene != null && scene.getRoot() instanceof BorderPane) {
+                        BorderPane borderPane = (BorderPane) scene.getRoot();
+                        showError("Fonctionnalité Incomplète", "La navigation vers la sélection du médecin doit être implémentée.");
+                    } else {
+                        showError("Erreur de Navigation", "Impossible de naviguer vers la sélection du médecin.");
+                    }
                 } catch (Exception ex) {
-                    logger.log(Level.SEVERE, "Error navigating to doctor selection", ex);
-                    ex.printStackTrace();
+                    showError("Erreur", "Une erreur s'est produite lors de la tentative de navigation.");
                 }
             });
             noMedecinBox.getChildren().addAll(aucunLabel, choisirBtn);
             medCard.getChildren().add(noMedecinBox);
+            medCard.setAlignment(Pos.CENTER); // Center content when no doctor is selected
         } else {
-            logger.log(Level.FINE, "Showing card for doctor: {0}", medecinNom);
-            HBox medInfo = new HBox(16);
+            HBox medInfo = new HBox(16); // Spacing between avatar and text
             medInfo.setAlignment(Pos.CENTER_LEFT);
-            ImageView avatar = createDoctorAvatar();
-            VBox medLabels = createDoctorLabels();
+            ImageView avatar = createDoctorAvatar(); // Get the styled avatar
+            VBox medLabels = new VBox();
+            medLabels.setAlignment(Pos.CENTER_LEFT);
+            Label nameLabel = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom inconnu"));
+            nameLabel.setStyle("-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: white;");
+            Label specialiteLabel = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité inconnue");
+            specialiteLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #757575; -fx-font-weight: bold;");
+            medLabels.getChildren().addAll(nameLabel, specialiteLabel);
             medInfo.getChildren().addAll(avatar, medLabels);
             medCard.getChildren().add(medInfo);
         }
@@ -210,804 +477,671 @@ public class AppointmentCrudWindow {
     }
 
     private ImageView createDoctorAvatar() {
-        logger.log(Level.FINE, "Creating avatar with image: {0}", medecinImageUrl);
-        ImageView avatar;
-        if (medecinImageUrl != null && !medecinImageUrl.isEmpty()) {
-            avatar = new ImageView(new Image(medecinImageUrl, 80, 80, true, true));
-        } else {
-            logger.fine("Using default avatar");
-            avatar = new ImageView();
-            avatar.setFitWidth(80);
-            avatar.setFitHeight(80);
-            avatar.setStyle("-fx-background-color: white; -fx-border-radius: 12; -fx-background-radius: 12;");
+        ImageView avatar = new ImageView();
+        avatar.setFitWidth(70); // Slightly smaller avatar
+        avatar.setFitHeight(70);
+        avatar.setPreserveRatio(false); // Ensure it fills the 70x70 space
+
+        // Try loading the image, use placeholder on error or if null/empty
+        try {
+            if (medecinImageUrl != null && !medecinImageUrl.isEmpty() && !medecinImageUrl.equalsIgnoreCase("null")) {
+                Image img = new Image(medecinImageUrl, true); // Load in background
+                if (img.isError()) {
+                    setPlaceholderAvatarStyle(avatar);
+                } else {
+                    avatar.setImage(img);
+                }
+            } else {
+                setPlaceholderAvatarStyle(avatar);
+            }
+        } catch (Exception e) {
+            setPlaceholderAvatarStyle(avatar);
         }
-        Rectangle avatarClip = new Rectangle(80, 80);
-        avatarClip.setArcWidth(12);
-        avatarClip.setArcHeight(12);
+
+
+        // Apply rounded clipping mask
+        Rectangle avatarClip = new Rectangle(avatar.getFitWidth(), avatar.getFitHeight());
+        avatarClip.setArcWidth(15); // Adjust corner radius
+        avatarClip.setArcHeight(15);
         avatar.setClip(avatarClip);
-        return avatar;
+
+        // Add a subtle border effect using StackPane (optional)
+        // StackPane avatarPane = new StackPane(avatar);
+        // avatarPane.setStyle("-fx-border-color: rgba(255, 255, 255, 0.5); -fx-border-width: 1; -fx-border-radius: 15; -fx-background-radius: 15;");
+        // return avatarPane; // If using StackPane, return it instead
+
+        return avatar; // Return ImageView directly if no border pane needed
     }
 
+    // Helper to set style for placeholder avatar
+    private void setPlaceholderAvatarStyle(ImageView avatar) {
+        // Simple gray background as placeholder
+        avatar.setImage(null); // Ensure no previous image is shown
+        avatar.setStyle("-fx-background-color: #B0BEC5; -fx-background-radius: 15;");
+        // You could add an icon here too if desired
+    }
+
+
     private VBox createDoctorLabels() {
-        logger.fine("Creating doctor labels");
-        VBox medLabels = new VBox(2);
-        Label nomMed = new Label(medecinNom != null ? medecinNom : "Nom Médecin");
-        nomMed.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
-        Label specMed = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité");
-        specMed.setStyle("-fx-font-size: 16px; -fx-text-fill: #e3f2fd;");
+        VBox medLabels = new VBox(4); // Spacing between name and specialty
+        Label nomMed = new Label("Dr " + (medecinNom != null ? medecinNom : "Nom Indisponible"));
+        nomMed.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;");
+        Label specMed = new Label(specialiteMedecin != null ? specialiteMedecin : "Spécialité Indisponible");
+        specMed.setStyle("-fx-font-size: 15px; -fx-text-fill: #e1f5fe;"); // Lighter blue/white for specialty
         medLabels.getChildren().addAll(nomMed, specMed);
         return medLabels;
     }
 
     private VBox createCalendarSection() {
-        logger.info("Creating calendar section");
-        VBox calendarSection = new VBox(18);
-        calendarSection.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 32 32 32 32; -fx-min-width: 600; -fx-max-width: 700; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);");
+        VBox calendarSection = new VBox(18); // Spacing between elements
+        // Styling: White background, subtle shadow, padding
+        calendarSection.setStyle("-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 25px 30px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);");
 
-        Label sectionTitle = new Label("Sélectionnez une date");
-        sectionTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #222; -fx-padding: 0 0 18 0; -fx-alignment: center;");
+        Label sectionTitle = new Label("Sélectionnez une date et une heure");
+        sectionTitle.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1a237e; -fx-alignment: center;");
+        sectionTitle.setMaxWidth(Double.MAX_VALUE); // Make title span width
+        sectionTitle.setAlignment(Pos.CENTER);
         calendarSection.getChildren().add(sectionTitle);
 
+        // Date Picker Row
         HBox dateRow = new HBox();
         dateRow.setAlignment(Pos.CENTER);
-        dateRow.setPadding(new Insets(0,0,18,0));
-        datePicker = new DatePicker(LocalDate.now());
+        // datePicker is initialized in constructor
+        datePicker.setPromptText("Choisir une date");
+        datePicker.setPrefWidth(250); // Fixed width for datepicker
+        datePicker.setStyle("-fx-font-size: 16px;"); // Style datepicker text
 
+        // --- Date Cell Factory for disabling past/full dates ---
         datePicker.setDayCellFactory(picker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
+                setDisable(false); // Reset disable state
+                setStyle(""); // Reset style
+                setTooltip(null); // Reset tooltip
 
-                // Disable past dates
-                setDisable(date.isBefore(LocalDate.now()));
-
-                // Check if date is fully booked (all 12 time slots taken)
-                List<LocalTime> takenTimes = service.getTakenTimesForDate(date, medecinId);
-                if (takenTimes.size() >= 12) { // 12 is the total number of time slots
+                if (date.isBefore(LocalDate.now())) {
                     setDisable(true);
-                    setStyle("-fx-background-color: #ffcccc;"); // Light red for fully booked dates
-                    setTooltip(new Tooltip("Cette date est complètement réservée"));
+                    setStyle("-fx-background-color: #EEEEEE;"); // Style for past dates
+                    return; // Don't check availability for past dates
+                }
+
+                // Check availability only if a doctor is selected
+                if (medecinId > 0) {
+                    try {
+                        List<LocalTime> takenTimes = service.getTakenTimesForDate(date, medecinId);
+                        // Assuming 12 slots per day based on the horaires array
+                        if (takenTimes.size() >= 12) {
+                            setDisable(true);
+                            setStyle("-fx-background-color: #FFCDD2; -fx-opacity: 0.7;"); // Light red for full dates
+                            setTooltip(new Tooltip("Cette date est complète"));
+                        }
+                        // Optional: Style for partially booked dates?
+                        // else if (!takenTimes.isEmpty()) {
+                        //     setStyle("-fx-background-color: #FFF9C4;"); // Light yellow
+                        // }
+
+                    } catch (Exception e) {
+                        // Optionally disable date if availability check fails? Or just log?
+                        // setDisable(true);
+                        // setStyle("-fx-background-color: #FFEBEE;"); // Indicate error?
+                    }
+                } else {
+                    // If no doctor selected, maybe disable date selection?
+                    // setDisable(true);
+                    // setTooltip(new Tooltip("Veuillez d'abord sélectionner un médecin"));
                 }
             }
         });
 
-        datePicker.setStyle("-fx-font-size: 18px; -fx-pref-width: 220; -fx-background-radius: 8; -fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 8; -fx-padding: 8 18;");
         dateRow.getChildren().add(datePicker);
         calendarSection.getChildren().add(dateRow);
 
-        Label horairesTitle = new Label("Choisissez un horaire");
-        horairesTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: 600; -fx-text-fill: #222; -fx-padding: 0 0 15 0; -fx-alignment: center;");
+        // Time Slots Section
+        Label horairesTitle = new Label("Choisissez un horaire disponible");
+        horairesTitle.setStyle("-fx-font-size: 17px; -fx-font-weight: 600; -fx-text-fill: #333; -fx-alignment: center;");
+        horairesTitle.setMaxWidth(Double.MAX_VALUE);
+        horairesTitle.setAlignment(Pos.CENTER);
         calendarSection.getChildren().add(horairesTitle);
 
-        // Create a container for the slots grid
+        // Container for the time slots grid (to allow dynamic updates)
         VBox slotsContainer = new VBox();
-        slotsContainer.getChildren().add(createTimeSlotsGrid());
+        slotsContainer.setAlignment(Pos.CENTER);
+        slotsContainer.setId("slotsContainer"); // ID for potential lookup
+        slotsContainer.getChildren().add(createTimeSlotsGrid()); // Initial grid
         calendarSection.getChildren().add(slotsContainer);
 
+        // Listener to update time slots when date changes
         datePicker.valueProperty().addListener((obs, oldDate, newDate) -> {
-            logger.log(Level.INFO, "Date changed from {0} to {1}", new Object[]{oldDate, newDate});
-            selectedTime = "";
-            // Instead of trying to replace the grid in the children list,
-            // just clear and rebuild the container
-            slotsContainer.getChildren().clear();
-            slotsContainer.getChildren().add(createTimeSlotsGrid());
+            if (newDate != null) {
+                selectedTime = ""; // Reset selected time when date changes
+                // Update the grid within the container
+                slotsContainer.getChildren().clear();
+                slotsContainer.getChildren().add(createTimeSlotsGrid());
+            }
         });
 
         return calendarSection;
     }
 
-    private GridPane createTimeSlotsGrid() {
-        logger.info("Creating time slots grid");
-        GridPane slotsGrid = new GridPane();
-        slotsGrid.setHgap(14);
-        slotsGrid.setVgap(14);
 
-        int medecinId = 0;
-        try {
-            if (medecinIdField != null && medecinIdField.getText() != null && !medecinIdField.getText().isEmpty()) {
-                medecinId = Integer.parseInt(medecinIdField.getText());
-            }
-        } catch (Exception ex) {
-            medecinId = 0;
-            logger.log(Level.WARNING, "Error parsing doctor ID", ex);
+    private GridPane createTimeSlotsGrid() {
+        GridPane slotsGrid = new GridPane();
+        slotsGrid.setHgap(12); // Horizontal gap
+        slotsGrid.setVgap(12); // Vertical gap
+        slotsGrid.setAlignment(Pos.CENTER);
+        slotsGrid.setPadding(new Insets(10, 0, 0, 0)); // Padding above the grid
+
+        // Check if a date is selected and a doctor ID is available
+        LocalDate selectedDate = datePicker.getValue();
+        if (selectedDate == null) {
+            slotsGrid.add(new Label("Veuillez sélectionner une date."), 0, 0);
+            return slotsGrid;
+        }
+        if (this.medecinId <= 0) {
+            slotsGrid.add(new Label("Veuillez sélectionner un médecin."), 0, 0);
+            return slotsGrid;
         }
 
-        LocalDate selectedDate = datePicker.getValue();
-        logger.log(Level.INFO, "Getting taken times for date: {0}, doctor ID: {1}",
-                new Object[]{selectedDate, medecinId});
+        List<LocalTime> takenTimes = service.getTakenTimesForDate(selectedDate, this.medecinId);
 
-        List<LocalTime> takenTimes = service.getTakenTimesForDate(selectedDate, medecinId);
-        logger.log(Level.FINE, "Found {0} taken times", takenTimes.size());
-
-        String[] horaires = {"09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "14:00", "14:30", "15:00", "15:30"};
+        // Define available time slots
+        String[] horaires = {"09:00", "09:30", "10:00", "10:30",
+                "11:00", "11:30", "12:00", "12:30",
+                "14:00", "14:30", "15:00", "15:30"};
+        int slotsPerRow = 4;
 
         for (int i = 0; i < horaires.length; i++) {
-            Button slot = new Button(horaires[i]);
-            slot.setPrefWidth(120);
-            slot.setPrefHeight(44);
+            String timeStr = horaires[i];
+            Button slotButton = new Button(timeStr);
+            slotButton.setPrefWidth(100); // Adjust button width
+            slotButton.setPrefHeight(40); // Adjust button height
+            slotButton.setUserData(timeStr); // Store the time string in the button
 
-            // Default style for available slots
-            slot.setStyle("-fx-font-size: 17px; -fx-font-weight: 500; -fx-background-radius: 8; " +
-                    "-fx-background-color: #f8f9fa; -fx-text-fill: #0288d1; " +
-                    "-fx-border-color: #e9ecef; -fx-border-width: 1;");
+            // Default style (available)
+            String baseStyle = "-fx-font-size: 15px; -fx-font-weight: 500; -fx-background-radius: 6; -fx-border-radius: 6; -fx-border-width: 1px; -fx-cursor: hand;";
+            String availableStyle = baseStyle + "-fx-background-color: #e3f2fd; -fx-text-fill: #01579b; -fx-border-color: #bbdefb;";
+            String takenStyle = baseStyle + "-fx-background-color: #ffcdd2; -fx-text-fill: #b71c1c; -fx-border-color: #ef9a9a; -fx-opacity: 0.7; -fx-cursor: default;";
+            String selectedStyle = baseStyle + "-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-border-color: #27ae60; -fx-border-width: 1.5px;";
 
-            LocalTime slotTime = LocalTime.parse(horaires[i]);
+
+            LocalTime slotTime = LocalTime.parse(timeStr);
+
+            // Disable and style if taken
             if (takenTimes.contains(slotTime)) {
-                logger.log(Level.FINE, "Time slot {0} is already taken", slotTime);
-                // Style for taken slots - red background with white text
-                slot.setStyle("-fx-font-size: 17px; -fx-font-weight: 500; -fx-background-radius: 8; " +
-                        "-fx-background-color: #e74c3c; -fx-text-fill: white; " +
-                        "-fx-border-color: #c0392b; -fx-border-width: 1; -fx-opacity: 0.9;");
-                slot.setDisable(true);
-                slot.setTooltip(new Tooltip("Ce créneau est déjà réservé"));
-            }
+                slotButton.setStyle(takenStyle);
+                slotButton.setDisable(true);
+                slotButton.setTooltip(new Tooltip("Ce créneau est déjà réservé"));
+            } else {
+                // Style available slots, check if it's the currently selected one
+                if (timeStr.equals(selectedTime)) {
+                    slotButton.setStyle(selectedStyle); // Style for the selected button
+                } else {
+                    slotButton.setStyle(availableStyle); // Style for available, non-selected
+                }
 
-            slot.setOnAction(e -> {
-                logger.log(Level.INFO, "Time slot selected: {0}", slot.getText());
-                // Reset all buttons to default style (except disabled ones)
-                slotsGrid.getChildren().forEach(node -> {
-                    if (node instanceof Button) {
-                        Button b = (Button) node;
-                        if (!b.isDisabled()) {
-                            b.setStyle("-fx-font-size: 17px; -fx-font-weight: 500; -fx-background-radius: 8; " +
-                                    "-fx-background-color: #f8f9fa; -fx-text-fill: #0288d1; " +
-                                    "-fx-border-color: #e9ecef; -fx-border-width: 1;");
-                        }
+                // Add hover effect for available slots
+                slotButton.setOnMouseEntered(e -> {
+                    if (!timeStr.equals(selectedTime)) { // Don't change style if selected
+                        slotButton.setStyle(availableStyle + "-fx-background-color: #bbdefb;"); // Darker blue on hover
+                    }
+                });
+                slotButton.setOnMouseExited(e -> {
+                    if (!timeStr.equals(selectedTime)) {
+                        slotButton.setStyle(availableStyle); // Revert to normal available style
                     }
                 });
 
-                // Style for selected slot (green)
-                slot.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; " +
-                        "-fx-border-color: #27ae60; -fx-border-width: 2;");
-                selectedTime = slot.getText();
-                selectedHourBtn.setText(selectedTime);
-            });
 
-            slotsGrid.add(slot, i % 4, i / 4);
+                // Handle click action
+                slotButton.setOnAction(e -> {
+                    String clickedTime = (String) slotButton.getUserData();
+
+                    // Update the selected time state
+                    selectedTime = clickedTime;
+
+                    // Update styles of all buttons in the grid
+                    slotsGrid.getChildren().forEach(node -> {
+                        if (node instanceof Button) {
+                            Button b = (Button) node;
+                            String buttonTime = (String) b.getUserData();
+                            if (!b.isDisabled()) { // Only restyle available buttons
+                                if (buttonTime.equals(selectedTime)) {
+                                    b.setStyle(selectedStyle); // Apply selected style
+                                } else {
+                                    b.setStyle(availableStyle); // Apply default available style
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+
+            slotsGrid.add(slotButton, i % slotsPerRow, i / slotsPerRow);
         }
 
         return slotsGrid;
     }
 
-    private HBox createActionButtons(VBox root) {
-        logger.info("Creating action buttons");
-        HBox actions = new HBox(16);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        actions.setPadding(new Insets(20, 30, 30, 0));
+    private HBox createActionButtonsForDateStep(VBox rootContainer) {
+        HBox actions = new HBox(15);
+        actions.setAlignment(Pos.CENTER_RIGHT); // Align buttons to the right
+        actions.setPadding(new Insets(15, 0, 20, 0)); // Padding top/bottom
 
-        Button ajouterBtn = new Button("Ajouter");
-        ajouterBtn.setStyle("-fx-background-color: #0288d1; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 6; -fx-padding: 12 25;");
-
+        // "Suivant" (Next) Button
         Button suivantBtn = new Button("Suivant");
-        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 6; -fx-padding: 12 25;");
-
+        // Style the button (e.g., primary action color)
+        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 16px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12 30; -fx-cursor: hand;");
         suivantBtn.setOnAction(e -> {
-            if (medecinNom == null || medecinNom.trim().isEmpty()) {
-                logger.warning("No doctor selected when trying to proceed");
-                showError("Erreur", "Veuillez d'abord sélectionner un médecin");
-                return;
+            // Validation before proceeding
+            if (medecinId <= 0) {
+                showError("Sélection Requise", "Veuillez d'abord sélectionner un médecin.");
+                return; // Stay on this step
+            }
+            if (datePicker.getValue() == null) {
+                showError("Sélection Requise", "Veuillez sélectionner une date.");
+                return; // Stay on this step
+            }
+            if (selectedTime.isEmpty()) {
+                showError("Sélection Requise", "Veuillez sélectionner une heure.");
+                return; // Stay on this step
             }
 
-            if (selectedTime.isEmpty()) {
-                logger.warning("No time selected when trying to proceed");
-                showError("Erreur", "Veuillez sélectionner une heure");
-                return;
+            // Navigate to the next step (Motif Selection)
+            VBox parentContainer = findParentContainer(rootContainer); // Helper to find the main content area
+            if (parentContainer != null) {
+                parentContainer.getChildren().clear();
+                parentContainer.getChildren().add(getContentWithMotifSelector());
+            } else { // Fallback
+                rootContainer.getChildren().clear();
+                rootContainer.getChildren().add(getContentWithMotifSelector());
             }
-            logger.info("Proceeding to motif selection");
-            root.getChildren().clear();
-            root.getChildren().add(getContentWithMotifSelector());
         });
 
-        ajouterBtn.setOnAction(e -> {
-            if (medecinNom == null || medecinNom.trim().isEmpty()) {
-                logger.warning("No doctor selected when trying to add");
-                showError("Erreur", "Veuillez d'abord sélectionner un médecin");
-                return;
-            }
-
-            if (selectedTime.isEmpty()) {
-                logger.warning("No time selected when trying to add");
-                showError("Erreur", "Veuillez sélectionner une heure");
-                return;
-            }
-            logger.info("Proceeding to motif selection");
-            root.getChildren().clear();
-            root.getChildren().add(getContentWithMotifSelector());
-        });
-
-        actions.getChildren().addAll(ajouterBtn, suivantBtn);
+        actions.getChildren().add(suivantBtn);
         return actions;
     }
 
-    private VBox getContentWithMotifSelector() {
-        logger.info("Building motif selector view");
-        VBox root = new VBox();
-        root.setStyle("-fx-background-color: white;");
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(0, 0, 0, 0));
+    private VBox createPatientInfoInputBox() {
+        VBox patientBox = new VBox(15); // Spacing between elements
+        patientBox.setAlignment(Pos.CENTER_LEFT);
+        patientBox.setPadding(new Insets(10, 0, 10, 0));
+        patientBox.setMaxWidth(450); // Control width
 
-        HBox progressBar = new HBox(0);
-        progressBar.setAlignment(Pos.CENTER);
-        progressBar.setPadding(new Insets(22, 0, 0, 0));
-        String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
+        // Patient ID Input
+        Label patientIdLabel = new Label("Votre ID Patient:");
+        patientIdLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        // patientIdField is initialized in constructor
+        patientIdField.setPromptText("Entrez votre numéro d'identification");
+        patientIdField.setStyle("-fx-font-size: 15px; -fx-pref-height: 40px;");
 
-        for (int i = 0; i < steps.length; i++) {
-            VBox step = new VBox(5);
-            step.setAlignment(Pos.CENTER);
-            Circle circle = new Circle(15);
-            Label stepLabel = new Label(steps[i]);
+        // Phone Number Input
+        Label phoneLabel = new Label("Votre Numéro de Téléphone:");
+        phoneLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #333;");
+        // phoneNumberField is initialized in constructor
+        phoneNumberField.setPromptText("Veuillez saisir votre numéro (ex: +216XXXXXXXX)");
+        phoneNumberField.setStyle("-fx-font-size: 15px; -fx-pref-height: 40px;");
 
-            if (i < 2) {
-                circle.setFill(Color.web("#ffd600"));
-                Label check = new Label("✓");
-                check.setStyle("-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;");
-                StackPane circlePane = new StackPane(circle, check);
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circlePane, stepLabel);
-            } else if (i == 2) {
-                circle.setFill(Color.web("#ffd600"));
-                stepLabel.setStyle("-fx-text-fill: #ffd600; -fx-font-size: 16px; -fx-font-weight: bold;");
-                step.getChildren().addAll(circle, stepLabel);
-            } else {
-                circle.setFill(Color.web("#e0e0e0"));
-                stepLabel.setStyle("-fx-text-fill: #bdbdbd; -fx-font-size: 16px; -fx-font-weight: normal;");
-                step.getChildren().addAll(circle, stepLabel);
-            }
+        patientBox.getChildren().addAll(
+                patientIdLabel, patientIdField,
+                phoneLabel, phoneNumberField
+        );
+        return patientBox;
+    }
 
-            if (i < steps.length - 1) {
-                Rectangle line = new Rectangle(80, 4);
-                line.setFill(i < 2 ? Color.web("#ffd600") : Color.web("#e0e0e0"));
-                progressBar.getChildren().addAll(step, line);
-            } else {
-                progressBar.getChildren().add(step);
-            }
-        }
+    private VBox createMotifSelectionBox() {
+        VBox motifBox = new VBox(15);
+        motifBox.setAlignment(Pos.CENTER_LEFT);
+        motifBox.setPadding(new Insets(10, 0, 10, 0));
+        motifBox.setMaxWidth(450); // Control width
+        motifBox.getStyleClass().add("vbox"); // Ajout de la classe CSS pour le lookup
 
-        // Bloc ID du patient en haut
-        VBox idBox = new VBox(6);
-        idBox.setAlignment(Pos.CENTER);
-        Label patientIdLabel = new Label("ID du patient:");
-        patientIdLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
-        patientIdField = new TextField();
-        patientIdField.setPromptText("Entrez votre ID patient");
-        patientIdField.setStyle("-fx-font-size: 16px; -fx-pref-width: 350;");
-        
-        Label phoneNumberLabel = new Label("Numéro de téléphone:");
-        phoneNumberLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1c2c46;");
-        phoneNumberField = new TextField();
-        phoneNumberField.setPromptText("Entrez votre numéro de téléphone");
-        phoneNumberField.setStyle("-fx-font-size: 16px; -fx-pref-width: 350;");
-        
-        VBox patientBox = new VBox(8);
-        patientBox.getChildren().addAll(patientIdLabel, patientIdField, phoneNumberLabel, phoneNumberField);
+        Label motifTitleLabel = new Label("Motif de la consultation:");
+        motifTitleLabel.setStyle("-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
 
-        Label motifLabel = new Label("Veuillez saisir le motif du rendez-vous :");
-        motifLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1a237e; -fx-padding: 10 0 10 0;");
-
-        // Les checkboxes des motifs fines et élégantes
-        CheckBox checkControle = new CheckBox("Contrôle");
+        // Checkboxes for common motifs
+        CheckBox checkControle = new CheckBox("Contrôle de routine");
         CheckBox checkVaccination = new CheckBox("Vaccination");
         CheckBox checkOrdonnance = new CheckBox("Renouvellement d'ordonnance");
-        CheckBox checkUrgence = new CheckBox("Urgence");
-        CheckBox checkSpecialiste = new CheckBox("Consultation spécialiste");
-        CheckBox checkExamen = new CheckBox("Examen médical");
-        CheckBox checkSuivi = new CheckBox("Suivi de traitement");
-        CheckBox checkAutre = new CheckBox("Autre :");
+        CheckBox checkUrgence = new CheckBox("Urgence / Symptômes aigus");
+        CheckBox checkSpecialiste = new CheckBox("Consultation spécialiste (référence)");
+        CheckBox checkExamen = new CheckBox("Examen médical spécifique");
+        CheckBox checkSuivi = new CheckBox("Suivi de traitement / maladie chronique");
+        CheckBox checkAutre = new CheckBox("Autre motif (préciser ci-dessous)");
+
         CheckBox[] allChecks = {checkControle, checkVaccination, checkOrdonnance, checkUrgence, checkSpecialiste, checkExamen, checkSuivi, checkAutre};
+        VBox checkVBox = new VBox(8); // Vertical layout for checkboxes
         for (CheckBox cb : allChecks) {
-            cb.setStyle("-fx-font-size: 15px; -fx-font-weight: normal; -fx-padding: 6 0 6 0;");
-            cb.setPrefHeight(26);
-            cb.setScaleX(1.05);
-            cb.setScaleY(1.05);
+            cb.setStyle("-fx-font-size: 14px;");
+            checkVBox.getChildren().add(cb);
         }
 
-        // Zone de texte pour "Autre"
+        // TextArea for "Autre" motif
         TextArea autreDetailsArea = new TextArea();
-        autreDetailsArea.setPromptText("Veuillez préciser votre besoin...");
-        autreDetailsArea.setPrefRowCount(2);
-        autreDetailsArea.setPrefWidth(350);
-        autreDetailsArea.setDisable(true);
-        autreDetailsArea.setStyle("-fx-font-size: 15px; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 8 8 8 8;");
+        autreDetailsArea.setPromptText("Si 'Autre', veuillez préciser votre motif ici...");
+        autreDetailsArea.setPrefRowCount(3);
+        autreDetailsArea.setWrapText(true);
+        autreDetailsArea.setStyle("-fx-font-size: 14px;");
+        autreDetailsArea.setDisable(true); // Disabled by default
+
+        // Enable/disable TextArea based on "Autre" checkbox
         checkAutre.selectedProperty().addListener((obs, oldVal, newVal) -> {
             autreDetailsArea.setDisable(!newVal);
             if (newVal) autreDetailsArea.requestFocus();
+            else autreDetailsArea.clear();
         });
 
-        // Organisation en deux colonnes fines et centrées
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(6);
-        grid.setAlignment(Pos.CENTER);
-        grid.setMaxWidth(340);
-        grid.setPadding(new Insets(2, 0, 2, 0));
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setMinWidth(100);
-        col1.setPrefWidth(120);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
-        grid.getColumnConstraints().addAll(col1, col2);
+        // Link the combined motif text to the motifField
+        // This logic will run when moving to the next step (in handleGoToConfirmation)
 
-        grid.add(checkControle, 0, 0);
-        grid.add(checkVaccination, 0, 1);
-        grid.add(checkOrdonnance, 0, 2);
-        grid.add(checkUrgence, 0, 3);
-        grid.add(checkSpecialiste, 1, 0);
-        grid.add(checkExamen, 1, 1);
-        grid.add(checkSuivi, 1, 2);
-        grid.add(checkAutre, 0, 4);
-        grid.add(autreDetailsArea, 0, 5, 2, 1);
+        motifBox.getChildren().addAll(motifTitleLabel, checkVBox, autreDetailsArea);
+        // Store references if needed for validation/data retrieval
+        motifBox.setUserData(new Object[]{allChecks, autreDetailsArea});
 
-        Button suivantBtn = new Button("Suivant");
-        suivantBtn.setStyle("-fx-background-color: #ffd600; -fx-text-fill: #222; -fx-font-size: 18px; -fx-font-weight: bold; -fx-border-radius: 8; -fx-padding: 10 40; -fx-effect: dropshadow(gaussian, rgba(255,214,0,0.13), 4, 0, 0, 1);");
-        suivantBtn.setOnAction(e -> {
-            if (patientIdField.getText().trim().isEmpty()) {
-                showError("Erreur", "Veuillez saisir votre ID patient");
-                return;
-            }
-            try {
-                Integer.parseInt(patientIdField.getText().trim());
-            } catch (NumberFormatException ex) {
-                showError("Erreur", "L'ID patient doit être un nombre valide");
-                return;
-            }
-            if (phoneNumberField.getText().trim().isEmpty()) {
-                showError("Erreur", "Veuillez saisir votre numéro de téléphone");
-                return;
-            }
-            StringBuilder motifs = new StringBuilder();
-            if (checkControle.isSelected()) motifs.append("Contrôle, ");
-            if (checkVaccination.isSelected()) motifs.append("Vaccination, ");
-            if (checkOrdonnance.isSelected()) motifs.append("Renouvellement d'ordonnance, ");
-            if (checkUrgence.isSelected()) motifs.append("Urgence, ");
-            if (checkSpecialiste.isSelected()) motifs.append("Consultation spécialiste, ");
-            if (checkExamen.isSelected()) motifs.append("Examen médical, ");
-            if (checkSuivi.isSelected()) motifs.append("Suivi de traitement, ");
-            if (checkAutre.isSelected() && !autreDetailsArea.getText().isEmpty()) {
-                motifs.append("Autre: ").append(autreDetailsArea.getText());
-            } else if (motifs.length() > 2) {
-                motifs.delete(motifs.length() - 2, motifs.length());
-            }
-            String motifComplet = motifs.toString();
-            if (motifComplet.isEmpty()) {
-                showError("Erreur", "Veuillez sélectionner au moins un motif ou saisir un besoin.");
-                return;
-            }
-            motifField.setText(motifComplet); // Pour la suite du workflow
-            logger.info("Motif sélectionné: " + motifComplet);
-            root.getChildren().clear();
-            root.getChildren().add(getContentWithConfirmationSelector());
-        });
-
-        // Bloc central motif + bouton
-        VBox motifBox = new VBox(16, motifLabel, grid);
-        motifBox.setAlignment(Pos.CENTER);
-        motifBox.setPadding(new Insets(8, 0, 0, 0));
-        motifBox.setMaxWidth(350);
-        motifBox.setMaxHeight(180);
-        motifBox.setStyle("-fx-background-color: #f8fafd; -fx-border-radius: 12; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.03), 4, 0, 0, 1);");
-
-        // Bouton bien visible, rapproché du champ
-        HBox boutonBox = new HBox(suivantBtn);
-        boutonBox.setAlignment(Pos.CENTER);
-        boutonBox.setPadding(new Insets(6, 0, 10, 0));
-        VBox motifZone = new VBox(motifBox, boutonBox);
-        motifZone.setAlignment(Pos.CENTER);
-        motifZone.setPadding(new Insets(0, 0, 0, 0));
-
-        root.getChildren().addAll(progressBar, patientBox, motifZone);
-        return root;
+        return motifBox;
     }
 
-    public VBox getContentWithConfirmationSelector() {
-        logger.info("Building confirmation view");
-        if (selectedTime.isEmpty()) {
-            logger.warning("No time selected for confirmation");
-            showError("Erreur", "Veuillez sélectionner une heure");
-            return getContentWithDateSelector();
+    // --- Navigation and Action Handlers ---
+
+    private void handleGoToConfirmation(VBox rootContainer) {
+        // 1. Validate Inputs from Motif Step
+        if (patientIdField.getText().trim().isEmpty()) {
+            showError("Champ Requis", "Veuillez saisir votre ID patient.");
+            patientIdField.requestFocus();
+            return;
         }
+        // Simple numeric check for Patient ID
+        try {
+            Integer.parseInt(patientIdField.getText().trim());
+        } catch (NumberFormatException ex) {
+            showError("Format Invalide", "L'ID patient doit être un nombre.");
+            patientIdField.requestFocus();
+            return;
+        }
+        // Contrôle du numéro de téléphone
+        String num = phoneNumberField.getText().trim();
+        if (!isValidPhoneNumber(num)) {
+            showError("Numéro invalide", "Le numéro doit commencer par +216 et comporter 12 caractères (ex: +216XXXXXXXX).");
+            phoneNumberField.requestFocus();
+            return;
+        }
+        // 2. Compile Motif Text
+        // Recherche du GridPane (motifs) et du TextArea (autre motif)
+        VBox card = (VBox) rootContainer.getChildren().filtered(node -> node instanceof VBox && ((VBox)node).getChildren().size() > 2).get(0);
+        GridPane grid = null;
+        TextArea autreDetails = null;
+        for (javafx.scene.Node n : card.getChildren()) {
+            if (n instanceof GridPane) grid = (GridPane) n;
+            if (n instanceof TextArea) autreDetails = (TextArea) n;
+        }
+        if (grid == null) {
+            showError("Erreur Interne", "Impossible de trouver la section du motif.");
+            return;
+        }
+        StringBuilder motifs = new StringBuilder();
+        for (javafx.scene.Node node : grid.getChildren()) {
+            if (node instanceof CheckBox) {
+                CheckBox cb = (CheckBox) node;
+                if (cb.isSelected()) {
+                    if (!cb.getText().equals("Autre :")) {
+                        if (motifs.length() > 0) motifs.append(", ");
+                        motifs.append(cb.getText());
+                    }
+                }
+            }
+        }
+        // Ajout du texte "Autre" si coché
+        for (javafx.scene.Node node : grid.getChildren()) {
+            if (node instanceof CheckBox) {
+                CheckBox cb = (CheckBox) node;
+                if (cb.getText().equals("Autre :") && cb.isSelected() && autreDetails != null && !autreDetails.getText().trim().isEmpty()) {
+                    if (motifs.length() > 0) motifs.append(", ");
+                    motifs.append("Autre: ").append(autreDetails.getText().trim());
+                }
+            }
+        }
+        motifField.setText(motifs.toString());
 
-        VBox root = new VBox();
-        root.setStyle("-fx-background-color: #f9fbfd;");
-        root.setAlignment(Pos.TOP_CENTER);
-        root.setPadding(new Insets(0, 0, 0, 0));
+        // 3. NAVIGATION ROBUSTE : toujours remplacer le contenu du rootContainer
+        rootContainer.getChildren().clear();
+        rootContainer.getChildren().add(getContentWithConfirmationSelector());
+    }
 
-        // Stepper progress bar (modern style)
-        HBox progressBar = createStepper(3);
+    // Contrôle de saisie pour le numéro de téléphone
+    private boolean isValidPhoneNumber(String phone) {
+        return phone != null && phone.trim().startsWith("+216") && phone.trim().length() == 12;
+    }
 
-        // Title
-        Label confirmationTitle = new Label("Confirmation du rendez-vous");
-        confirmationTitle.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1a237e;");
-        VBox.setMargin(confirmationTitle, new Insets(10, 0, 20, 0));
+    private void handleConfirmAppointment(javafx.event.ActionEvent event) {
+        try {
+            // 1. Retrieve and Parse Data
+            int patientId = Integer.parseInt(patientIdField.getText().trim());
+            int currentMedecinId = this.medecinId;
+            LocalDate selectedDate = datePicker.getValue();
+            LocalTime selectedLocalTime = LocalTime.parse(selectedTime);
+            LocalDateTime dateTimeRdv = LocalDateTime.of(selectedDate, selectedLocalTime);
+            String motif = motifField.getText();
+            String numeroTel = phoneNumberField.getText().trim();
 
-        // Card summary (styled like the reference)
-        VBox card = new VBox();
-        card.setMaxWidth(500);
-        card.setStyle("-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3); -fx-background-radius: 15;");
+            // Validate phone number
+            if (!numeroTel.matches("\\+?[0-9\\s\\-]+") || numeroTel.length() < 8) {
+                showError("Numéro Invalide", "Veuillez entrer un numéro de téléphone valide.");
+                return;
+            }
 
-        // Card header
-        HBox cardHeader = new HBox();
-        cardHeader.setAlignment(Pos.CENTER_LEFT);
-        cardHeader.setStyle("-fx-background-color: #f0f8ff; -fx-background-radius: 15 15 0 0; -fx-padding: 15;");
-        StackPane iconPane = new StackPane();
-        iconPane.setMinSize(40, 40);
-        iconPane.setStyle("-fx-background-color: #6a5acd33; -fx-background-radius: 40;");
-        Label checkIcon = new Label("✓");
-        checkIcon.setStyle("-fx-font-size: 20px; -fx-text-fill: #6a5acd;");
-        iconPane.getChildren().add(checkIcon);
-        Label headerLabel = new Label("Résumé de votre rendez-vous");
-        headerLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;");
-        HBox.setMargin(headerLabel, new Insets(0, 0, 0, 15));
-        cardHeader.getChildren().addAll(iconPane, headerLabel);
-
-        // Card content grid
-        GridPane grid = new GridPane();
-        grid.setHgap(30);
-        grid.setVgap(15);
-        grid.setStyle("-fx-padding: 25;");
-        ColumnConstraints col1 = new ColumnConstraints();
-        col1.setMinWidth(100);
-        col1.setPrefWidth(120);
-        ColumnConstraints col2 = new ColumnConstraints();
-        col2.setHgrow(Priority.ALWAYS);
-        grid.getColumnConstraints().addAll(col1, col2);
-
-        String formattedDate = datePicker.getValue().format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.FRENCH));
-
-        // Médecin
-        Label medecinLabel = new Label("Médecin:");
-        medecinLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label medecinValue = new Label(medecinNom != null ? medecinNom : "Non sélectionné");
-        medecinValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        grid.add(medecinLabel, 0, 0);
-        grid.add(medecinValue, 1, 0);
-
-        // Spécialité
-        Label specialiteLabel = new Label("Spécialité:");
-        specialiteLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label specialiteValue = new Label(specialiteMedecin != null ? specialiteMedecin : "");
-        specialiteValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        grid.add(specialiteLabel, 0, 1);
-        grid.add(specialiteValue, 1, 1);
-
-        // Date
-        Label dateLabel = new Label("Date:");
-        dateLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label dateValue = new Label(formattedDate);
-        dateValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        grid.add(dateLabel, 0, 2);
-        grid.add(dateValue, 1, 2);
-
-        // Heure
-        Label heureLabel = new Label("Heure:");
-        heureLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label heureValue = new Label(selectedTime);
-        heureValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        grid.add(heureLabel, 0, 3);
-        grid.add(heureValue, 1, 3);
-
-        // Motif
-        Label motifLabel = new Label("Motif:");
-        motifLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label motifValue = new Label(motifField.getText());
-        motifValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        motifValue.setWrapText(true);
-        grid.add(motifLabel, 0, 4);
-        grid.add(motifValue, 1, 4);
-
-        // Adresse (optionnel, à personnaliser selon vos données)
-        Label adresseLabel = new Label("Adresse:");
-        adresseLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #555;");
-        Label adresseValue = new Label("Centre médical MaSanté, 123 Avenue de la Santé");
-        adresseValue.setStyle("-fx-font-size: 15px; -fx-text-fill: #333;");
-        adresseValue.setWrapText(true);
-        grid.add(adresseLabel, 0, 5);
-        grid.add(adresseValue, 1, 5);
-
-        card.getChildren().addAll(cardHeader, grid);
-
-        // Info box (reminder)
-        VBox infoBox = new VBox();
-        infoBox.setStyle("-fx-background-color: #fffdea; -fx-border-color: #ffd600; -fx-border-width: 1; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 15; -fx-max-width: 500;");
-        HBox infoRow = new HBox(10);
-        infoRow.setAlignment(Pos.CENTER_LEFT);
-        Label infoIcon = new Label("ℹ️");
-        infoIcon.setStyle("-fx-font-size: 16px;");
-        VBox infoTexts = new VBox(8);
-        Label infoText1 = new Label("Un rappel sera envoyé 24h avant votre rendez-vous.");
-        infoText1.setStyle("-fx-font-size: 14px; -fx-text-fill: #333;");
-        Label infoText2 = new Label("En cas d'empêchement, merci d'annuler au moins 48h à l'avance.");
-        infoText2.setStyle("-fx-font-size: 14px; -fx-text-fill: #333;");
-        infoTexts.getChildren().addAll(infoText1, infoText2);
-        infoRow.getChildren().addAll(infoIcon, infoTexts);
-        infoBox.getChildren().add(infoRow);
-        VBox.setMargin(infoBox, new Insets(20, 0, 20, 0));
-
-        // Action buttons
-        HBox actions = new HBox(20);
-        actions.setAlignment(Pos.CENTER);
-        Button confirmBtn = new Button("Confirmer le rendez-vous");
-        confirmBtn.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 25; -fx-background-radius: 25;");
-        confirmBtn.setOnAction(e -> {
-            try {
-                if (medecinNom == null || medecinNom.trim().isEmpty() || medecinIdField.getText().trim().isEmpty()) {
-                    logger.warning("No doctor selected during confirmation");
-                    showError("Erreur", "Veuillez sélectionner un médecin");
+            // Format phone number
+            if (!numeroTel.startsWith("+")) {
+                if (numeroTel.length() == 8) {
+                    numeroTel = "+216" + numeroTel;
+                } else {
+                    showError("Format Téléphone", "Numéro de téléphone non reconnu. Veuillez utiliser le format international (ex: +21612345678).");
                     return;
                 }
-                logger.info("Confirming appointment creation");
-                handleAdd();
-                showInfo("Succès", "Votre rendez-vous a été confirmé avec succès!");
-            } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Error confirming appointment", ex);
-                showError("Erreur", "Erreur lors de la confirmation: " + ex.getMessage());
             }
-        });
-        Button cancelBtn = new Button("Annuler");
-        cancelBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-font-size: 16px; -fx-border-color: #e74c3c; -fx-border-radius: 25; -fx-padding: 12 25;");
-        cancelBtn.setOnAction(e -> {
-            // Retour à la page précédente (motif)
-            root.getChildren().clear();
-            root.getChildren().add(getContentWithMotifSelector());
-        });
-        actions.getChildren().addAll(confirmBtn, cancelBtn);
 
-        // Assemble all
-        root.getChildren().addAll(progressBar, confirmationTitle, card, infoBox, actions);
-        return root;
-    }
+            // 2. Create RendezVous Object
+            RendezVous newRdv = new RendezVous();
+            newRdv.setDate(dateTimeRdv);
+            newRdv.setMotif(motif);
+            newRdv.setMedecinId(currentMedecinId);
+            newRdv.setPatientId(patientId);
+            newRdv.setStatut("Confirmé");
 
-    private void handleAdd() {
-        try {
-            logger.info("Attempting to add new appointment");
-            logger.log(Level.FINE, "Current data - Motif: {0}, PatientID: {1}, Date: {2}, Time: {3}",
-                    new Object[]{
-                            motifField.getText(),
-                            patientIdField.getText(),
-                            datePicker.getValue(),
-                            selectedTime
-                    });
-
-            // Validate required fields
-            StringBuilder missingFields = new StringBuilder();
-            if (motifField.getText().trim().isEmpty()) missingFields.append("motif, ");
-            if (patientIdField.getText().trim().isEmpty()) missingFields.append("patient ID, ");
-            if (phoneNumberField.getText().trim().isEmpty()) missingFields.append("téléphone, ");
-            if (medecinIdField.getText().trim().isEmpty()) missingFields.append("médecin, ");
-            if (datePicker.getValue() == null) missingFields.append("date, ");
-            if (selectedTime.isEmpty()) missingFields.append("heure, ");
-            if (missingFields.length() > 0) {
-                showError("Champs manquants", "Veuillez remplir les champs suivants : " + missingFields.toString());
+            // 3. Save to Database
+            boolean savedSuccessfully = service.ajouterRendezVous(newRdv);
+            if (!savedSuccessfully) {
+                showError("Erreur d'enregistrement", "Impossible d'enregistrer le rendez-vous.");
+                refreshTimeSlots();
                 return;
             }
 
-            int userId = Integer.parseInt(patientIdField.getText().trim());
-            String phoneNumber = phoneNumberField.getText().trim();
-            String motif = motifField.getText().trim();
-            LocalDate date = datePicker.getValue();
-            String time = selectedTime;
+            // 4. Send SMS Confirmation
+            try {
+                DateTimeFormatter smsFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'à' HH:mm");
+                String smsMessage = String.format(
+                        " Bonjour, votre rendez-vous avec le Dr %s est confirmé pour le %s. Motif : %s. Merci pour votre confiance. À bientôt ! 👋",
+                        medecinNom,
+                        dateTimeRdv.format(smsFormatter),
+                        motif.length() > 40 ? motif.substring(0, 37) + "..." : motif
+                );
 
-            // Création du message personnalisé pour le SMS
-            String message = String.format(
-                "Bonjour, votre rendez-vous avec le %s est confirmé pour le %s à %s. Motif : %s. Merci pour votre confiance. À bientôt ! 👋",
-                medecinNom,
-                date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-                time,
-                motif
-            );
+                smsService.sendSms(numeroTel, smsMessage);
+                showSuccess("Rendez-vous Confirmé", "Votre rendez-vous a été enregistré. Un SMS de confirmation a été envoyé au " + numeroTel + ".", event);
+            } catch (Exception smsEx) {
+                showSuccess("Rendez-vous Confirmé", "Votre rendez-vous a été enregistré. (Échec d'envoi SMS)", event);
+            }
 
-            // Utilisation du Messaging Service SID pour envoyer le SMS
-            smsService.sendSmsWithServiceSid(phoneNumber, message);
+            // 5. Ajout notification dynamique dans le dashboard patient (si accessible)
+            try {
+                // Recherche d'une instance PatientDashboardView dans la fenêtre principale
+                Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                Scene scene = stage.getScene();
+                BorderPane root = (scene != null && scene.getRoot() instanceof BorderPane) ? (BorderPane) scene.getRoot() : null;
+                PatientDashboardView dashboard = null;
+                if (root != null && root.getCenter() instanceof PatientDashboardView) {
+                    dashboard = (PatientDashboardView) root.getCenter();
+                }
+                // Fallback: si on vient de rediriger, utiliser la nouvelle instance
+                if (dashboard == null && Stage.getWindows().stream().anyMatch(w -> w instanceof Stage && w.isShowing())) {
+                    Stage mainStage = (Stage) Stage.getWindows().stream().filter(w -> w instanceof Stage && w.isShowing()).findFirst().get();
+                    Scene mainScene = mainStage.getScene();
+                    if (mainScene != null && mainScene.getRoot() instanceof BorderPane) {
+                        BorderPane mainRoot = (BorderPane) mainScene.getRoot();
+                        if (mainRoot.getCenter() instanceof PatientDashboardView) {
+                            dashboard = (PatientDashboardView) mainRoot.getCenter();
+                        }
+                    }
+                }
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                String dateStr = dateTimeRdv.format(fmt);
+                String heureStr = dateTimeRdv.toLocalTime().toString();
+                if (dashboard != null) {
+                    dashboard.addAppointmentNotification(medecinNom, dateStr, heureStr);
+                }
+            } catch (Exception ex) {
+                // Ignorer si le dashboard n'est pas accessible
+            }
 
-            showInfo("Succès", "Votre rendez-vous a été confirmé avec succès! Un SMS de confirmation a été envoyé.");
+            // 6. Redirige vers la page d'accueil (landing)
+            try {
+                Stage primaryStage = null;
+                for (Window w : Stage.getWindows()) {
+                    if (w instanceof Stage && w.isShowing()) {
+                        primaryStage = (Stage) w;
+                        break;
+                    }
+                }
+                if (primaryStage != null) {
+                    PatientDashboardView dashboardView = new PatientDashboardView();
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    String dateStr = dateTimeRdv.format(fmt);
+                    String heureStr = dateTimeRdv.toLocalTime().toString();
+                    dashboardView.addAppointmentNotification(medecinNom, dateStr, heureStr);
+                    Scene scene = new Scene(dashboardView, 1200, 800); // ajuste la taille si besoin
+                    primaryStage.setScene(scene);
+                    primaryStage.show();
+                } else {
+                    System.err.println("Impossible de retrouver la fenêtre principale pour la redirection.");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
 
-            clearFields();
         } catch (NumberFormatException e) {
-            logger.log(Level.SEVERE, "Invalid patient ID format", e);
-            showError("Erreur", "L'ID du patient doit être un nombre valide");
+            showError("Erreur de Données", "L'ID du patient doit être un nombre valide.");
+        } catch (DateTimeException e) {
+            showError("Erreur Date/Heure", "La date ou l'heure sélectionnée est invalide.");
         } catch (Exception e) {
-            logger.log(Level.SEVERE, "Error adding appointment", e);
-            showError("Erreur", "Erreur lors de l'ajout: " + e.getMessage());
+            showError("Erreur", "Une erreur inattendue s'est produite: " + e.getMessage());
         }
     }
 
-    private void clearFields() {
-        logger.info("Clearing form fields");
-        if (motifField != null) motifField.clear();
-        if (patientIdField != null) patientIdField.clear();
-        if (phoneNumberField != null) phoneNumberField.clear();
-        if (medecinIdField != null) medecinIdField.clear();
-        if (datePicker != null) datePicker.setValue(null);
-        selectedTime = "";
-        if (selectedHourBtn != null) selectedHourBtn.setText("");
-        if (tableView != null) {
-            tableView.getSelectionModel().clearSelection();
+    private void refreshTimeSlots() {
+        VBox slotsContainer = (VBox) datePicker.getScene().lookup("#slotsContainer");
+        if (slotsContainer != null) {
+            slotsContainer.getChildren().clear();
+            slotsContainer.getChildren().add(createTimeSlotsGrid());
         }
     }
 
+    private void closeCurrentWindow(javafx.event.ActionEvent event) {
+        Node source = (Node) event.getSource();
+        if (source != null && source.getScene() != null && source.getScene().getWindow() instanceof Stage) {
+            ((Stage) source.getScene().getWindow()).close();
+        }
+    }
+
+    // --- UI Helper Methods ---
+
+    /**
+     * Helper to find the main content container for navigation.
+     * Correction : si non trouvé, retourne toujours un VBox (le courant ou un nouveau).
+     */
+    private VBox findParentContainer(Node currentNode) {
+        // Correction : NE PLUS JAMAIS afficher d'erreur, et SI AUCUN parent trouvé, TOUJOURS retourner le VBox courant comme fallback
+        Scene scene = currentNode.getScene();
+        if (scene != null) {
+            Node rootNode = scene.lookup("#mainContentArea");
+            if (rootNode instanceof VBox) {
+                return (VBox) rootNode;
+            }
+            else if (scene.getRoot() instanceof BorderPane) {
+                Node centerNode = ((BorderPane) scene.getRoot()).getCenter();
+                if (centerNode instanceof VBox) {
+                    return (VBox) centerNode;
+                }
+            }
+        }
+        // Fallback : retourne toujours le VBox courant si possible
+        if (currentNode instanceof VBox) {
+            return (VBox) currentNode;
+        }
+        if (currentNode.getParent() instanceof VBox) {
+            return (VBox) currentNode.getParent();
+        }
+        // Fallback ultime : crée un nouveau VBox pour éviter tout blocage
+        return new VBox();
+    }
+
+    /**
+     * Helper method to create a detail row (Label + Value) for the confirmation card.
+     */
+    private Node createDetailRow(String labelText, String valueText) {
+        HBox row = new HBox(8);
+        row.setAlignment(Pos.CENTER_LEFT);
+
+        Text label = new Text(labelText);
+        label.setFont(Font.font("System", FontWeight.BOLD, 15));
+        label.setFill(Color.web("#424242")); // Dark gray label
+        label.setWrappingWidth(100); // Max width for label
+
+        Text value = new Text(valueText);
+        value.setFont(Font.font("System", FontWeight.NORMAL, 15));
+        value.setFill(Color.web("#212121")); // Black value
+        value.setWrappingWidth(380); // Allow text wrapping
+
+        row.getChildren().addAll(label, value);
+        return row;
+    }
+
+
+    /**
+     * Shows an error alert dialog.
+     */
     private void showError(String title, String message) {
-        logger.log(Level.WARNING, "Showing error dialog: {0} - {1}", new Object[]{title, message});
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
+        alert.setTitle("Erreur - " + title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.showAndWait();
     }
 
-    private void showInfo(String title, String message) {
-        logger.log(Level.INFO, "Showing info dialog: {0} - {1}", new Object[]{title, message});
+    /**
+     * Shows a success/information alert dialog.
+     */
+    private void showSuccess(String title, String message, javafx.event.ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
+        alert.initModality(Modality.APPLICATION_MODAL);
         alert.showAndWait();
-    }
-
-    private HBox createStepper(int currentStep) {
-        logger.log(Level.FINE, "Creating stepper at step {0}", currentStep);
-        String[] steps = {"Médecin", "Date/Heure", "Motif", "Confirmation"};
-        HBox stepper = new HBox();
-        stepper.setAlignment(Pos.CENTER);
-        stepper.setSpacing(0);
-        for (int i = 0; i < steps.length; i++) {
-            VBox stepBox = new VBox(6);
-            stepBox.setAlignment(Pos.CENTER);
-            StackPane circlePane = new StackPane();
-            Circle circle = new Circle(20);
-
-            Label iconLabel;
-            if (i < currentStep) {
-                circle.setFill(Color.web("#FFD600"));
-                iconLabel = new Label("\u2713");
-                iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
-            } else if (i == currentStep) {
-                circle.setFill(Color.web("#FFD600"));
-                iconLabel = new Label("●");
-                iconLabel.setStyle("-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;");
-            } else {
-                circle.setFill(Color.web("#e0e0e0"));
-                iconLabel = new Label(String.valueOf(i + 1));
-                iconLabel.setStyle("-fx-text-fill: #bdbdbd; -fx-font-size: 20px; -fx-font-weight: bold;");
-            }
-            circlePane.getChildren().addAll(circle, iconLabel);
-            Label label = new Label(steps[i]);
-            label.setStyle("-fx-font-size: 15px; -fx-font-weight: 600;");
-            if (i <= currentStep) {
-                label.setTextFill(Color.web("#FFD600"));
-            } else {
-                label.setTextFill(Color.web("#bdbdbd"));
-            }
-            stepBox.getChildren().addAll(circlePane, label);
-            stepper.getChildren().add(stepBox);
-            if (i < steps.length - 1) {
-                VBox lineBox = new VBox();
-                lineBox.setAlignment(Pos.CENTER);
-                Rectangle line = new Rectangle(56, 5);
-                line.setFill(i < currentStep ? Color.web("#FFD600") : Color.web("#e0e0e0"));
-                lineBox.getChildren().add(line);
-                stepper.getChildren().add(lineBox);
-            }
-        }
-        stepper.setPadding(new Insets(20, 0, 30, 0));
-        return stepper;
-    }
-
-    // Nouvelle vue CRUD minimaliste pour les rendez-vous
-    public VBox getCrudTableOnlyView() {
-        VBox layout = new VBox(20);
-        layout.setPadding(new Insets(20));
-
-        // TableView
-        tableView = new TableView<>();
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        TableColumn<RendezVous, Integer> idCol = new TableColumn<>("ID");
-        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-
-        TableColumn<RendezVous, String> dateCol = new TableColumn<>("Date");
-        dateCol.setCellValueFactory(cell -> {
-            LocalDateTime d = cell.getValue().getDate();
-            return new ReadOnlyStringWrapper(d != null ? d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "");
-        });
-
-        TableColumn<RendezVous, String> motifCol = new TableColumn<>("Motif");
-        motifCol.setCellValueFactory(new PropertyValueFactory<>("motif"));
-
-        TableColumn<RendezVous, Integer> patientCol = new TableColumn<>("ID Patient");
-        patientCol.setCellValueFactory(new PropertyValueFactory<>("patientId"));
-
-        TableColumn<RendezVous, Integer> medecinCol = new TableColumn<>("ID Médecin");
-        medecinCol.setCellValueFactory(new PropertyValueFactory<>("medecinId"));
-
-        TableColumn<RendezVous, String> statutCol = new TableColumn<>("Statut");
-        statutCol.setCellValueFactory(new PropertyValueFactory<>("statut"));
-
-        TableColumn<RendezVous, Void> actionCol = new TableColumn<>("Actions");
-        actionCol.setCellFactory(col -> new TableCell<>() {
-            final Button modifBtn = new Button("Modifier");
-            final Button supprBtn = new Button("Supprimer");
-            final Button rateBtn = new Button("Évaluer");
-            final HBox box = new HBox(6, modifBtn, supprBtn, rateBtn);
-            {
-                modifBtn.setStyle("-fx-background-color: #26c6da; -fx-text-fill: white;");
-                supprBtn.setStyle("-fx-background-color: #ef5350; -fx-text-fill: white;");
-                rateBtn.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
-                modifBtn.setOnAction(e -> {
-                    RendezVous rv = getTableView().getItems().get(getIndex());
-                    showEditDialog(rv);
-                });
-                supprBtn.setOnAction(e -> {
-                    RendezVous rv = getTableView().getItems().get(getIndex());
-                    supprimerRendezVous(rv);
-                });
-                rateBtn.setOnAction(e -> {
-                    RendezVous rv = getTableView().getItems().get(getIndex());
-                    handleRateButton(rv);
-                });
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : box);
-            }
-        });
-
-        tableView.getColumns().addAll(idCol, dateCol, motifCol, patientCol, medecinCol, statutCol, actionCol);
-
-        // Charger les rendez-vous depuis la base
-        ObservableList<RendezVous> data = FXCollections.observableArrayList(service.listerRendezVous());
-        tableView.setItems(data);
-
-        layout.getChildren().addAll(new Label("Liste des rendez-vous"), tableView);
-        return layout;
-    }
-
-    // Affiche une boîte de dialogue de modification (exemple simple)
-    private void showEditDialog(RendezVous rv) {
-        TextInputDialog dialog = new TextInputDialog(rv.getMotif());
-        dialog.setTitle("Modifier le motif");
-        dialog.setHeaderText("Modifier le motif du rendez-vous ID " + rv.getId());
-        dialog.setContentText("Nouveau motif :");
-        dialog.showAndWait().ifPresent(newMotif -> {
-            rv.setMotif(newMotif);
-            service.modifierRendezVous(rv);
-            tableView.refresh();
-        });
-    }
-
-    // Supprimer un rendez-vous
-    private void supprimerRendezVous(RendezVous rv) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation de suppression");
-        alert.setHeaderText("Supprimer le rendez-vous ID " + rv.getId() + " ?");
-        alert.setContentText("Êtes-vous sûr de vouloir supprimer ce rendez-vous ?");
-        alert.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                service.supprimerRendezVous(rv.getId());
-                tableView.getItems().remove(rv);
-            }
-        });
-    }
-
-    private void handleRateButton(RendezVous rv) {
+        // Après OK, retourne vers l'accueil (dashboard patient)
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/frontend/src/views/Rating.fxml"));
-            Stage ratingStage = new Stage();
-            ratingStage.setScene(new Scene(loader.load()));
-            ratingStage.setTitle("Évaluation du médecin");
-
-            RatingController controller = loader.getController();
-            controller.initialize(medecinId, getCurrentUserId()); // À adapter selon ta logique utilisateur
-
-            ratingStage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError("Erreur", "Erreur de chargement de la fenêtre d'évaluation");
+            PatientDashboardView dashboardView = new PatientDashboardView();
+            Scene scene = new Scene(dashboardView, 1200, 800); // ajuste la taille si besoin
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
-    // Méthode utilitaire fictive pour récupérer l'ID utilisateur courant
-    private int getCurrentUserId() {
-        // TODO: Remplacer par la vraie logique d'authentification/utilisateur
-        return 1;
+    // The createStepper method is currently identical to createProgressBar
+    // If you need different visuals for steps later, modify this.
+    private HBox createStepper(int currentStep) {
+        return createProgressBar(currentStep);
     }
-}
+} // End of AppointmentCrudWindow class

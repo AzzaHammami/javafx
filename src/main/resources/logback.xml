@@ -1,0 +1,7 @@
+<configuration>
+    <!-- Force tous les logs Spring et RestTemplate à WARN -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.springframework.web.client.RestTemplate" level="WARN"/>
+    <root level="WARN"/>
+</configuration>

@@ -8,10 +8,6 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import javafx.event.ActionEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.Dialog;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.collections.FXCollections;
@@ -24,6 +20,22 @@ import java.sql.SQLException;
 import javafx.stage.FileChooser;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import com.example.rendez_vous.services.Servicerendez_vous;
+import javafx.scene.chart.PieChart;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.LineChart;
+import java.util.Map;
+import javafx.scene.control.Tooltip;
+import javafx.scene.paint.Color;
+import java.time.LocalDate;
+import javafx.geometry.Pos;
+import javafx.scene.layout.StackPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 
 public class ReclamationController {
     @FXML
@@ -43,9 +55,13 @@ public class ReclamationController {
     
     @FXML
     private VBox medecinContent;
-
+    
+    @FXML
+    private Button rdvStatBtn;
+    
     private ObservableList<User> medecins = FXCollections.observableArrayList();
     private ServiceUser serviceUser = new ServiceUser();
+    private Servicerendez_vous serviceRdv = new Servicerendez_vous();
 
     // --- CHAMPS DU FORMULAIRE AU NIVEAU DE LA CLASSE ---
     private TextField nomField;
@@ -57,6 +73,9 @@ public class ReclamationController {
     @FXML
     private void initialize() {
         // TODO: Load existing reclamations
+        if (rdvStatBtn != null) {
+            rdvStatBtn.setOnAction(e -> showRdvStatistiquePage());
+        }
     }
     
     @FXML
@@ -248,13 +267,13 @@ public class ReclamationController {
 
     @FXML
     private void showRendezVousCrud() throws IOException {
-        Parent content = FXMLLoader.load(getClass().getResource("/Views/AjouterRendezvous.fxml"));
+        Parent content = FXMLLoader.load(getClass().getResource("/views/Back/AjouterRendezvous.fxml"));
         medecinContent.getChildren().setAll(content);
     }
 
     @FXML
     private void showDisponibiliteCrud() throws IOException {
-        Parent content = FXMLLoader.load(getClass().getResource("/Views/GestionDisponibilite.fxml"));
+        Parent content = FXMLLoader.load(getClass().getResource("/views/Back/GestionDisponibilite.fxml"));
         medecinContent.getChildren().setAll(content);
     }
 
@@ -309,5 +328,154 @@ public class ReclamationController {
         });
 
         medecinContent.getChildren().add(table);
+    }
+
+    private void showRdvStatistiquePage() {
+        VBox statsCard = new VBox(32);
+        statsCard.setAlignment(Pos.TOP_CENTER);
+        statsCard.setStyle(
+            "-fx-background-color: #fff;" +
+            "-fx-background-radius: 18;" +
+            "-fx-effect: dropshadow(gaussian, #b0bec5, 12, 0.18, 0, 4);" +
+            "-fx-padding: 32 48 32 48;"
+        );
+
+        Label mainTitle = new Label("Statistiques des Rendez-vous");
+        mainTitle.setStyle("-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #673ab7;");
+
+        HBox filtersBox = new HBox(18);
+        filtersBox.setAlignment(Pos.CENTER_LEFT);
+        filtersBox.setStyle("-fx-background-color: #f9f9fb; -fx-background-radius: 12; -fx-padding: 12 24 12 24; -fx-spacing: 18; -fx-effect: dropshadow(gaussian, #e0e0e0, 4, 0.12, 0, 1);");
+        ComboBox<Integer> yearCombo = new ComboBox<>();
+        int currentYear = java.time.LocalDate.now().getYear();
+        for (int y = currentYear - 5; y <= currentYear; y++) yearCombo.getItems().add(y);
+        yearCombo.setValue(currentYear);
+        ComboBox<String> monthCombo = new ComboBox<>();
+        monthCombo.getItems().add("Tous");
+        String[] months = {"01","02","03","04","05","06","07","08","09","10","11","12"};
+        for (String m : months) monthCombo.getItems().add(m);
+        monthCombo.setValue("Tous");
+        DatePicker startDatePicker = new DatePicker();
+        DatePicker endDatePicker = new DatePicker();
+        Button resetBtn = new Button("Réinitialiser");
+        resetBtn.setStyle("-fx-background-color: #e0e0e0; -fx-background-radius: 8; -fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #673ab7;");
+        filtersBox.getChildren().addAll(
+            new Label("Année :"), yearCombo,
+            new Label("Mois :"), monthCombo,
+            new Label("Du :"), startDatePicker,
+            new Label("Au :"), endDatePicker,
+            resetBtn
+        );
+
+        statsCard.getChildren().addAll(mainTitle, filtersBox);
+
+        Runnable updateStats = () -> {
+            statsCard.getChildren().removeIf(node -> (node instanceof Separator) || (node instanceof PieChart) || (node instanceof BarChart) || (node instanceof LineChart) || (node instanceof Label && node != mainTitle));
+            Integer year = yearCombo.getValue();
+            String month = monthCombo.getValue();
+            LocalDate start = startDatePicker.getValue();
+            LocalDate end = endDatePicker.getValue();
+            try {
+                int total = serviceRdv.countAllRendezVousFiltered(year, month, start, end);
+                int confirmes = serviceRdv.countRendezVousByStatutFiltered("Confirmé", year, month, start, end);
+                int annules = serviceRdv.countRendezVousByStatutFiltered("Annulé", year, month, start, end);
+                int attente = serviceRdv.countRendezVousByStatutFiltered("En attente", year, month, start, end);
+                int matin = serviceRdv.countRendezVousByPlageHoraireFiltered("Matin", year, month, start, end);
+                int apresmidi = serviceRdv.countRendezVousByPlageHoraireFiltered("Après-midi", year, month, start, end);
+                int soir = serviceRdv.countRendezVousByPlageHoraireFiltered("Soir", year, month, start, end);
+                Label totalLabel = new Label("Nombre total de rendez-vous : " + total);
+                totalLabel.setStyle("-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding: 0 0 12 0;");
+                statsCard.getChildren().add(totalLabel);
+                Separator sep1 = new Separator();
+                sep1.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 12 0 12 0;");
+                statsCard.getChildren().add(sep1);
+                Label pieTitle = new Label("Répartition des rendez-vous par statut");
+                pieTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding: 0 0 8 0;");
+                statsCard.getChildren().add(pieTitle);
+                PieChart pieStatut = new PieChart();
+                pieStatut.getData().add(new PieChart.Data("Confirmés", confirmes));
+                pieStatut.getData().add(new PieChart.Data("Annulés", annules));
+                pieStatut.getData().add(new PieChart.Data("En attente", attente));
+                pieStatut.setTitle(null);
+                pieStatut.setLabelsVisible(true);
+                pieStatut.setLegendVisible(true);
+                pieStatut.setStyle("-fx-font-size: 15px;");
+                pieStatut.setPrefHeight(220);
+                pieStatut.setPrefWidth(320);
+                pieStatut.setMaxWidth(320);
+                pieStatut.setMaxHeight(220);
+                pieStatut.setAnimated(true);
+                pieStatut.getStylesheets().add(getClass().getResource("/chart-style.css").toExternalForm());
+                statsCard.getChildren().add(pieStatut);
+                Separator sep2 = new Separator();
+                sep2.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 12 0 12 0;");
+                statsCard.getChildren().add(sep2);
+                Label piePlageTitle = new Label("Répartition par plage horaire");
+                piePlageTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding: 0 0 8 0;");
+                statsCard.getChildren().add(piePlageTitle);
+                PieChart piePlage = new PieChart();
+                piePlage.getData().add(new PieChart.Data("Matin (6h-12h)", matin));
+                piePlage.getData().add(new PieChart.Data("Après-midi (12h-18h)", apresmidi));
+                piePlage.getData().add(new PieChart.Data("Soir (18h-6h)", soir));
+                piePlage.setTitle(null);
+                piePlage.setLabelsVisible(true);
+                piePlage.setLegendVisible(true);
+                piePlage.setStyle("-fx-font-size: 15px;");
+                piePlage.setPrefHeight(220);
+                piePlage.setPrefWidth(320);
+                piePlage.setMaxWidth(320);
+                piePlage.setMaxHeight(220);
+                piePlage.setAnimated(true);
+                piePlage.getStylesheets().add(getClass().getResource("/chart-style.css").toExternalForm());
+                statsCard.getChildren().add(piePlage);
+                Separator sep3 = new Separator();
+                sep3.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 12 0 12 0;");
+                statsCard.getChildren().add(sep3);
+                Label barTitle = new Label("Histogramme des rendez-vous par statut");
+                barTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333; -fx-padding: 0 0 8 0;");
+                statsCard.getChildren().add(barTitle);
+                CategoryAxis xAxis = new CategoryAxis();
+                xAxis.setLabel("Statut");
+                NumberAxis yAxis = new NumberAxis();
+                yAxis.setLabel("Nombre de rendez-vous");
+                BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+                XYChart.Series<String, Number> series = new XYChart.Series<>();
+                series.setName("Statuts");
+                series.getData().add(new XYChart.Data<>("Confirmés", confirmes));
+                series.getData().add(new XYChart.Data<>("Annulés", annules));
+                series.getData().add(new XYChart.Data<>("En attente", attente));
+                barChart.getData().add(series);
+                barChart.setTitle(null);
+                barChart.setCategoryGap(20);
+                barChart.setBarGap(8);
+                barChart.setLegendVisible(false);
+                barChart.setStyle("-fx-font-size: 15px;");
+                barChart.setPrefHeight(220);
+                barChart.setPrefWidth(400);
+                barChart.setAnimated(true);
+                barChart.getStylesheets().add(getClass().getResource("/chart-style.css").toExternalForm());
+                statsCard.getChildren().add(barChart);
+                // Ajoute les autres graphiques et séparateurs ici si besoin
+            } catch (Exception ex) {
+                statsCard.getChildren().add(new Label("Erreur lors du calcul des statistiques : " + ex.getMessage()));
+            }
+        };
+        // Listeners dynamiques
+        yearCombo.setOnAction(e -> updateStats.run());
+        monthCombo.setOnAction(e -> updateStats.run());
+        startDatePicker.setOnAction(e -> updateStats.run());
+        endDatePicker.setOnAction(e -> updateStats.run());
+        resetBtn.setOnAction(e -> {
+            yearCombo.setValue(currentYear);
+            monthCombo.setValue("Tous");
+            startDatePicker.setValue(null);
+            endDatePicker.setValue(null);
+        });
+        // Premier affichage
+        updateStats.run();
+        ScrollPane scrollPane = new ScrollPane(statsCard);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setStyle("-fx-background:transparent; -fx-background-color:transparent;");
+        medecinContent.getChildren().setAll(scrollPane);
     }
 }

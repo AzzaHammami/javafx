@@ -20,6 +20,8 @@ public class HelloApplication extends Application {
     }
 
     public static void main(String[] args) {
+        // --- Export automatique des IDs de tous les médecins au démarrage ---
+        com.example.rendez_vous.services.ServiceUser.printAllMedecinIds();
         launch();
     }
 }

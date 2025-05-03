@@ -4,9 +4,7 @@ import com.example.rendez_vous.services.Servicedisponibilite;
 import com.example.rendez_vous.models.Disponibilite;
 import com.example.rendez_vous.services.ServiceUser;
 import com.example.rendez_vous.models.User;
-import com.example.rendez_vous.services.ServiceRating;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -15,23 +13,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
 
-import java.sql.SQLException;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -46,7 +34,6 @@ public class DisponibiliteController {
 
     private final Servicedisponibilite service = new Servicedisponibilite();
     private final ServiceUser userService = new ServiceUser();
-    private final ServiceRating ratingService = new ServiceRating();
 
     @FXML
     public void initialize() {
@@ -84,15 +71,35 @@ public class DisponibiliteController {
         grid.setVgap(10);
         grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
 
-        // Champ Médecin ID (ComboBox avec les IDs des médecins disponibles)
-        ComboBox<String> medecinIdCombo = new ComboBox<>();
-        medecinIdCombo.setPromptText("ID Médecin");
+        // Champ Médecin ID (ComboBox avec les noms des médecins)
+        ComboBox<User> medecinCombo = new ComboBox<>();
+        medecinCombo.setPromptText("Sélectionner un médecin");
         ServiceUser serviceUser = new ServiceUser();
-        for (User medecin : serviceUser.getAllMedecins()) {
-            medecinIdCombo.getItems().add(String.valueOf(medecin.getId()));
-        }
-        grid.add(new Label("Médecin ID:"), 0, 0);
-        grid.add(medecinIdCombo, 1, 0);
+        medecinCombo.getItems().addAll(serviceUser.getAllMedecins());
+        medecinCombo.setCellFactory(lv -> new ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText("Dr. " + user.getName());
+                }
+            }
+        });
+        medecinCombo.setButtonCell(new ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText("Dr. " + user.getName());
+                }
+            }
+        });
+        grid.add(new Label("Médecin :"), 0, 0);
+        grid.add(medecinCombo, 1, 0);
 
         DatePicker dateDebutPicker = new DatePicker();
         ComboBox<String> heureDebutField = new ComboBox<>();
@@ -118,12 +125,12 @@ public class DisponibiliteController {
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ajouterBtn) {
                 try {
-                    int medecinId = Integer.parseInt(medecinIdCombo.getValue());
+                    User medecin = medecinCombo.getValue();
                     LocalDateTime dateDebut = LocalDateTime.of(dateDebutPicker.getValue(), LocalTime.parse(heureDebutField.getValue()));
                     LocalDateTime dateFin = LocalDateTime.of(dateFinPicker.getValue(), LocalTime.parse(heureFinField.getValue()));
                     String statut = statutField.getValue();
                     Disponibilite disp = new Disponibilite();
-                    disp.setMedecinId(medecinId);
+                    disp.setMedecinId(medecin.getId());
                     disp.setDateDebut(dateDebut);
                     disp.setDateFin(dateFin);
                     disp.setStatut(statut);
@@ -188,17 +195,7 @@ public class DisponibiliteController {
                 Label finLabel = new Label("Fin : " + disp.getDateFin());
                 Label statutLabel = new Label("Statut : " + disp.getStatut());
                 // Affichage de la moyenne de note du médecin
-                double moyenne = 0.0;
-                try {
-                    moyenne = ratingService.getMoyenneRatingMedecin(disp.getMedecinId());
-                } catch (Exception ex) {
-                    // Affiche rien si erreur
-                }
-                String stars = "";
-                int fullStars = (int) Math.round(moyenne);
-                for (int i = 0; i < fullStars; i++) stars += "★";
-                for (int i = fullStars; i < 5; i++) stars += "☆";
-                Label ratingLabel = new Label("Note : " + stars + (moyenne > 0 ? String.format(" (%.1f/5)", moyenne) : " (Aucune note)"));
+                Label ratingLabel = new Label("Note : ");
                 ratingLabel.setStyle("-fx-font-size: 15px; -fx-text-fill: #ff9800; -fx-font-weight: bold;");
                 HBox actions = new HBox(12);
                 actions.setAlignment(Pos.CENTER_LEFT);
@@ -219,23 +216,49 @@ public class DisponibiliteController {
 
     private void modifierCard(Disponibilite disp) {
         javafx.scene.control.Dialog<Disponibilite> dialog = new javafx.scene.control.Dialog<>();
-        dialog.setTitle("Modifier la disponibilité");
-        dialog.setHeaderText("Modification de la disponibilité ID : " + disp.getId());
+        dialog.setTitle("Modifier une Disponibilité");
+        dialog.setHeaderText("Formulaire de modification de disponibilité");
+        ButtonType okButtonType = new ButtonType("Modifier", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        javafx.scene.control.ButtonType okButtonType = new javafx.scene.control.ButtonType("Enregistrer", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(okButtonType, javafx.scene.control.ButtonType.CANCEL);
+        ComboBox<User> medecinCombo = new ComboBox<>();
+        medecinCombo.setPromptText("Sélectionner un médecin");
+        ServiceUser serviceUser = new ServiceUser();
+        medecinCombo.getItems().addAll(serviceUser.getAllMedecins());
+        User currentMedecin = serviceUser.getUserById(disp.getMedecinId());
+        medecinCombo.setValue(currentMedecin);
+        medecinCombo.setCellFactory(lv -> new ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText("Dr. " + user.getName());
+                }
+            }
+        });
+        medecinCombo.setButtonCell(new ListCell<User>() {
+            @Override
+            protected void updateItem(User user, boolean empty) {
+                super.updateItem(user, empty);
+                if (empty || user == null) {
+                    setText(null);
+                } else {
+                    setText("Dr. " + user.getName());
+                }
+            }
+        });
 
-        javafx.scene.control.TextField medecinField = new javafx.scene.control.TextField(String.valueOf(disp.getMedecinId()));
-        medecinField.setPromptText("ID Médecin");
-        javafx.scene.control.DatePicker dateDebutPicker = new javafx.scene.control.DatePicker(disp.getDateDebut().toLocalDate());
-        javafx.scene.control.ComboBox<String> heureDebutCombo = new javafx.scene.control.ComboBox<>();
+        DatePicker dateDebutPicker = new DatePicker(disp.getDateDebut().toLocalDate());
+        ComboBox<String> heureDebutCombo = new ComboBox<>();
         heureDebutCombo.getItems().addAll("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00");
         heureDebutCombo.setValue(disp.getDateDebut().toLocalTime().toString());
-        javafx.scene.control.DatePicker dateFinPicker = new javafx.scene.control.DatePicker(disp.getDateFin().toLocalDate());
-        javafx.scene.control.ComboBox<String> heureFinCombo = new javafx.scene.control.ComboBox<>();
+        DatePicker dateFinPicker = new DatePicker(disp.getDateFin().toLocalDate());
+        ComboBox<String> heureFinCombo = new ComboBox<>();
         heureFinCombo.getItems().addAll("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00");
         heureFinCombo.setValue(disp.getDateFin().toLocalTime().toString());
-        javafx.scene.control.ComboBox<String> statutCombo = new javafx.scene.control.ComboBox<>();
+        ComboBox<String> statutCombo = new ComboBox<>();
         statutCombo.getItems().addAll("Disponible", "Indisponible");
         statutCombo.setValue(disp.getStatut());
 
@@ -243,8 +266,8 @@ public class DisponibiliteController {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new javafx.geometry.Insets(20, 120, 10, 10));
-        grid.add(new javafx.scene.control.Label("ID Médecin :"), 0, 0);
-        grid.add(medecinField, 1, 0);
+        grid.add(new javafx.scene.control.Label("Médecin :"), 0, 0);
+        grid.add(medecinCombo, 1, 0);
         grid.add(new javafx.scene.control.Label("Date Début :"), 0, 1);
         grid.add(dateDebutPicker, 1, 1);
         grid.add(new javafx.scene.control.Label("Heure Début :"), 0, 2);
@@ -260,7 +283,7 @@ public class DisponibiliteController {
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == okButtonType) {
                 try {
-                    int medecinId = Integer.parseInt(medecinField.getText().trim());
+                    User medecin = medecinCombo.getValue();
                     java.time.LocalDateTime dateDebut = java.time.LocalDateTime.of(
                         dateDebutPicker.getValue(),
                         java.time.LocalTime.parse(heureDebutCombo.getValue())
@@ -270,7 +293,7 @@ public class DisponibiliteController {
                         java.time.LocalTime.parse(heureFinCombo.getValue())
                     );
                     String statut = statutCombo.getValue();
-                    disp.setMedecinId(medecinId);
+                    disp.setMedecinId(medecin.getId());
                     disp.setDateDebut(dateDebut);
                     disp.setDateFin(dateFin);
                     disp.setStatut(statut);

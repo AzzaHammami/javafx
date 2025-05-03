@@ -1,0 +1,7 @@
+# pack-refs with: peeled fully-peeled sorted 
+0b8af1e49359220df193fb8b0041a8a3c008a523 refs/heads/gestion-rendezvous
+4f494c7d18b7086320b0a0aefef7c27b7018ef63 refs/heads/gestion-store
+50ee81d6c8d619957a0931d0611f9e85e0c2d7b7 refs/heads/gestion-traitement
+fb99960c5f246c347e7b3b570bb960289453b55b refs/heads/gestion_consultation
+bd150f88ccca770fe001405008e5f957012ff908 refs/heads/gestion_reclamation
+4322ec85c43953cbe67d9a43a5c84319c3189d6d refs/heads/main

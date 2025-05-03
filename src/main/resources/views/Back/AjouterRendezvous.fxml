@@ -11,12 +11,12 @@
     </top>
     <center>
         <VBox>
-            <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color:transparent;">
+            <ScrollPane fitToWidth="true" fitToHeight="true" style="-fx-background-color:transparent;" HBox.hgrow="ALWAYS">
                 <content>
-                    <FlowPane fx:id="cardContainer" hgap="24" vgap="24" alignment="CENTER" style="-fx-padding: 30;">
+                    <VBox fx:id="cardContainer" spacing="16" alignment="TOP_CENTER" style="-fx-padding: 0;" fillWidth="true">
                         <ComboBox fx:id="patientComboBox" promptText="Sélectionnez un patient" />
                         <ComboBox fx:id="medecinComboBox" promptText="Sélectionnez un médecin" />
-                    </FlowPane>
+                    </VBox>
                 </content>
             </ScrollPane>
             <HBox fx:id="paginationBox" alignment="CENTER" spacing="8" style="-fx-padding: 16 0 0 0;" />
