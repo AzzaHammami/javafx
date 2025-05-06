@@ -5,10 +5,18 @@
 }
 
 .header {
-    -fx-background-color: #6c5ce7;
-    -fx-min-height: 60px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-background-color: #2c98f0;
+    background-color: #2c98f0;
+    -fx-padding: 20 30 20 30;
+    padding: 20px 30px;
+    -fx-min-height: 70px;
+    -fx-background-radius: 0 0 18 18;
+    border-radius: 0 0 18px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(44,152,240,0.08), 10, 0, 0, 2);
+    -fx-spacing: 22;
+    -fx-alignment: center-left;
 }
+
 
 .header-title {
     -fx-fill: white;
@@ -45,10 +53,18 @@
 
 /* Header Styles */
 .header {
-    -fx-background-color: #6c5ce7;
-    -fx-min-height: 60px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);
+    -fx-background-color: #2c98f0;
+    background-color: #2c98f0;
+    -fx-padding: 20 30 20 30;
+    padding: 20px 30px;
+    -fx-min-height: 70px;
+    -fx-background-radius: 0 0 18 18;
+    border-radius: 0 0 18px 18px;
+    -fx-effect: dropshadow(gaussian, rgba(44,152,240,0.08), 10, 0, 0, 2);
+    -fx-spacing: 22;
+    -fx-alignment: center-left;
 }
+
 
 .header-title {
     -fx-fill: white;
@@ -63,29 +79,91 @@
 
 .logo-circle {
     -fx-fill: white;
+    fill: white;
+    -fx-stroke: transparent;
+}
+
+    -fx-fill: white;
     -fx-stroke: transparent;
 }
 
 .logo-text {
+    -fx-fill: #2c98f0;
+    fill: #2c98f0;
+    -fx-font-size: 22px;
+    font-size: 22px;
+    -fx-font-weight: bold;
+    font-weight: bold;
+}
+
     -fx-fill: #6c5ce7;
     -fx-font-size: 24px;
 }
 
 .nav-item {
+    -fx-text-fill: white;
+    color: white;
+    -fx-font-size: 16px;
+    font-size: 16px;
+    -fx-font-weight: 500;
+    font-weight: 500;
+    -fx-opacity: 0.92;
+    opacity: 0.92;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-padding: 0 8 0 8;
+    padding: 0 8px 0 8px;
+    -fx-cursor: hand;
+    cursor: pointer;
+    -fx-background-radius: 6;
+    border-radius: 6px;
+}
+
     -fx-opacity: 0.8;
     -fx-cursor: hand;
 }
 
 .nav-item:hover {
+    -fx-background-color: rgba(255,255,255,0.08);
+    background-color: rgba(255,255,255,0.08);
     -fx-opacity: 1;
+    opacity: 1;
 }
 
+
 .nav-item-active {
+    -fx-background-color: rgba(255,255,255,0.16);
+    background-color: rgba(255,255,255,0.16);
+    -fx-text-fill: #fff;
+    color: #fff;
+    -fx-font-weight: bold;
+    font-weight: bold;
+    -fx-underline: true;
+    text-decoration: underline;
+    -fx-opacity: 1;
+    opacity: 1;
+}
+
     -fx-opacity: 1;
     -fx-font-weight: bold;
 }
 
 .profile-circle {
+    -fx-background-color: #fff;
+    background-color: #fff;
+    -fx-background-radius: 50%;
+    border-radius: 50%;
+    -fx-min-width: 34px;
+    min-width: 34px;
+    -fx-min-height: 34px;
+    min-height: 34px;
+    -fx-max-width: 34px;
+    max-width: 34px;
+    -fx-max-height: 34px;
+    max-height: 34px;
+    -fx-effect: dropshadow(gaussian, rgba(44,152,240,0.08), 2, 0, 0, 1);
+}
+
     -fx-fill: white;
     -fx-stroke: transparent;
 }
@@ -101,14 +179,26 @@
 }
 
 .btn-back {
-    -fx-background-color: #6c5ce7;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8 15;
-    -fx-background-radius: 5;
+    -fx-background-color: transparent;
+    background-color: transparent;
+    -fx-text-fill: #fff;
+    color: #fff;
+    -fx-font-size: 15px;
+    font-size: 15px;
+    -fx-border-color: #fff;
+    border-color: #fff;
+    -fx-border-width: 1.5px;
+    border-width: 1.5px;
+    -fx-border-radius: 6;
+    border-radius: 6px;
+    -fx-padding: 4 18 4 18;
+    padding: 4px 18px;
     -fx-cursor: hand;
-    -fx-min-width: 100px;
+    cursor: pointer;
+    -fx-effect: dropshadow(gaussian, rgba(44,152,240,0.13), 2, 0, 0, 1);
+    margin-right: 10px;
 }
+
 
 .main-title {
     -fx-font-size: 24px;
@@ -946,9 +1036,12 @@
 }
 
 .btn-back:hover {
-    -fx-text-fill: #3498db;
-    color: #3498db;
+    -fx-background-color: rgba(255,255,255,0.13);
+    background-color: rgba(255,255,255,0.13);
+    -fx-text-fill: #fff;
+    color: #fff;
 }
+
 
 .btn-secondary {
     -fx-background-color: #6c757d;

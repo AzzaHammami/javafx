@@ -11,7 +11,8 @@
         <Button text="Réponses" onAction="#showReponses" />
         <Button text="Statistiques" onAction="#showStats" />
         <Button text="Messagerie" onAction="#showMessagerie" /> 
-        <StackPane fx:id="messengerButtonStack" maxWidth="54" maxHeight="54" minWidth="54" minHeight="54" style="-fx-alignment: TOP_RIGHT;">
+        <!-- DEBUG : Ajout d'une couleur de fond visible pour le StackPane Messenger -->
+        <StackPane fx:id="messengerButtonStack" maxWidth="54" maxHeight="54" minWidth="54" minHeight="54" style="-fx-alignment: TOP_RIGHT; -fx-background-color: #fffbe6; -fx-border-color: #ff0000; -fx-border-width: 2;">
             <Button fx:id="floatingMessengerButton" text="💬" style="-fx-background-radius: 50%; -fx-background-color: #0084ff; -fx-text-fill: white; -fx-font-size: 22px; -fx-pref-width: 54; -fx-pref-height: 54; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);" />
             <Label fx:id="messengerBadgeLabel" visible="false" style="-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 1 6 1 6; -fx-background-radius: 10; -fx-border-radius: 10; -fx-translate-x: 18; -fx-translate-y: -16;" />
         </StackPane>

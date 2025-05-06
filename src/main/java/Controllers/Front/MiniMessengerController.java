@@ -1,4 +1,4 @@
-package Controllers;
+package Controllers.Front;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -42,14 +42,14 @@ public class MiniMessengerController {
         this.currentUser = currentUser;
         this.onClose = onClose;
         // Affiche le nom du destinataire dans une conversation privée
-        if (!conversation.isGroup() && conversation.getParticipants() != null) {
+        if (conversation != null && !conversation.isGroup() && conversation.getParticipants() != null) {
             for (User participant : conversation.getParticipants()) {
                 if (participant.getId() != currentUser.getId()) {
                     conversationTitleLabel.setText(participant.getName());
                     break;
                 }
             }
-        } else {
+        } else if (conversation != null) {
             conversationTitleLabel.setText(conversation.getTitle());
         }
         setupPolling();
@@ -81,16 +81,11 @@ public class MiniMessengerController {
         message.setSender(currentUser);
         message.setContent(content);
         message.setSentAt(java.time.LocalDateTime.now());
-        // --- DEBUG LOGGING ---
-        System.out.println("[DEBUG] Sending message:");
-        System.out.println("  conversationId=" + message.getConversationId());
-        System.out.println("  senderId=" + currentUser.getId());
         // Set receiverId for direct conversations
         if (!conversation.isGroup() && conversation.getParticipants() != null) {
             for (User participant : conversation.getParticipants()) {
                 if (participant.getId() != currentUser.getId()) {
                     message.setReceiverId(participant.getId());
-                    System.out.println("  receiverId=" + participant.getId());
                     break;
                 }
             }
@@ -129,16 +124,20 @@ public class MiniMessengerController {
     }
 
     private void setupPolling() {
-        pollingExecutor = Executors.newSingleThreadScheduledExecutor();
+        pollingExecutor = java.util.concurrent.Executors.newSingleThreadScheduledExecutor();
         pollingExecutor.scheduleAtFixedRate(() -> {
-            if (conversation != null) {
-                List<Message> currentMessages = messageService.getMessagesByConversation(conversation.getId());
-                if (!currentMessages.equals(lastMessagesSnapshot)) {
-                    lastMessagesSnapshot = new ArrayList<>(currentMessages);
-                    Platform.runLater(this::loadMessages);
+            try {
+                if (conversation != null) {
+                    java.util.List<Message> currentMessages = messageService.getMessagesByConversation(conversation.getId());
+                    if (!currentMessages.equals(lastMessagesSnapshot)) {
+                        lastMessagesSnapshot = new java.util.ArrayList<>(currentMessages);
+                        javafx.application.Platform.runLater(this::loadMessages);
+                    }
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        }, 0, 2, TimeUnit.SECONDS);
+        }, 0, 2, java.util.concurrent.TimeUnit.SECONDS);
     }
 
     private void closeWindow() {

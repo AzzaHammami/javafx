@@ -60,6 +60,29 @@ public class MessageService {
 
             updateConversationLastMessage(message.getConversationId(), message.getSentAt());
             conn.commit();
+
+            // Notifier le destinataire (Firebase Realtime DB)
+            try {
+                services.NotificationService.envoyerNotification(
+                    String.valueOf(message.getReceiverId()),
+                    "Vous avez reçu un nouveau message de : " + message.getSender().getName()
+                );
+            } catch (Exception ex) {
+                LOGGER.log(Level.WARNING, "Erreur lors de l'envoi de la notification Firebase : " + ex.getMessage());
+            }
+
+            // Envoi de la notification FCM au destinataire du message
+            services.UserFcmTokenService tokenService = new services.UserFcmTokenService();
+            java.util.List<String> tokens = tokenService.getTokensByUserId(message.getReceiverId());
+            String title = "Nouveau message reçu";
+            String body = "Vous avez reçu un nouveau message de : " + message.getSender().getName();
+            for (String token : tokens) {
+                try {
+                    services.FCMService.sendNotification(token, title, body);
+                } catch (Exception ex) {
+                    LOGGER.log(Level.WARNING, "Erreur lors de l'envoi de la notification FCM : " + ex.getMessage());
+                }
+            }
         } catch (SQLException e) {
             try { conn.rollback(); } catch (SQLException ex) {
                 LOGGER.log(Level.SEVERE, "Rollback failed", ex);

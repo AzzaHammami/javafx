@@ -11,6 +11,24 @@ import java.util.List;
 
 public class ReclamationService implements IReclamation {
 
+    // Méthode utilitaire pour vérifier les bad words via l'API Purgomalum
+    private boolean contientBadWords(String texte) {
+        try {
+            String apiUrl = "https://www.purgomalum.com/service/containsprofanity?text=" + java.net.URLEncoder.encode(texte, "UTF-8");
+            java.net.URL url = new java.net.URL(apiUrl);
+            java.net.HttpURLConnection con = (java.net.HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream()));
+            String response = in.readLine();
+            in.close();
+            return Boolean.parseBoolean(response);
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la vérification des bad words : " + e.getMessage());
+            // En cas d'erreur réseau, on laisse passer (ne bloque pas l'ajout)
+            return false;
+        }
+    }
+
     private Connection connection;
 
     public ReclamationService() {
@@ -19,9 +37,14 @@ public class ReclamationService implements IReclamation {
 
     @Override
     public void ajouter(Reclamation r) {
+        // Vérification des bad words dans le sujet et la description
+        if (contientBadWords(r.getSujet()) || contientBadWords(r.getDescription())) {
+            System.err.println("Erreur : Votre réclamation contient des mots interdits et ne peut pas être ajoutée.");
+            return;
+        }
         // Correction : ajout du champ user_id dans l'insertion
         String sql = "INSERT INTO reclamation (sujet, description, statut, date_reclamation, user_id) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, r.getSujet());
             ps.setString(2, r.getDescription());
             ps.setString(3, r.getStatut());
@@ -29,6 +52,30 @@ public class ReclamationService implements IReclamation {
             ps.setInt(5, r.getUserId());
             ps.executeUpdate();
             System.out.println("Reclamation ajoutée !");
+
+            // Notifier l'utilisateur (Firebase Realtime DB)
+            try {
+                services.NotificationService.envoyerNotification(
+                    String.valueOf(r.getUserId()),
+                    "Votre réclamation a bien été créée ! Sujet : " + r.getSujet()
+                );
+            } catch (Exception ex) {
+                System.err.println("Erreur lors de l'envoi de la notification Firebase : " + ex.getMessage());
+            }
+
+            // Envoi de la notification FCM à l'utilisateur (créateur de la réclamation)
+            // Récupérer les tokens via UserFcmTokenService
+            services.UserFcmTokenService tokenService = new services.UserFcmTokenService();
+            java.util.List<String> tokens = tokenService.getTokensByUserId(r.getUserId());
+            String title = "Nouvelle réclamation créée";
+            String body = "Votre réclamation a été enregistrée : " + r.getSujet();
+            for (String token : tokens) {
+                try {
+                    services.FCMService.sendNotification(token, title, body);
+                } catch (Exception ex) {
+                    System.err.println("Erreur lors de l'envoi de la notification FCM : " + ex.getMessage());
+                }
+            }
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'ajout de la réclamation : " + e.getMessage());
         }

@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Home" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="application.Main" />
     <module name="GestionReclamation" />
-    <option name="VM_PARAMETERS" value="--add-modules javafx.controls,javafx.fxml" />
+    <option name="VM_PARAMETERS" value="--add-opens=java.base/java.lang=ALL-UNNAMED" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

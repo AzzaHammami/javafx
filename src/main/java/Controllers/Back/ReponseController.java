@@ -50,7 +50,7 @@ public class ReponseController implements Initializable {
         contenuColumn.setCellValueFactory(new PropertyValueFactory<>("contenu"));
         dateColumn.setCellValueFactory(new PropertyValueFactory<>("dateReponse"));
         reclamationColumn.setCellValueFactory(cellData ->
-            new javafx.beans.property.SimpleStringProperty(cellData.getValue().getReclamation().getSujet())
+                new javafx.beans.property.SimpleStringProperty(cellData.getValue().getReclamation().getSujet())
         );
     }
 
@@ -109,6 +109,7 @@ public class ReponseController implements Initializable {
             // Ajout explicite du CSS pour Home
             scene.getStylesheets().add(getClass().getResource("/styles/theme.css").toExternalForm());
             stage.setScene(scene);
+            stage.sizeToScene();
             stage.setWidth(1200);
             stage.setHeight(800);
             stage.setResizable(false);

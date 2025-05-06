@@ -14,74 +14,92 @@
     <!-- Header -->
     <top>
         <VBox spacing="0">
-            <HBox styleClass="header" alignment="CENTER_LEFT" spacing="20" minHeight="70">
-                <padding>
-                    <Insets top="15" right="20" bottom="15" left="20"/>
-                </padding>
-                
-                <!-- Logo and App Name -->
-                <HBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-                    <StackPane>
-                        <Circle radius="20" styleClass="logo-circle"/>
-                        <Text text="+" styleClass="logo-text"/>
-                    </StackPane>
-                    <Label text="MaSanté" styleClass="app-name"/>
-                </HBox>
-
-                <!-- Navigation Menu -->
-                <HBox spacing="30" alignment="CENTER">
-                    <Label text="Accueil" styleClass="nav-item"/>
-                    <Label text="Réclamations" styleClass="nav-item, nav-item-active"/>
-                    <Label text="Documents" styleClass="nav-item"/>
-                    <Label text="Messages" styleClass="nav-item"/>
-                </HBox>
-                
-                <!-- Profile Circle -->
-                <Circle radius="15" styleClass="profile-circle"/>
-            </HBox>
+            <HBox styleClass="header" alignment="CENTER_LEFT" spacing="22" minHeight="70">
+    <padding>
+        <Insets top="0" right="30" bottom="0" left="30"/>
+    </padding>
+    <!-- Logo rond -->
+    <StackPane>
+        <Circle radius="18" styleClass="logo-circle"/>
+        <Text text=" " styleClass="logo-text"/>
+    </StackPane>
+    <!-- Nom appli -->
+    <!-- Menu horizontal -->
+    <HBox spacing="30" alignment="CENTER">
+        <Label text="MaSanté" styleClass="nav-item"/>
+        <Label text="Accueil" styleClass="nav-item"/>
+        <Label text="Rendez-vous" styleClass="nav-item"/>
+        <Label text="Documents" styleClass="nav-item"/>
+        <Label text="Messages" styleClass="nav-item"/>
+   </HBox>
+   <!-- <Region HBox.hgrow="ALWAYS"/>
+     Icône cloche
+    <Label text="🔔" styleClass="notif-bell"/>
+     Bouton Retour
+    <Button text="Retour" styleClass="btn-retour"/>
+     Profil à droite
+    <Circle radius="16" styleClass="profile-circle"/>-->
+</HBox>
         </VBox>
     </top>
 
     <!-- Main Content -->
     <center>
-        <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
-            <VBox spacing="30" minHeight="800">
-                <padding>
-                    <Insets top="20" right="40" bottom="20" left="40"/>
-                </padding>
-                <Button text="Retour" onAction="#handleRetourHome" styleClass="btn-back"/>
-                <Button text="Messagerie" onAction="#handleGoToMessenger" styleClass="btn-primary"/>
-                <Label text="Gestion des Réclamations" styleClass="main-title"/>
-                <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
-                <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
-                <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
-                    <Label text="Nouvelle Réclamation" styleClass="section-title"/>
-                    <VBox spacing="10">
-                        <Label text="Sujet" styleClass="field-label"/>
-                        <TextField fx:id="sujetField" promptText="Entrez le sujet de votre réclamation"/>
+        <StackPane>
+            <ScrollPane fx:id="mainScrollPane" fitToWidth="true" styleClass="main-scroll">
+                <VBox spacing="30" minHeight="800">
+                    <padding>
+                        <Insets top="20" right="40" bottom="20" left="40"/>
+                    </padding>
+                    <Button text="Retour" onAction="#handleRetourHome" styleClass="btn-back"/>
+                    <Button text="Messagerie" onAction="#handleGoToMessenger" styleClass="btn-primary"/>
+                    <Label text="Gestion des Réclamations" styleClass="main-title"/>
+                    <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
+                    <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
+<!-- Pagination Controls -->
+<HBox alignment="CENTER" spacing="8" style="-fx-padding: 8 0 8 0;">
+    <Button fx:id="btnPrevPage" text="Précédent" />
+    <Label fx:id="lblPageInfo" text="Page 1/1" style="-fx-font-size: 14; -fx-padding: 0 10 0 10;" />
+    <Button fx:id="btnNextPage" text="Suivant" />
+</HBox>
+                    <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
+                        <Label text="Nouvelle Réclamation" styleClass="section-title"/>
+                        <VBox spacing="10">
+                            <Label text="Sujet" styleClass="field-label"/>
+                            <TextField fx:id="sujetField" promptText="Entrez le sujet de votre réclamation"/>
+                        </VBox>
+                        <VBox spacing="10">
+                            <Label text="Description" styleClass="field-label"/>
+                            <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" wrapText="true" prefRowCount="3"/>
+                        </VBox>
+                        <HBox spacing="10">
+                            <Button fx:id="ajouterButton" text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
+                            <Button fx:id="modifierButton" text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
+                            <Button fx:id="supprimerButton" text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
+                            <Button fx:id="annulerButton" text="Annuler" onAction="#handleAnnulerForm" styleClass="btn-secondary"/>
+                        </HBox>
                     </VBox>
-                    <VBox spacing="10">
-                        <Label text="Description" styleClass="field-label"/>
-                        <TextArea fx:id="descriptionField" promptText="Décrivez votre réclamation en détail" wrapText="true" prefRowCount="3"/>
+                    <VBox fx:id="reponsesContainer" spacing="10" styleClass="responses-section">
+                        <Label text="Réponses" styleClass="section-title"/>
+                        <TableView fx:id="reponsesTableView" prefHeight="200">
+                            <columns>
+                                <TableColumn fx:id="reponseContenuColumn" text="Réponse"/>
+                                <TableColumn fx:id="reponseDateColumn" text="Date"/>
+                            </columns>
+                        </TableView>
                     </VBox>
-                    <HBox spacing="10">
-                        <Button fx:id="ajouterButton" text="Ajouter" onAction="#handleEnvoyerReclamation" styleClass="btn-primary"/>
-                        <Button fx:id="modifierButton" text="Modifier" onAction="#handleModifierReclamation" styleClass="btn-success"/>
-                        <Button fx:id="supprimerButton" text="Supprimer" onAction="#handleSupprimerReclamation" styleClass="btn-danger"/>
-                        <Button fx:id="annulerButton" text="Annuler" onAction="#handleAnnulerForm" styleClass="btn-secondary"/>
-                    </HBox>
                 </VBox>
-                <VBox fx:id="reponsesContainer" spacing="10" styleClass="responses-section">
-                    <Label text="Réponses" styleClass="section-title"/>
-                    <TableView fx:id="reponsesTableView" prefHeight="200">
-                        <columns>
-                            <TableColumn fx:id="reponseContenuColumn" text="Réponse"/>
-                            <TableColumn fx:id="reponseDateColumn" text="Date"/>
-                        </columns>
-                    </TableView>
-                </VBox>
-            </VBox>
-        </ScrollPane>
+            </ScrollPane>
+            <!-- Bouton Messenger flottant -->
+            <Button fx:id="floatingMessengerButton"
+                    style="-fx-background-radius: 50%; -fx-background-color: #0084ff; -fx-text-fill: white; -fx-font-size: 22px; -fx-pref-width: 54; -fx-pref-height: 54; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);"
+                    text="💬"
+                    StackPane.alignment="BOTTOM_RIGHT"
+                    translateY="-32" translateX="-32"/>
+            <!-- Conteneur pour les mini-messageries -->
+            <StackPane fx:id="miniMessengersContainer" pickOnBounds="false" style="-fx-background-color: transparent;"
+                      visible="true" managed="true" mouseTransparent="true"/>
+        </StackPane>
     </center>
     
     <!-- Barre latérale -->

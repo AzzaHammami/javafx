@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Front.HomeController">
+    <!-- Le contenu central est généré dynamiquement en Java, mais on déclare les nodes pour l'injection FXML -->
+    <VBox alignment="CENTER" spacing="30.0" padding="50.0"
+          AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button fx:id="btnLireSheets" text="Lire Google Sheets" onAction="#onLireSheetsClicked"/>
+        <TableView fx:id="tableSheets" VBox.vgrow="ALWAYS" prefHeight="300.0" prefWidth="600.0">
+            <columns>
+                <TableColumn fx:id="colA" text="ID"/>
+                <TableColumn fx:id="colB" text="Utilisateur"/>
+                <TableColumn fx:id="colC" text="Sujet"/>
+                <TableColumn fx:id="colD" text="Description"/>
+                <TableColumn fx:id="colE" text="Date" prefWidth="100.0"/>
+                <TableColumn fx:id="colF" text="Statut" prefWidth="100.0"/>
+            </columns>
+        </TableView>
+        <ListView fx:id="notificationsListView" prefHeight="120" prefWidth="600" />
+    </VBox>
+</AnchorPane>

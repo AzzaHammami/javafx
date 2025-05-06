@@ -4,6 +4,10 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Back.StatistiquesController"
            stylesheets="/styles/theme.css"
@@ -83,8 +87,13 @@
                         <padding>
                             <Insets top="20" right="20" bottom="20" left="20"/>
                         </padding>
-                        <Label text="Répartition des Statuts" styleClass="section-title"/>
-                        <Pane fx:id="pieChartContainer" VBox.vgrow="ALWAYS" minHeight="400"/>
+                        <HBox alignment="CENTER_LEFT" spacing="20">
+    <Label fx:id="pieChartTitle" text="Répartition des Statuts" styleClass="section-title"/>
+    <RadioButton fx:id="statRadio" text="Par Statut" selected="true" onAction="#updatePieChart"/>
+<RadioButton fx:id="userRadio" text="Par Utilisateur" onAction="#updatePieChart"/>
+                        </HBox>
+                        <PieChart fx:id="statutPieChart" minHeight="350"/>
+                        
                     </VBox>
                     
                     <!-- Tableau détaillé -->
@@ -110,6 +119,8 @@
                         </TableView>
                     </VBox>
                 </GridPane>
+
+
             </VBox>
         </ScrollPane>
     </center>

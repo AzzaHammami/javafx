@@ -62,12 +62,16 @@ public class Home extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // Initialiser Firebase explicitement (au démarrage global)
+        services.FirebaseService.initialize();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/Home.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
         scene.getStylesheets().add(getClass().getResource("/theme.css").toExternalForm());
         primaryStage.setTitle("Accueil - Gestion des Réclamations");
         primaryStage.setScene(scene);
+        primaryStage.sizeToScene();
         primaryStage.setWidth(1200);
         primaryStage.setHeight(800);
         primaryStage.setResizable(false);

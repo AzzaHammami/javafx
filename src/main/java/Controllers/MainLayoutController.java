@@ -15,7 +15,9 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import models.Conversation;
 import models.User;
 import utils.UserContext;
@@ -29,6 +31,9 @@ public class MainLayoutController {
     private Label adminNameLabel;
     @FXML
     private Button floatingMessengerButton;
+    @FXML
+    private StackPane messengerButtonStack;
+    @FXML
     private Label messengerBadgeLabel;
     private Popup conversationListPopup;
     private final List<Popup> openMessengerPopups = new ArrayList<>();
@@ -42,9 +47,11 @@ public class MainLayoutController {
     // Liste des popups ouverts (pour gérer plusieurs discussions)
     private final List<Popup> openMessengerPopupsList = new ArrayList<>();
 
+    // Map pour suivre les popups ouverts par conversationId
+    private final Map<Integer, Popup> openMessengerPopupsMap = new HashMap<>();
+
     @FXML
     public void initialize() {
-        setupFloatingMessengerBadge();
         floatingMessengerButton.setOnAction(e -> showFloatingMessengerChooser());
         startBadgePolling();
         // showDashboard(null); // Désactivé pour éviter le chargement avant passage du user
@@ -102,8 +109,12 @@ public class MainLayoutController {
             Parent view = loader.load();
             contentPane.getChildren().setAll(view);
             System.out.println("[MainLayoutController] loadView: currentUser = " + (getCurrentUser() != null ? getCurrentUser().getName() : "null"));
-            if (fxmlPath.endsWith("MessengerView.fxml")) {
-                MessengerController messengerController = loader.getController();
+            if (fxmlPath.endsWith("ReclamationView.fxml")) {
+                Controllers.Back.ReclamationController reclamationController = loader.getController();
+                reclamationController.setCurrentUser(getCurrentUser());
+                System.out.println("[DEBUG] setCurrentUser appelé dans loadView pour ReclamationController : " + (getCurrentUser() != null ? getCurrentUser().getName() : "null"));
+            } else if (fxmlPath.endsWith("MessengerView.fxml")) {
+                Controllers.MessengerController messengerController = loader.getController();
                 System.out.println("[MainLayoutController] loadView: getCurrentUser() just before setCurrentUser = " + (getCurrentUser() != null ? getCurrentUser().getName() : "null"));
                 messengerController.setCurrentUser(getCurrentUser());
             }
@@ -114,20 +125,6 @@ public class MainLayoutController {
             System.err.println("[MainLayoutController] UNEXPECTED ERROR loading " + fxmlPath + ": " + ex.getMessage());
             ex.printStackTrace();
         }
-    }
-
-    private void setupFloatingMessengerBadge() {
-        messengerBadgeLabel = new Label();
-        messengerBadgeLabel.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 1 6 1 6; -fx-background-radius: 10; -fx-border-radius: 10;");
-        messengerBadgeLabel.setVisible(false);
-        // Ajout correct du badge dans la VBox parent du bouton
-        VBox vbox = (VBox) floatingMessengerButton.getParent();
-        StackPane badgeStack = new StackPane(floatingMessengerButton, messengerBadgeLabel);
-        badgeStack.setMaxSize(54, 54);
-        badgeStack.setMinSize(54, 54);
-        badgeStack.setPrefSize(54, 54);
-        vbox.getChildren().remove(floatingMessengerButton);
-        vbox.getChildren().add(badgeStack);
     }
 
     private void updateMessengerBadge(int unreadCount) {
@@ -202,33 +199,39 @@ public class MainLayoutController {
     // Ouvre un mini chat flottant pour une conversation donnée
     public void openMiniMessenger(Conversation conversation) {
         try {
+            // Si un popup pour cette conversation existe déjà, le ramener au premier plan
+            if (openMessengerPopupsMap.containsKey(conversation.getId())) {
+                Popup existingPopup = openMessengerPopupsMap.get(conversation.getId());
+                if (!existingPopup.isShowing()) {
+                    existingPopup.show(contentPane.getScene().getWindow());
+                }
+                existingPopup.requestFocus();
+                return;
+            }
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/back/MiniMessengerView.fxml"));
             Pane miniMessengerPane = loader.load();
             Controllers.MiniMessengerController miniMessengerController = loader.getController();
-            miniMessengerController.setConversation(conversation, getCurrentUser(), () -> closeMiniMessenger(miniMessengerPane));
+            miniMessengerController.setConversation(conversation, getCurrentUser(), () -> closeMiniMessenger(miniMessengerPane, conversation.getId()));
             Popup popup = new Popup();
             popup.getContent().add(miniMessengerPane);
             popup.setAutoHide(false);
-            // Positionne le popup (ex : en bas à droite, décalé selon le nombre déjà ouverts)
-            double baseRight = 40;
-            double baseBottom = 40;
-            int offset = openMessengerPopups.size();
+            // Positionne le popup (en bas à droite, décalé selon le nombre déjà ouverts)
+            int offset = openMessengerPopupsMap.size();
             popup.setX(contentPane.getScene().getWindow().getX() + contentPane.getScene().getWindow().getWidth() - 380 - offset * 370);
             popup.setY(contentPane.getScene().getWindow().getY() + contentPane.getScene().getWindow().getHeight() - 520);
             popup.show(contentPane.getScene().getWindow());
-            openMessengerPopups.add(popup);
+            openMessengerPopupsMap.put(conversation.getId(), popup);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void closeMiniMessenger(Pane miniMessengerPane) {
-        openMessengerPopups.removeIf(popup -> {
-            if (popup.getContent().contains(miniMessengerPane)) {
-                popup.hide();
-                return true;
-            }
-            return false;
-        });
+    // Nouvelle version pour fermer proprement le popup et le retirer de la map
+    private void closeMiniMessenger(Pane miniMessengerPane, int conversationId) {
+        Popup popup = openMessengerPopupsMap.get(conversationId);
+        if (popup != null) {
+            popup.hide();
+            openMessengerPopupsMap.remove(conversationId);
+        }
     }
 }

@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import models.User;
 import services.UserService;
 import Controllers.Front.ReclamationController;
+import services.FirebaseListener;
 import utils.UserContext;
 
 import java.io.IOException;
@@ -66,6 +67,8 @@ public class LoginController {
             return;
         }
         try {
+            // Activer l'écoute des notifications pour l'utilisateur connecté
+            FirebaseListener.ecouterNotifications(String.valueOf(selectedUser.getId()));
             Stage stage = (Stage) loginButton.getScene().getWindow();
             if (roleMode.equals("admin")) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainLayout.fxml"));
@@ -78,6 +81,7 @@ public class LoginController {
                 System.out.println("[LoginController] Après setCurrentUser: " + (selectedUser != null ? selectedUser.getName() : "null"));
                 mainLayoutController.showDashboard(null); // Ajouté pour charger la vue dashboard après passage du user
                 stage.setScene(scene);
+                stage.sizeToScene();
                 stage.setTitle("Espace Admin - " + selectedUser.getName());
                 stage.setMinWidth(1200);
                 stage.setMinHeight(800);
@@ -90,6 +94,7 @@ public class LoginController {
                 ReclamationController reclamationController = loader.getController();
                 reclamationController.setCurrentUser(selectedUser);
                 stage.setScene(scene);
+                stage.sizeToScene();
                 stage.setTitle("Espace Utilisateur - " + selectedUser.getName());
                 stage.setMinWidth(1200);
                 stage.setMinHeight(800);

@@ -6,7 +6,7 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.Group?>
 <?import javafx.scene.layout.StackPane?>
-<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<VBox fx:id="rootCard" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="Controllers.Front.CardReclamationFrontController"
       spacing="0" style="-fx-background-color: white; -fx-background-radius: 14; -fx-effect: dropshadow(gaussian, #d3d6e9, 8,0,0,2);">
     <!-- Header coloré -->
@@ -43,5 +43,6 @@
             </Button>
         </HBox>
         <Label fx:id="descriptionLabel" styleClass="card-desc" wrapText="true" maxWidth="350" style="-fx-font-size: 14; -fx-text-fill: #444444;"/>
+    <VBox fx:id="reponsesContainer" spacing="5" style="-fx-padding: 6 0 0 0;" />
     </VBox>
 </VBox>

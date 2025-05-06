@@ -7,6 +7,8 @@
     <groupId>org.example</groupId>
     <artifactId>GestionReclamation</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <!-- <packaging>pom</packaging> -->
+    <!-- <modules> ... </modules> SUPPRIMÉ pour éviter l'erreur multi-modules -->
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -16,35 +18,32 @@
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
     <dependencies>
-        <!-- MySQL Connector/J -->
+        <!-- Dépendances principales du projet (hors Google) -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.0.33</version>
         </dependency>
+        <!-- JavaFX dependencies for classpath usage (no module-info.java needed) -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
-            <!-- <classifier>win</classifier> -->
+            <version>20.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${javafx.version}</version>
-            <!-- <classifier>win</classifier> -->
-        </dependency>
-        <dependency>
-            <groupId>org.openjfx</groupId>
-            <artifactId>javafx-graphics</artifactId>
-            <version>${javafx.version}</version>
-            <!-- <classifier>win</classifier> -->
+            <version>20.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>${javafx.version}</version>
-            <!-- <classifier>win</classifier> -->
+            <version>20.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>20.0.2</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
@@ -56,7 +55,53 @@
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
+        <!-- Dépendances Google Sheets API (corrigées) -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>1.34.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-gson</artifactId>
+            <version>1.43.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.43.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.auth</groupId>
+            <artifactId>google-auth-library-oauth2-http</artifactId>
+            <version>1.23.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>v4-rev20250415-2.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.7</version>
+        </dependency>
+
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <resources>
             <resource>
@@ -90,5 +135,17 @@
             </plugin>
         </plugins>
     </build>
-    
+    <repositories>
+        <repository>
+            <id>google</id>
+            <name>Google Maven Repository</name>
+            <url>https://maven.google.com/</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
