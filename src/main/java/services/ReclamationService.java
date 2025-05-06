@@ -118,10 +118,6 @@ public class ReclamationService implements IReclamation {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                // Lors de la récupération des réclamations depuis la base, il faut remplir le champ userId
-                // Exemple pour la méthode getAll() et toute méthode qui crée un objet Reclamation
-                // rs.getInt("user_id")
-                // new Reclamation(id, sujet, description, statut, dateReclamation, userId)
                 Reclamation r = new Reclamation(
                         rs.getInt("id"),
                         rs.getString("sujet"),
@@ -135,6 +131,30 @@ public class ReclamationService implements IReclamation {
 
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'affichage : " + e.getMessage());
+        }
+        return list;
+    }
+
+    // Ajouté pour compatibilité avec ReclamationController
+    public List<Reclamation> getReclamationsByUserId(int userId) {
+        List<Reclamation> list = new ArrayList<>();
+        String sql = "SELECT * FROM reclamation WHERE user_id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Reclamation r = new Reclamation(
+                        rs.getInt("id"),
+                        rs.getString("sujet"),
+                        rs.getString("description"),
+                        rs.getString("statut"),
+                        rs.getDate("date_reclamation").toLocalDate(),
+                        rs.getInt("user_id")
+                );
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de l'affichage par userId : " + e.getMessage());
         }
         return list;
     }

@@ -3,7 +3,11 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="Controllers.Front.HomeController">
     <!-- Le contenu central est généré dynamiquement en Java, mais on déclare les nodes pour l'injection FXML -->
+<<<<<<< HEAD
     <VBox alignment="CENTER" spacing="30.0" padding="50.0"
+=======
+    <VBox alignment="CENTER" spacing="30.0" padding="50"
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
           AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Button fx:id="btnLireSheets" text="Lire Google Sheets" onAction="#onLireSheetsClicked"/>

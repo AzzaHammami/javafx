@@ -27,7 +27,10 @@ public class Main extends Application {
         }
         // Écouter dynamiquement les notifications pour l'utilisateur choisi
         FirebaseListener.ecouterNotifications(userId);
+<<<<<<< HEAD
         utils.WindowsNotification.show("Test Notification", "Ceci est un test !");
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
         // Tester la connexion
         Connection cnx = MyDataBase.getInstance().getConnection();

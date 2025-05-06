@@ -33,13 +33,21 @@
                 <Button text="Réponses" styleClass="menu-item"/>
                 <Button text="Messagerie" onAction="#showMessagerie" styleClass="menu-item"/>
                 <Button text="Statistiques" onAction="#handleStatistiques" styleClass="menu-item"/>
+<<<<<<< HEAD
                 <!--  Ajout du bouton Messenger flottant
+=======
+                <!-- Ajout du bouton Messenger flottant -->
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
                 <StackPane maxWidth="54" maxHeight="54" minWidth="54" minHeight="54" style="-fx-alignment: TOP_RIGHT; -fx-background-color: #fffbe6; -fx-border-color: #ff0000; -fx-border-width: 2;">
                     <Button fx:id="floatingMessengerButton" text="💬"
                             style="-fx-background-radius: 50%; -fx-background-color: #0084ff; -fx-text-fill: white; -fx-font-size: 22px; -fx-pref-width: 54; -fx-pref-height: 54; -fx-cursor: hand; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 3);" />
                     <Label fx:id="messengerBadgeLabel" visible="false"
                            style="-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 1 6 1 6; -fx-background-radius: 10; -fx-border-radius: 10; -fx-translate-x: 18; -fx-translate-y: -16;" />
+<<<<<<< HEAD
                 </StackPane> -->
+=======
+                </StackPane>
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
@@ -97,11 +105,14 @@
                             </columnResizePolicy>
                         </TableView>
                     </VBox>
+<<<<<<< HEAD
                     <HBox spacing="10" alignment="CENTER" style="-fx-padding: 10 0 0 0;">
                         <Button fx:id="btnPrevPage" text="Précédent" onAction="#handlePrevPage" />
                         <Label fx:id="lblPageInfo" text="Page 1 sur 1" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
                         <Button fx:id="btnNextPage" text="Suivant" onAction="#handleNextPage" />
                     </HBox>
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
                     <!-- TEST GOOGLE SHEETS API -->
                     <VBox spacing="10" style="-fx-background-color: #f8f8ff; -fx-padding: 20;">

@@ -4,7 +4,12 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
+<<<<<<< HEAD
         <option value="$PROJECT_DIR$/GestionReclamation - Copie - Copie/pom.xml" />
+=======
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/lib/pom.xml" />
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
       </list>
     </option>
   </component>

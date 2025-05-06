@@ -56,12 +56,15 @@
                     <Label text="Gestion des Réclamations" styleClass="main-title"/>
                     <Button text="Nouvelle réclamation" onAction="#handleScrollToForm" styleClass="btn-primary" maxWidth="220"/>
                     <VBox fx:id="cardContainer" spacing="18" VBox.vgrow="ALWAYS"/>
+<<<<<<< HEAD
 <!-- Pagination Controls -->
 <HBox alignment="CENTER" spacing="8" style="-fx-padding: 8 0 8 0;">
     <Button fx:id="btnPrevPage" text="Précédent" />
     <Label fx:id="lblPageInfo" text="Page 1/1" style="-fx-font-size: 14; -fx-padding: 0 10 0 10;" />
     <Button fx:id="btnNextPage" text="Suivant" />
 </HBox>
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
                     <VBox fx:id="formContainer" spacing="20" styleClass="form-container" visible="false" managed="false">
                         <Label text="Nouvelle Réclamation" styleClass="section-title"/>
                         <VBox spacing="10">
@@ -88,6 +91,10 @@
                             </columns>
                         </TableView>
                     </VBox>
+<<<<<<< HEAD
+=======
+                    <ListView fx:id="notificationsListView" prefHeight="120" prefWidth="600" />
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
                 </VBox>
             </ScrollPane>
             <!-- Bouton Messenger flottant -->

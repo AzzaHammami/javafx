@@ -121,6 +121,7 @@ public class ReclamationController implements Initializable {
 
     // Ajout pour la gestion de toutes les réclamations affichées (filtrage, tri, etc.)
     private ObservableList<Reclamation> allReclamations = FXCollections.observableArrayList();
+<<<<<<< HEAD
 
     // Pagination
     private int currentPage = 1;
@@ -132,6 +133,8 @@ public class ReclamationController implements Initializable {
     private Button btnNextPage;
     @FXML
     private Label lblPageInfo;
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
     public void setCurrentUser(User user) {
         this.currentUser = user;
@@ -614,7 +617,11 @@ public class ReclamationController implements Initializable {
             miniMessengerPane.setManaged(true);
             miniMessengerPane.setMouseTransparent(false);
             miniMessengerPane.setPickOnBounds(false);
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
             Object controllerObj = loader.getController();
             if (controllerObj == null) {
                 System.err.println("[ERROR] MiniMessengerController is null. Check fx:controller attribute in MiniMessengerView.fxml");
@@ -623,8 +630,13 @@ public class ReclamationController implements Initializable {
             Controllers.MiniMessengerController messengerController = (Controllers.MiniMessengerController) controllerObj;
             messengerController.setConversation(conversation, currentUser, () -> closeMiniMessenger(conversation.getId()));
             int index = miniMessengersContainer.getChildren().stream()
+<<<<<<< HEAD
                     .filter(node -> node != null && node.getId() == null) // ignore la liste de choix
                     .toArray().length;
+=======
+                .filter(node -> node != null && node.getId() == null) // ignore la liste de choix
+                .toArray().length;
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
             int horizontalOffset = 90 + (index * 360); // Décale plus à droite
             int bottomOffset = 90; // Décale plus en bas pour laisser passer le bouton
             StackPane.setAlignment(miniMessengerPane, Pos.BOTTOM_RIGHT);
@@ -723,7 +735,11 @@ public class ReclamationController implements Initializable {
     private void toggleFloatingMessenger() {
         // Si la liste de choix est déjà affichée, on la ferme (mais on ne ferme PAS les mini-messageries ouvertes)
         boolean choixAffiche = miniMessengersContainer.getChildren().stream()
+<<<<<<< HEAD
                 .anyMatch(node -> node.getId() != null && node.getId().equals("compactListRoot"));
+=======
+            .anyMatch(node -> node.getId() != null && node.getId().equals("compactListRoot"));
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
         if (choixAffiche) {
             miniMessengersContainer.getChildren().removeIf(node -> node.getId() != null && node.getId().equals("compactListRoot"));
             System.out.println("[DEBUG] Fermeture de la liste des choix Messenger");
@@ -739,11 +755,19 @@ public class ReclamationController implements Initializable {
             System.out.println("[DEBUG] Bouton Lire Google Sheets (back) cliqué");
             final com.google.api.client.http.javanet.NetHttpTransport HTTP_TRANSPORT = com.google.api.client.googleapis.javanet.GoogleNetHttpTransport.newTrustedTransport();
             com.google.api.services.sheets.v4.Sheets sheetsService = new com.google.api.services.sheets.v4.Sheets.Builder(
+<<<<<<< HEAD
                     HTTP_TRANSPORT,
                     com.google.api.client.json.jackson2.JacksonFactory.getDefaultInstance(),
                     GoogleApi.getCredentials(HTTP_TRANSPORT))
                     .setApplicationName("GestionReclamationApp")
                     .build();
+=======
+                HTTP_TRANSPORT,
+                com.google.api.client.json.jackson2.JacksonFactory.getDefaultInstance(),
+                GoogleApi.getCredentials(HTTP_TRANSPORT))
+                .setApplicationName("GestionReclamationApp")
+                .build();
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
             String spreadsheetId = "1TrWsvtqrDd2yja0fTHDxcDD-pjZ6QfIdHmkZcl18Dm0";
             String range = "messages_sheet!A1:F";
@@ -792,9 +816,15 @@ public class ReclamationController implements Initializable {
                 Object date = rec.getDateReclamation() != null ? rec.getDateReclamation().toString() : "";
                 Object statut = rec.getStatut();
                 GoogleApi.ajouterReclamationDansSheet(
+<<<<<<< HEAD
                         "1TrWsvtqrDd2yja0fTHDxcDD-pjZ6QfIdHmkZcl18Dm0",
                         "messages_sheet",
                         id, utilisateur, sujet, description, date, statut
+=======
+                    "1TrWsvtqrDd2yja0fTHDxcDD-pjZ6QfIdHmkZcl18Dm0",
+                    "messages_sheet",
+                    id, utilisateur, sujet, description, date, statut
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
                 );
             }
             showAlert("Succès", "Export terminé avec succès !");
@@ -816,6 +846,7 @@ public class ReclamationController implements Initializable {
         public String getE() { return e; }
         public String getF() { return f; }
     }
+<<<<<<< HEAD
 
     private void updatePaginationControls() {
         if (lblPageInfo != null) {
@@ -844,5 +875,7 @@ public class ReclamationController implements Initializable {
             loadReclamations();
         }
     }
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 }
 

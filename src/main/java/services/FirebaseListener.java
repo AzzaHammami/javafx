@@ -8,7 +8,10 @@ import com.google.firebase.database.DatabaseError;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+<<<<<<< HEAD
 import utils.WindowsNotification;
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
 public class FirebaseListener {
     public static void ecouterNotifications(String userId) {
@@ -19,16 +22,22 @@ public class FirebaseListener {
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
                 String message = dataSnapshot.getValue(String.class);
                 Platform.runLater(() -> {
+<<<<<<< HEAD
                     WindowsNotification.show("Nouvelle notification !", message);
                     // Affichage optionnel JavaFX (peut être commenté si non désiré)
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Notification");
                     alert.setHeaderText("Nouvelle notification !");
                     alert.setContentText(message);
                     alert.showAndWait();
                 });
+<<<<<<< HEAD
                 // Supprimer la notification après affichage
                 dataSnapshot.getRef().removeValue(null);
+=======
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
             }
 
             @Override

@@ -15,6 +15,19 @@ import models.Reclamation;
 import Controllers.Front.ReclamationController;
 
 public class CardReclamationFrontController {
+    // Ajout pour compatibilité avec ReclamationController
+    public void setReponses(java.util.List<models.Reponse> reponses) {
+        // TODO: Implémenter l'affichage ou la gestion des réponses si besoin
+    }
+    // Stubs pour corriger les erreurs de compilation
+    public void setReclamation(models.Reclamation reclamation, String userName) {}
+    public void setReclamationController(Controllers.Front.ReclamationController controller) {}
+    public void setUserService(services.UserService userService) {}
+    public void setReponseService(services.ReponseService reponseService) {}
+    public void setConversationService(services.ConversationService conversationService) {}
+    public void setMiniMessengersContainer(javafx.scene.layout.StackPane miniMessengersContainer) {}
+    public void setFloatingMessengerButton(javafx.scene.control.Button floatingMessengerButton) {}
+
     @FXML private Text sujetLabel;
     @FXML private Label descriptionLabel;
     @FXML private Label dateLabel;
@@ -22,12 +35,20 @@ public class CardReclamationFrontController {
     @FXML private Label userNameLabel;
     @FXML private Button editButton;
     @FXML private Button deleteButton;
+<<<<<<< HEAD
     @FXML private VBox reponsesContainer;
     @FXML private VBox rootCard;
+=======
+    @FXML private Button btnSelect;
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
     private Reclamation reclamation;
     private ReclamationController parentController;
     private final services.ReponseService reponseService = new services.ReponseService();
     private boolean reponsesVisible = false;
+
+    public Button getBtnSelect() {
+        return btnSelect;
+    }
 
     public void setData(Reclamation reclamation, String userName) {
         this.reclamation = reclamation;

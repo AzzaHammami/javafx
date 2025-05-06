@@ -9,6 +9,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+<<<<<<< HEAD
+=======
+import javafx.scene.control.ListView;
+import javafx.scene.control.Alert;
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.scene.Node;
@@ -27,6 +32,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
+<<<<<<< HEAD
+=======
+import com.google.firebase.database.*;
+import javafx.application.Platform;
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
 public class HomeController implements Initializable {
 
@@ -49,6 +59,11 @@ public class HomeController implements Initializable {
     private TableColumn<SheetRow, String> colE;
     @FXML
     private TableColumn<SheetRow, String> colF;
+<<<<<<< HEAD
+=======
+    @FXML
+    private ListView<String> notificationsListView;
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
     public HomeController() {
         System.out.println("[DEBUG] Constructeur HomeController appelé !");
@@ -65,8 +80,15 @@ public class HomeController implements Initializable {
         if (colD != null) colD.setCellValueFactory(new PropertyValueFactory<>("d"));
         if (colE != null) colE.setCellValueFactory(new PropertyValueFactory<>("e"));
         if (colF != null) colF.setCellValueFactory(new PropertyValueFactory<>("f"));
+<<<<<<< HEAD
     }
 
+=======
+        // --- Notifications ---
+        listenForAllNotifications();
+    }
+    
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
     @FXML
     private void setupUI() {
         // Cette méthode peut rester vide ou être supprimée si tu utilises le FXML pour toute la structure
@@ -112,11 +134,19 @@ public class HomeController implements Initializable {
             System.out.println("[DEBUG] Bouton Lire Google Sheets cliqué");
             final com.google.api.client.http.javanet.NetHttpTransport HTTP_TRANSPORT = com.google.api.client.googleapis.javanet.GoogleNetHttpTransport.newTrustedTransport();
             com.google.api.services.sheets.v4.Sheets sheetsService = new com.google.api.services.sheets.v4.Sheets.Builder(
+<<<<<<< HEAD
                     HTTP_TRANSPORT,
                     com.google.api.client.json.jackson2.JacksonFactory.getDefaultInstance(),
                     services.GoogleApi.getCredentials(HTTP_TRANSPORT))
                     .setApplicationName("GestionReclamationApp")
                     .build();
+=======
+                HTTP_TRANSPORT,
+                com.google.api.client.json.jackson2.JacksonFactory.getDefaultInstance(),
+                services.GoogleApi.getCredentials(HTTP_TRANSPORT))
+                .setApplicationName("GestionReclamationApp")
+                .build();
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
 
             String spreadsheetId = "1TrWsvtqrDd2yja0fTHDxcDD-pjZ6QfIdHmkZcl18Dm0"; // Mets ici ton vrai ID
             String range = "messages_sheet!A1:F";
@@ -144,6 +174,85 @@ public class HomeController implements Initializable {
         }
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Écoute toutes les notifications pour tous les utilisateurs.
+     */
+    private void listenForAllNotifications() {
+        System.out.println("[DEBUG] HomeController.listenForAllNotifications() appelé");
+        
+        // Vérifie si Firebase est initialisé
+        if (FirebaseDatabase.getInstance() == null) {
+            System.out.println("[DEBUG] ERREUR: Firebase n'est pas initialisé");
+            return;
+        }
+        
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("notifications");
+        System.out.println("[DEBUG] Écoute sur le chemin: " + ref.toString());
+        
+        ref.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot userSnapshot, String previousUserKey) {
+                System.out.println("[DEBUG] Nouvelle notification détectée pour utilisateur: " + previousUserKey);
+                // userSnapshot correspond à notifications/{userId}
+                for (DataSnapshot notifSnapshot : userSnapshot.getChildren()) {
+                    String message = notifSnapshot.getValue(String.class);
+                    System.out.println("[DEBUG] Message reçu: " + message);
+                    
+                    if (message != null) {
+                        Platform.runLater(() -> {
+                            System.out.println("[DEBUG] Ajout message à la ListView: " + message);
+                            notificationsListView.getItems().add(0, message);
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
+                            alert.setTitle("Nouvelle notification");
+                            alert.setHeaderText(null);
+                            alert.show();
+                        });
+                    } else {
+                        System.out.println("[DEBUG] ERREUR: Message null reçu de Firebase");
+                    }
+                }
+            }
+            
+            @Override
+            public void onChildChanged(DataSnapshot userSnapshot, String previousUserKey) {
+                System.out.println("[DEBUG] Notification modifiée pour utilisateur: " + previousUserKey);
+                // Gérer les notifications ajoutées à un user existant
+                for (DataSnapshot notifSnapshot : userSnapshot.getChildren()) {
+                    String message = notifSnapshot.getValue(String.class);
+                    System.out.println("[DEBUG] Message modifié: " + message);
+                    
+                    if (message != null) {
+                        Platform.runLater(() -> {
+                            System.out.println("[DEBUG] Ajout message modifié à la ListView: " + message);
+                            notificationsListView.getItems().add(0, message);
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION, message);
+                            alert.setTitle("Nouvelle notification");
+                            alert.setHeaderText(null);
+                            alert.show();
+                        });
+                    } else {
+                        System.out.println("[DEBUG] ERREUR: Message null modifié de Firebase");
+                    }
+                }
+            }
+            
+            public void onChildRemoved(DataSnapshot s) {
+                System.out.println("[DEBUG] Notification supprimée pour utilisateur: " + s.getKey());
+            }
+            
+            public void onChildMoved(DataSnapshot s, String p) {
+                System.out.println("[DEBUG] Notification déplacée pour utilisateur: " + p);
+            }
+            
+            public void onCancelled(DatabaseError e) {
+                System.out.println("[DEBUG] Écoute Firebase annulée: " + e.getMessage());
+            }
+        });
+    }
+
+>>>>>>> 0437d716b496ba8972d63fba270ee7c757826b2b
     public static class SheetRow {
         private String a, b, c, d, e, f;
         public SheetRow(String a, String b, String c, String d, String e, String f) {
