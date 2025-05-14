@@ -58,7 +58,7 @@ src/
 
 1. *Cloner le dépôt*
    
-   git clone <url-du-repo>
+git clone https://github.com/AzzaHammami/javafx.git333
    
 2. *Configurer la base de données*  
    Modifier application.properties avec vos informations de connexion.
