@@ -69,7 +69,7 @@ src/
    
 
 4. *Accéder à l’application*  
-   Ouvrir [http://localhost:8080](http://localhost:8080)
+   Ouvrir [http://localhost:8080](http://localhost:8000)
 
 ## Acknowledgments
 
